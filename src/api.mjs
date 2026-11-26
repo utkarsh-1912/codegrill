@@ -573,6 +573,49 @@ export async function saveRemoteProfiles(profiles, profile = DEFAULT_APP_CONFIG.
 
 async function syncPlatformProfileBrowser(platformId, handle) {
   const profileUrl = buildProfileUrl(platformId, handle);
+  if (platformId === 'leetcode') {
+    const endpoints = [
+      `https://leetcode-api-faisalshohag.vercel.app/${encodeURIComponent(handle)}`,
+      `https://leetcode-stats-api.herokuapp.com/${encodeURIComponent(handle)}`,
+    ];
+    for (const endpoint of endpoints) {
+      try {
+        const res = await fetch(endpoint, { signal: AbortSignal.timeout(7000) });
+        if (!res.ok) continue;
+        const data = await res.json();
+        if (data?.status === 'error' || data?.errors) continue;
+        const total = Number(data.totalSolved);
+        if (!Number.isFinite(total)) continue;
+        return {
+          ok: true,
+          platform: platformId,
+          handle,
+          profileUrl,
+          syncedAt: new Date().toISOString(),
+          stats: {
+            platform: platformId,
+            handle,
+            profileUrl,
+            solved: total,
+            easy: Number.isFinite(Number(data.easySolved)) ? Number(data.easySolved) : null,
+            medium: Number.isFinite(Number(data.mediumSolved)) ? Number(data.mediumSolved) : null,
+            hard: Number.isFinite(Number(data.hardSolved)) ? Number(data.hardSolved) : null,
+            rating: Number.isFinite(Number(data.contestRating)) ? Math.round(Number(data.contestRating)) : null,
+            rank: Number.isFinite(Number(data.ranking)) && Number(data.ranking) > 0
+              ? `#${Number(data.ranking).toLocaleString()}`
+              : '',
+            globalRank: Number.isFinite(Number(data.ranking)) && Number(data.ranking) > 0
+              ? Number(data.ranking)
+              : null,
+            source: 'live',
+          },
+        };
+      } catch {
+        // Try next public endpoint
+      }
+    }
+  }
+
   if (platformId === 'codeforces') {
     const res = await fetch(`https://codeforces.com/api/user.info?handles=${encodeURIComponent(handle)}`, {
       signal: AbortSignal.timeout(7000),
@@ -691,7 +734,11 @@ export async function syncPlatformProfile(platformId, rawHandle, baseUrl) {
       apiUrl(`/api/profiles/sync?platform=${encodeURIComponent(platformId)}&handle=${encodeURIComponent(handle)}`, baseUrl),
       { signal: AbortSignal.timeout(9000) },
     );
-    if (res.ok) return await res.json();
+    const ct = res.headers.get('content-type') || '';
+    if (res.ok && ct.includes('application/json')) {
+      const json = await res.json();
+      if (json?.ok && json?.stats) return json;
+    }
   } catch {
     // Fall through to browser-side CORS-friendly sync
   }

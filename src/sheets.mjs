@@ -1,3 +1,8 @@
+import { CODEFORCES_PROBLEMS, HACKERRANK_PROBLEMS } from './externalProblems.mjs';
+
+const CODEFORCES_CORE_SLUGS = CODEFORCES_PROBLEMS.map((p) => p.slug);
+const HACKERRANK_KIT_SLUGS = HACKERRANK_PROBLEMS.map((p) => p.slug);
+
 // Popular curated interview series/sheets mapped cleanly onto the verified 150-problem catalog,
 // plus Grind-75-style dynamic weekly schedule generation and custom user series helpers.
 
@@ -260,6 +265,52 @@ export const BUILTIN_SHEETS = [
       ko: '면접 직전 마지막 주에 집중 복습할 최고 효율 30문제.',
     },
     slugs: FAANG_30_SLUGS,
+  },
+  {
+    id: 'codeforces-core',
+    source: 'Codeforces',
+    badge: '800–1900',
+    plannerSupported: true,
+    names: {
+      en: 'Codeforces Competitive Core',
+      ja: 'Codeforces 競技プログラミング厳選',
+      hi: 'कोडफोर्सेस कॉम्पिटिटिव कोर',
+      es: 'Núcleo Competitivo Codeforces',
+      zh: 'Codeforces 竞赛核心题单',
+      ko: 'Codeforces 알고리즘 핵심',
+    },
+    descriptions: {
+      en: 'Classic Codeforces problems progressing from 800 to 1900 rating across greedy, binary search, DP, and graphs.',
+      ja: 'レート800〜1900の貪欲法・二分探索・DP・グラフを網羅するCodeforces定番問題集。',
+      hi: '800 से 1900 रेटिंग तक ग्रीडी, बाइनरी सर्च, DP और ग्राफ के प्रमुख कोडफोर्सेस प्रश्न।',
+      es: 'Problemas clásicos de Codeforces de rating 800 a 1900 en greedy, búsqueda binaria, DP y grafos.',
+      zh: '从 800 到 1900 分段的 Codeforces 经典题目，覆盖贪心、二分、DP 与图论。',
+      ko: '레이팅 800~1900 구간의 그리디, 이분 탐색, DP, 그래프 핵심 Codeforces 문제집.',
+    },
+    slugs: CODEFORCES_CORE_SLUGS,
+  },
+  {
+    id: 'hackerrank-kit',
+    source: 'HackerRank',
+    badge: 'Interview Kit',
+    plannerSupported: true,
+    names: {
+      en: 'HackerRank Interview Prep Kit',
+      ja: 'HackerRank 面接対策キット',
+      hi: 'हैकररैंक इंटरव्यू प्रेप किट',
+      es: 'Kit de Entrevista HackerRank',
+      zh: 'HackerRank 面试准备精选',
+      ko: 'HackerRank 면접 대비 키트',
+    },
+    descriptions: {
+      en: 'High-signal HackerRank interview classics covering arrays, heaps, tries, graphs, and dynamic programming.',
+      ja: '配列・ヒープ・Trie・グラフ・DPを網羅するHackerRank面接対策の定番問題。',
+      hi: 'एरे, हीप, ट्राई, ग्राफ और डायनेमिक प्रोग्रामिंग के प्रमुख हैकररैंक इंटरव्यू प्रश्न।',
+      es: 'Clásicos de entrevistas en HackerRank sobre arreglos, heaps, tries, grafos y programación dinámica.',
+      zh: '涵盖数组、堆、字典树、图论与动态规划的 HackerRank 高频面试经典题。',
+      ko: '배열, 힙, 트라이, 그래프, DP를 아우르는 HackerRank 대표 면접 문제.',
+    },
+    slugs: HACKERRANK_KIT_SLUGS,
   },
 ];
 

@@ -12,6 +12,7 @@ import {
 } from '../src/profiles.mjs';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from '../src/sheets.mjs';
 import { ROADMAP_DOMAINS, buildDomainRoadmap } from '../src/domainRoadmaps.mjs';
+import { CODEFORCES_PROBLEMS, HACKERRANK_PROBLEMS, mergeCatalogProblems } from '../src/externalProblems.mjs';
 import { getMessages } from '../src/i18n.mjs';
 import { createStore } from '../server/store.mjs';
 import { createPluginRegistry } from '../server/plugins/registry.mjs';
@@ -88,5 +89,13 @@ for (const dom of ROADMAP_DOMAINS.filter((d) => d.id !== 'dsa')) {
   assert.ok(topics.length >= 4, `Expected >= 4 topics in domain ${dom.id}`);
   assert.ok(topics.some((t) => t.ready), `Expected at least one ready foundation topic in ${dom.id}`);
 }
+
+// 8. Codeforces & HackerRank integrated problems & sheets
+assert.ok(CODEFORCES_PROBLEMS.length >= 15, 'Expected >= 15 Codeforces problems');
+assert.ok(HACKERRANK_PROBLEMS.length >= 12, 'Expected >= 12 HackerRank problems');
+const merged = mergeCatalogProblems([{ slug: 'two-sum', leetcode_id: 1, leetcode_url: 'https://leetcode.com/problems/two-sum/' }]);
+assert.equal(merged.length, 1 + CODEFORCES_PROBLEMS.length + HACKERRANK_PROBLEMS.length);
+assert.ok(BUILTIN_SHEETS.some((s) => s.id === 'codeforces-core'), 'Missing codeforces-core sheet');
+assert.ok(BUILTIN_SHEETS.some((s) => s.id === 'hackerrank-kit'), 'Missing hackerrank-kit sheet');
 
 console.log('All unit and integration tests passed.');

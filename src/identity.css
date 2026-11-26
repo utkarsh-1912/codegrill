@@ -1130,54 +1130,156 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, #ff693d, #f59e0
 }
 
 /* Custom Series Builder */
+.builder-panel {
+  width: min(700px, 100%);
+  max-height: 88dvh;
+}
+
+.builder-header {
+  align-items: center;
+}
+
+.builder-header h2 {
+  font-family: var(--display-font);
+  font-size: 1.35rem;
+  margin: 0;
+}
+
 .builder-body {
-  padding: 16px 20px;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 18px 20px;
   overflow-y: auto;
   display: grid;
+  align-content: start;
+  gap: 14px;
+}
+
+.builder-fields-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
 .builder-field {
   display: grid;
-  gap: 5px;
-  font-size: .88rem;
+  gap: 6px;
+  min-width: 0;
+  font-size: 0.84rem;
   font-weight: 600;
+  color: var(--muted);
 }
 
 .builder-field input {
-  padding: 9px 12px;
+  width: 100%;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
   border: 1px solid var(--ut-line);
-  border-radius: 8px;
+  border-radius: 9px;
   background: var(--ut-bg);
   color: var(--ink);
+  font-weight: 400;
+  font-size: 0.9rem;
+}
+
+.builder-field input:focus {
+  outline: 2px solid var(--ut-accent);
+  outline-offset: 1px;
 }
 
 .builder-picker-bar {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 230px);
+  align-items: stretch;
+  gap: 10px;
+}
+
+.builder-picker-bar .search-field {
+  height: 40px;
+  min-height: 40px;
+  border-radius: 9px;
+  background: var(--ut-bg);
+}
+
+.builder-picker-bar .search-field input {
+  padding: 0;
+  height: 100%;
+}
+
+.builder-picker-bar .custom-select {
+  width: 100%;
+  min-width: 0;
+}
+
+.builder-selected-count {
+  margin: 0;
 }
 
 .builder-problem-list {
-  max-height: 260px;
+  max-height: 280px;
   overflow-y: auto;
   border: 1px solid var(--ut-line);
-  border-radius: 9px;
+  border-radius: 10px;
   background: var(--ut-bg);
 }
 
 .builder-problem-item {
   display: grid;
-  grid-template-columns: auto 44px minmax(0, 1fr) auto;
+  grid-template-columns: 18px 46px minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 10px;
+  padding: 9px 12px;
   border-bottom: 1px solid var(--ut-line);
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out-expo);
+}
+
+.builder-problem-item:last-child {
+  border-bottom: 0;
+}
+
+.builder-problem-item:hover {
+  background: var(--ut-bg-3);
+}
+
+.builder-problem-item.is-selected {
+  background: var(--ember-soft);
+}
+
+.builder-problem-item input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--ember);
   cursor: pointer;
 }
 
-.builder-problem-item input { accent-color: var(--ember); }
-.builder-error { color: #dc2626; font-size: .88rem; }
+.builder-problem-title {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.builder-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.builder-error { color: #dc2626; font-size: .88rem; margin: 0; }
+
+@media (max-width: 640px) {
+  .builder-fields-row,
+  .builder-picker-bar {
+    grid-template-columns: 1fr;
+  }
+}
 
 /* Study rooms & Footer */
 .study-weights li { flex-wrap: wrap; }
@@ -4903,40 +5005,81 @@ body,
 .roadmap-domain-tabs {
   display: flex;
   flex-wrap: nowrap;
-  gap: 6px;
+  gap: 4px;
   overflow-x: auto;
-  padding: 4px 0 6px;
-  margin-top: 14px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--ut-line-2) transparent;
+  margin-top: 16px;
+  border-bottom: 1px solid var(--ut-line);
+  scrollbar-width: none;
+}
+
+.roadmap-domain-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .roadmap-domain-tab {
+  position: relative;
   flex: 0 0 auto;
-  padding: 7px 13px;
-  border: 1px solid var(--ut-line);
-  border-radius: 999px;
-  background: var(--ut-bg-2);
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
   color: var(--muted);
-  font-size: 0.84rem;
-  font-weight: 600;
+  font-size: 0.9rem;
+  font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
   transition:
+    color var(--dur-fast) var(--ease-out-expo),
     border-color var(--dur-fast) var(--ease-out-expo),
-    background-color var(--dur-fast) var(--ease-out-expo),
-    color var(--dur-fast) var(--ease-out-expo);
+    background-color var(--dur-fast) var(--ease-out-expo);
 }
 
 .roadmap-domain-tab:hover {
-  border-color: var(--ut-line-2);
   color: var(--ink);
+  background: var(--ut-bg-3);
 }
 
 .roadmap-domain-tab.is-active {
+  color: var(--ut-accent);
+  border-bottom-color: var(--ember);
+  font-weight: 700;
+}
+
+.roadmap .stage-selector {
+  margin-top: 12px;
+  margin-bottom: 16px;
+  gap: 6px;
+}
+
+.roadmap .stage-selector button {
+  padding: 5px 10px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border-color: var(--ut-line);
+}
+
+.roadmap .stage-selector button:hover {
+  color: var(--ink);
+  border-color: var(--ut-line-2);
+  background: var(--ut-bg-2);
+}
+
+.roadmap .stage-selector button[aria-pressed="true"] {
   border-color: var(--ember);
-  background: var(--ut-solid);
-  color: var(--ut-on-solid);
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+  font-weight: 650;
+}
+
+.roadmap .stage-selector span {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.72rem;
+  opacity: 0.8;
 }
 
 .domain-inspector-summary {
@@ -5006,4 +5149,29 @@ body,
   gap: 4px;
   font-size: 0.82rem;
   color: var(--ink);
+}
+
+
+/* Problem Platform Chip (Codeforces / HackerRank) */
+.problem-row-title-wrap {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+}
+
+.problem-platform-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 7px;
+  border-radius: 6px;
+  border: 1px solid var(--ut-line);
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
 }

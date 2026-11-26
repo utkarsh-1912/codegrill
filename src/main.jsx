@@ -27,6 +27,7 @@ import { ErrorBoundary, ErrorPage, NotFoundPage } from './StatusPages.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from './sheets.mjs';
 import { ROADMAP_DOMAINS, buildDomainRoadmap } from './domainRoadmaps.mjs';
+import { mergeCatalogProblems, problemPlatformBadge, problemPlatformLabel } from './externalProblems.mjs';
 import { DEFAULT_APP_CONFIG } from './config.mjs';
 import { getMessages } from './i18n.mjs';
 import {
@@ -46,7 +47,8 @@ import {
   writeLocalCustomSheets,
 } from './api.mjs';
 
-const { problems, roadmap_categories: categories, languages } = curriculum;
+const { roadmap_categories: categories, languages } = curriculum;
+const problems = mergeCatalogProblems(curriculum.problems);
 const directories = curriculum.directories
   .filter(({ url }) => safeUrl(url)?.hostname !== 'neetcode.io')
   .map((entry) => {
@@ -838,9 +840,9 @@ function ProblemLibrary({
   const t = getMessages(locale);
   const [query, setQuery] = useState('');
   const [difficulty, setDifficulty] = useState('');
+  const [platformFilter, setPlatformFilter] = useState('');
   const [progressFilter, setProgressFilter] = useState('');
   const [openSlug, setOpenSlug] = useState(sharedProblem);
-  const [pageNum, setPageNum] = useState(1);
   const [noteDrafts, setNoteDrafts] = useState({});
   const [savedNotice, setSavedNotice] = useState('');
 
@@ -849,20 +851,17 @@ function ProblemLibrary({
       setOpenSlug(sharedProblem);
       setQuery('');
       setDifficulty('');
+      setPlatformFilter('');
       setProgressFilter('');
-      setPageNum(1);
     }
   }, [sharedProblem]);
 
-  useEffect(() => {
-    setPageNum(1);
-  }, [query, difficulty, topic, progressFilter]);
-
   const matches = matchingProblems(problems, categories, { query, difficulty, topic, locale })
-    .filter(({ slug }) => {
+    .filter((p) => {
+      if (platformFilter && (p.platform || 'leetcode') !== platformFilter) return false;
       if (!progressFilter) return true;
-      if (progressFilter === 'revision') return bookmarked.has(slug);
-      return completed.has(slug) === (progressFilter === 'solved');
+      if (progressFilter === 'revision') return bookmarked.has(p.slug);
+      return completed.has(p.slug) === (progressFilter === 'solved');
     });
 
   const sharedIndex = matches.findIndex(({ slug }) => slug === sharedProblem);
@@ -913,6 +912,17 @@ function ProblemLibrary({
           ]}
         />
         <SelectDropdown
+          ariaLabel="Platform"
+          value={platformFilter}
+          onChange={setPlatformFilter}
+          options={[
+            { value: '', label: 'All platforms' },
+            { value: 'leetcode', label: 'LeetCode', badge: 'LC' },
+            { value: 'codeforces', label: 'Codeforces', badge: 'CF' },
+            { value: 'hackerrank', label: 'HackerRank', badge: 'HR' },
+          ]}
+        />
+        <SelectDropdown
           ariaLabel={t.problems.anyProgress}
           value={progressFilter}
           onChange={setProgressFilter}
@@ -929,9 +939,9 @@ function ProblemLibrary({
         <p className="result-count" role="status">
           {ordered.length} {t.sheets.problemsCount} · {ordered.filter(({ slug }) => completed.has(slug)).length} {t.sheets.solvedCount}
         </p>
-        {(query || topic || difficulty || progressFilter) && (
+        {(query || topic || difficulty || platformFilter || progressFilter) && (
           <Button variant="quiet" size="sm" onClick={() => {
-            setQuery(''); setDifficulty(''); setProgressFilter(''); setTopic('');
+            setQuery(''); setDifficulty(''); setPlatformFilter(''); setProgressFilter(''); setTopic('');
           }}>{t.problems.clearFilters}</Button>
         )}
       </div>
@@ -963,8 +973,15 @@ function ProblemLibrary({
                   aria-controls={'details-' + problem.slug}
                   onClick={() => setOpenSlug(expanded ? '' : problem.slug)}
                 >
-                  <span className="problem-number">#{problem.leetcode_id}</span>
-                  <strong lang={titleLocale}>{name}</strong>
+                  <span className="problem-number">{problem.display_id || `#${problem.leetcode_id}`}</span>
+                  <strong lang={titleLocale} className="problem-row-title-wrap">
+                    <span>{name}</span>
+                    {problem.platform && problem.platform !== 'leetcode' && (
+                      <span className="problem-platform-chip">
+                        {problemPlatformBadge(problem.platform)}{problem.rating ? ` · ${problem.rating}` : ''}
+                      </span>
+                    )}
+                  </strong>
                   <Badge tone={{ Easy: 'ok', Medium: 'warn', Hard: 'bad' }[problem.difficulty]}>
                     {t.sheets[problem.difficulty.toLowerCase()] || problem.difficulty}
                   </Badge>
@@ -985,9 +1002,11 @@ function ProblemLibrary({
                 {expanded && <>
                   <ProblemPracticeBar problem={problem} locale={locale} defaultTimerMinutes={timerMinutes} />
                   <div className="rooms-actions">
-                    {safeUrl(problem.leetcode_url) && (
-                      <Button variant="solid" href={problem.leetcode_url} target="_blank" rel="noopener noreferrer">
-                        {t.problems.practiceLeetCode}
+                    {safeUrl(problem.problem_url || problem.leetcode_url) && (
+                      <Button variant="solid" href={problem.problem_url || problem.leetcode_url} target="_blank" rel="noopener noreferrer">
+                        {problem.platform && problem.platform !== 'leetcode'
+                          ? `Practice on ${problemPlatformLabel(problem.platform)}`
+                          : t.problems.practiceLeetCode}
                       </Button>
                     )}
                     <Button

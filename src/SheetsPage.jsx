@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Badge, Button, Card } from '@utkristi/ui';
 import { BookOpen, ChevronDown, FileCode2, Play, Plus, Search, Star, StickyNote, Trash2, X } from 'lucide-react';
 import { buildWeeklyPlan, resolveSheetProblems } from './sheets.mjs';
@@ -424,11 +425,11 @@ function CustomSeriesModal({ problems, categories, locale, defaultLocale, onClos
     await onSave({ name: name.trim(), description: description.trim(), slugs: [...selected] });
   }
 
-  return (
+  return createPortal(
     <div className="viewer-backdrop" role="dialog" aria-modal="true" aria-label={t.sheets.builderTitle}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <form className="viewer-panel builder-panel" onSubmit={handleSubmit}>
-        <div className="viewer-header">
+        <div className="viewer-header builder-header">
           <h2>{t.sheets.builderTitle}</h2>
           <button type="button" className="icon-btn" onClick={onClose} aria-label={t.viewer.close}>
             <X size={20} aria-hidden="true" />
@@ -436,16 +437,18 @@ function CustomSeriesModal({ problems, categories, locale, defaultLocale, onClos
         </div>
 
         <div className="builder-body">
-          <label className="builder-field">
-            <span>{t.sheets.seriesName}</span>
-            <input type="text" required value={name} placeholder={t.sheets.seriesNamePlaceholder}
-              onChange={(e) => { setName(e.target.value); setError(''); }} />
-          </label>
-          <label className="builder-field">
-            <span>{t.sheets.seriesDesc}</span>
-            <input type="text" value={description} placeholder={t.sheets.seriesDescPlaceholder}
-              onChange={(e) => setDescription(e.target.value)} />
-          </label>
+          <div className="builder-fields-row">
+            <label className="builder-field">
+              <span>{t.sheets.seriesName}</span>
+              <input type="text" required value={name} placeholder={t.sheets.seriesNamePlaceholder}
+                onChange={(e) => { setName(e.target.value); setError(''); }} />
+            </label>
+            <label className="builder-field">
+              <span>{t.sheets.seriesDesc}</span>
+              <input type="text" value={description} placeholder={t.sheets.seriesDescPlaceholder}
+                onChange={(e) => setDescription(e.target.value)} />
+            </label>
+          </div>
 
           <div className="builder-picker-bar">
             <label className="search-field">
@@ -454,6 +457,7 @@ function CustomSeriesModal({ problems, categories, locale, defaultLocale, onClos
                 onChange={(e) => setSearch(e.target.value)} />
             </label>
             <SelectDropdown
+              align="right"
               ariaLabel={t.problems.allTopics}
               value={topicFilter}
               onChange={setTopicFilter}
@@ -464,16 +468,16 @@ function CustomSeriesModal({ problems, categories, locale, defaultLocale, onClos
             />
           </div>
 
-          <p className="result-count">{selected.size} {t.sheets.selectedCount}</p>
+          <p className="result-count builder-selected-count">{selected.size} {t.sheets.selectedCount}</p>
 
           <div className="builder-problem-list">
             {filtered.map((p) => {
               const title = p.translations[locale]?.title || p.translations[defaultLocale].title;
               return (
-                <label key={p.slug} className="builder-problem-item">
+                <label key={p.slug} className={`builder-problem-item ${selected.has(p.slug) ? 'is-selected' : ''}`}>
                   <input type="checkbox" checked={selected.has(p.slug)} onChange={() => toggleSlug(p.slug)} />
                   <span className="problem-number">#{p.leetcode_id}</span>
-                  <span>{title}</span>
+                  <span className="builder-problem-title">{title}</span>
                   <Badge tone={{ Easy: 'ok', Medium: 'warn', Hard: 'bad' }[p.difficulty]}>{p.difficulty}</Badge>
                 </label>
               );
@@ -487,6 +491,7 @@ function CustomSeriesModal({ problems, categories, locale, defaultLocale, onClos
           <Button variant="solid" type="submit">{t.sheets.saveSeries}</Button>
         </div>
       </form>
-    </div>
+    </div>,
+    document.body,
   );
 }

@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { matchingProblems, resourcesFor, roadmapFor, safeUrl } from '../src/catalog.mjs';
 import { newRoomId, problemShareUrl, roomEditor, roomInvite, roomsDirectory, studyLocation } from '../src/rooms.mjs';
 import { BUILTIN_SHEETS, buildWeeklyPlan, normalizeCustomSheet, resolveSheetProblems } from '../src/sheets.mjs';
+import { mergeCatalogProblems } from '../src/externalProblems.mjs';
 import { MESSAGES, SUPPORTED_LOCALES, getMessages } from '../src/i18n.mjs';
 import { createPluginRegistry } from '../server/plugins/registry.mjs';
 import { extractYouTubeId } from '../server/plugins/youtube.mjs';
@@ -94,23 +95,25 @@ assert.deepEqual(studyLocation(share.hash, problemSlugs), { page: 'problems', pr
 assert.deepEqual(studyLocation('#rooms?problem=two-sum', problemSlugs), { page: 'rooms', problem: 'two-sum' });
 assert.deepEqual(studyLocation('#problems?problem=unknown', problemSlugs), { page: 'problems', problem: '' });
 
-// Verify curated sheets & custom series
-assert.ok(BUILTIN_SHEETS.length >= 6);
+// Verify curated sheets & custom series (including Codeforces & HackerRank integrated catalog)
+const allProblems = mergeCatalogProblems(problems);
+const allSlugs = new Set(allProblems.map(({ slug }) => slug));
+assert.ok(BUILTIN_SHEETS.length >= 8);
 for (const sheet of BUILTIN_SHEETS) {
   for (const code of SUPPORTED_LOCALES) {
     assert.ok(sheet.names[code], `${sheet.id} missing ${code} name`);
     assert.ok(sheet.descriptions[code], `${sheet.id} missing ${code} description`);
   }
-  const resolved = resolveSheetProblems(sheet, problems);
+  const resolved = resolveSheetProblems(sheet, allProblems);
   if (sheet.slugs !== null) {
     assert.equal(resolved.length, sheet.slugs.length, `${sheet.id} contains unknown problem slugs`);
   } else {
-    assert.equal(resolved.length, problems.length);
+    assert.equal(resolved.length, allProblems.length);
   }
 }
-const weekly = buildWeeklyPlan(resolveSheetProblems(BUILTIN_SHEETS.find((s) => s.id === 'grind-75'), problems), 8, 8);
+const weekly = buildWeeklyPlan(resolveSheetProblems(BUILTIN_SHEETS.find((s) => s.id === 'grind-75'), allProblems), 8, 8);
 assert.ok(weekly.length > 0 && weekly.reduce((n, b) => n + b.problems.length, 0) === 75);
-const custom = normalizeCustomSheet({ name: 'My Sprint', slugs: ['two-sum', 'unknown-slug'] }, problemSlugs);
+const custom = normalizeCustomSheet({ name: 'My Sprint', slugs: ['two-sum', 'unknown-slug'] }, allSlugs);
 assert.deepEqual(custom.slugs, ['two-sum']);
 
 // Verify complete i18n coverage

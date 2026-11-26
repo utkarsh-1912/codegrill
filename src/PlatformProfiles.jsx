@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Badge, Button, Card } from '@utkristi/ui';
 import {
   Edit3, ExternalLink, Link2, Plus, RefreshCw, Trash2, Trophy, X,
@@ -31,6 +31,54 @@ export function PlatformProfiles({
   const [syncingId, setSyncingId] = useState(null);
   const [syncingAll, setSyncingAll] = useState(false);
   const [statusNote, setStatusNote] = useState('');
+  const autoSyncedRef = useRef(false);
+
+  // Auto-sync linked profiles on load if stats are missing or older than 15 minutes
+  useEffect(() => {
+    if (autoSyncedRef.current) return;
+    const entries = Object.values(linkedProfiles || {}).filter(Boolean);
+    if (!entries.length) return;
+    const staleThresholdMs = 15 * 60 * 1000;
+    const now = Date.now();
+    const needsSync = entries.filter((e) => {
+      const missing = e.solved == null && e.rating == null && e.extraCount == null;
+      const stale = !e.syncedAt || (now - Date.parse(e.syncedAt)) > staleThresholdMs;
+      return missing || stale;
+    });
+    if (!needsSync.length) return;
+    autoSyncedRef.current = true;
+
+    let cancelled = false;
+    setSyncingAll(true);
+    Promise.all(
+      needsSync.map(async (entry) => {
+        const res = await syncPlatformProfile(entry.platform, entry.handle, apiBaseUrl);
+        return { entry, res };
+      }),
+    ).then((results) => {
+      if (cancelled) return;
+      let changed = false;
+      const next = { ...linkedProfiles };
+      for (const { entry, res } of results) {
+        if (res?.ok && res.stats) {
+          next[entry.platform] = {
+            ...entry,
+            ...res.stats,
+            solved: res.stats.solved ?? entry.solved,
+            rating: res.stats.rating ?? entry.rating,
+            rank: res.stats.rank || entry.rank,
+            syncedAt: res.syncedAt || new Date().toISOString(),
+            source: 'live',
+          };
+          changed = true;
+        }
+      }
+      setSyncingAll(false);
+      if (changed) onSaveProfiles(next);
+    });
+
+    return () => { cancelled = true; };
+  }, [linkedProfiles, apiBaseUrl]);
 
   const summary = useMemo(
     () => computeCombinedProfileStats(linkedProfiles, codegrillSolved),

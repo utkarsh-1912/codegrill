@@ -8,11 +8,13 @@ import { fetchPlatformProfile } from './plugins/profiles.mjs';
 import { buildAnalytics, createStore } from './store.mjs';
 import { getPublicConfig, loadServerConfig } from './config.mjs';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from '../src/sheets.mjs';
+import { mergeCatalogProblems } from '../src/externalProblems.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const curriculum = JSON.parse(readFileSync(join(__dirname, '../src/roadmap.generated.json'), 'utf8'));
 const seed = JSON.parse(readFileSync(join(__dirname, '../src/multilingual_leetcode_dataset.json'), 'utf8'));
-const validSlugs = new Set(curriculum.problems.map(({ slug }) => slug));
+const allProblems = mergeCatalogProblems(curriculum.problems);
+const validSlugs = new Set(allProblems.map(({ slug }) => slug));
 
 export function pickDailyProblem(problems, date = new Date()) {
   const dayKey = date.toISOString().slice(0, 10);
@@ -75,7 +77,7 @@ export function createServer(configOverrides = {}) {
         return sendJson(res, 200, {
           ok: true,
           service: `${config.brand.name}-backend`,
-          problems: curriculum.problems.length,
+          problems: allProblems.length,
           topics: curriculum.roadmap_categories.length,
           locales: seed.platform_metadata.supported_locales.map((l) => l.code),
           plugins: plugins.list(),
@@ -87,7 +89,7 @@ export function createServer(configOverrides = {}) {
       }
 
       if (req.method === 'GET' && pathname === '/api/daily') {
-        return sendJson(res, 200, pickDailyProblem(curriculum.problems));
+        return sendJson(res, 200, pickDailyProblem(allProblems));
       }
 
       if (req.method === 'GET' && pathname === '/api/analytics') {
@@ -96,14 +98,14 @@ export function createServer(configOverrides = {}) {
         return sendJson(
           res,
           200,
-          buildAnalytics(profile, curriculum.problems, curriculum.roadmap_categories, config.interview.activityDays),
+          buildAnalytics(profile, allProblems, curriculum.roadmap_categories, config.interview.activityDays),
         );
       }
 
       if (req.method === 'GET' && pathname === '/api/catalog') {
         return sendJson(res, 200, {
           categories: curriculum.roadmap_categories,
-          problems: curriculum.problems,
+          problems: allProblems,
           languages: curriculum.languages,
           locales: seed.platform_metadata.supported_locales,
         });
