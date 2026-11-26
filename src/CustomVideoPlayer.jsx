@@ -355,81 +355,81 @@ export function CustomVideoPlayer({
           ) : (
             <div ref={ytHostRef} className="yt-api-mount" aria-label={title || 'Video walkthrough'} />
           )}
+        </div>
 
-          {!useCustomExternal && (
-            <div className="player-overlay-controls">
-              {duration > 0 && (
-                <div className="player-scrubber-row">
-                  <input
-                    type="range"
-                    className="player-scrubber"
-                    min={0}
-                    max={Math.floor(duration)}
-                    value={Math.floor(currentTime)}
-                    aria-label="Seek video timeline"
-                    onChange={(e) => seekTo(Number(e.target.value))}
-                  />
-                </div>
-              )}
+        {!useCustomExternal && (
+          <div className="player-dock-controls">
+            {duration > 0 && (
+              <div className="player-scrubber-row">
+                <input
+                  type="range"
+                  className="player-scrubber"
+                  min={0}
+                  max={Math.floor(duration)}
+                  value={Math.floor(currentTime)}
+                  aria-label="Seek video timeline"
+                  onChange={(e) => seekTo(Number(e.target.value))}
+                />
+              </div>
+            )}
 
-              <div className="player-controls" role="toolbar" aria-label="Video player controls">
-                <div className="player-controls-left">
-                  <button type="button" className="player-ov-btn" onClick={togglePlay} disabled={isYouTube && !ready}
-                    aria-label={playing ? 'Pause' : 'Play'} title={playing ? 'Pause' : 'Play'}>
-                    {playing ? <Pause size={17} aria-hidden="true" /> : <Play size={17} aria-hidden="true" />}
-                  </button>
-                  <button type="button" className="player-ov-btn" onClick={() => seekTo(0)} disabled={isYouTube && !ready}
-                    aria-label="Restart" title="Restart">
-                    <RotateCcw size={15} aria-hidden="true" />
-                  </button>
-                  <button type="button" className="player-ov-btn" onClick={toggleMute} disabled={isYouTube && !ready}
-                    aria-label={muted ? 'Unmute' : 'Mute'} title={muted ? 'Unmute' : 'Mute'}>
-                    {muted ? <VolumeX size={17} aria-hidden="true" /> : <Volume2 size={17} aria-hidden="true" />}
-                  </button>
-                  {duration > 0 && (
-                    <span className="player-time-inline">
-                      {formatTime(currentTime)} / {formatTime(duration)}
-                    </span>
-                  )}
-                </div>
+            <div className="player-controls" role="toolbar" aria-label="Video player controls">
+              <div className="player-controls-left">
+                <button type="button" className="player-ov-btn" onClick={togglePlay} disabled={isYouTube && !ready}
+                  aria-label={playing ? 'Pause' : 'Play'} title={playing ? 'Pause' : 'Play'}>
+                  {playing ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
+                </button>
+                <button type="button" className="player-ov-btn player-btn-restart" onClick={() => seekTo(0)} disabled={isYouTube && !ready}
+                  aria-label="Restart" title="Restart">
+                  <RotateCcw size={14} aria-hidden="true" />
+                </button>
+                <button type="button" className="player-ov-btn" onClick={toggleMute} disabled={isYouTube && !ready}
+                  aria-label={muted ? 'Unmute' : 'Mute'} title={muted ? 'Unmute' : 'Mute'}>
+                  {muted ? <VolumeX size={16} aria-hidden="true" /> : <Volume2 size={16} aria-hidden="true" />}
+                </button>
+                {duration > 0 && (
+                  <span className="player-time-inline">
+                    {formatTime(currentTime)} / {formatTime(duration)}
+                  </span>
+                )}
+              </div>
 
-                <div className="player-controls-right">
+              <div className="player-controls-right">
+                <button
+                  type="button"
+                  className={`player-ov-btn ${showScript ? 'is-active' : ''}`}
+                  aria-pressed={showScript}
+                  aria-label="Walkthrough script"
+                  title="Walkthrough script"
+                  onClick={() => setShowScript((v) => !v)}
+                >
+                  <FileText size={15} aria-hidden="true" />
+                </button>
+                <button type="button" className="player-ov-speed" onClick={cycleSpeed} title="Playback speed">
+                  {speed}×
+                </button>
+                {customUrl && (
                   <button
                     type="button"
-                    className={`player-ov-btn ${showScript ? 'is-active' : ''}`}
-                    aria-pressed={showScript}
-                    aria-label="Walkthrough script"
-                    title="Walkthrough script"
-                    onClick={() => setShowScript((v) => !v)}
+                    className={`player-ov-speed ${mode === 'custom' ? 'is-active' : ''}`}
+                    onClick={() => setMode((m) => (m === 'forge' ? 'custom' : 'forge'))}
                   >
-                    <FileText size={16} aria-hidden="true" />
+                    {mode === 'custom' ? 'Custom' : 'Forge'}
                   </button>
-                  <button type="button" className="player-ov-speed" onClick={cycleSpeed} title="Playback speed">
-                    {speed}×
-                  </button>
-                  {customUrl && (
-                    <button
-                      type="button"
-                      className={`player-ov-speed ${mode === 'custom' ? 'is-active' : ''}`}
-                      onClick={() => setMode((m) => (m === 'forge' ? 'custom' : 'forge'))}
-                    >
-                      {mode === 'custom' ? 'Custom' : 'Forge'}
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="player-ov-btn"
-                    onClick={requestFullscreen}
-                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-                    title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-                  >
-                    {isFullscreen ? <Minimize size={16} aria-hidden="true" /> : <Maximize size={16} aria-hidden="true" />}
-                  </button>
-                </div>
+                )}
+                <button
+                  type="button"
+                  className="player-ov-btn"
+                  onClick={requestFullscreen}
+                  aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                  title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                >
+                  {isFullscreen ? <Minimize size={15} aria-hidden="true" /> : <Maximize size={15} aria-hidden="true" />}
+                </button>
               </div>
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       {showScript && (

@@ -65,15 +65,17 @@ export const ROOM_FORMATS = [
       'Implement clean code & trace edge cases',
       'State time O(...) and space O(...) complexity',
     ],
-    template: `## Approach Notes
-- **Constraints**: $n \\le 10^5$, check empty/duplicate inputs
-- **Idea**: Hash map / two pointers / monotonic stack
-- **Complexity**: Time $O(n)$, Space $O(n)$
+    template: `## 1. Constraints & Edge Cases
+- 
 
+## 2. Approach & Complexity
+- **Brute Force**: 
+- **Optimal**: 
+- **Time**:  · **Space**: 
+
+## 3. Implementation
 \`\`\`python
-def solve(nums):
-    # Draft your solution here
-    pass
+# Write your implementation here
 \`\`\`
 `,
   },
@@ -90,22 +92,17 @@ def solve(nums):
       'Draw high-level architecture diagram',
       'Deep-dive bottlenecks, caching & failure modes',
     ],
-    template: `## Scale Estimates
-- **DAU**: 50M · **Read:Write** = 100:1
-- **Peak QPS**: $\\approx 2 \\times \\text{avg QPS}$
+    template: `## 1. Functional & Non-Functional Requirements
+- 
 
-\`\`\`mermaid
-flowchart LR
-    Client --> LB["Load Balancer"]
-    LB --> API["API Fleet"]
-    API --> Cache[("Redis Cache")]
-    API --> DB[("Primary + Read Replicas")]
-    API --> Queue["Kafka"] --> Worker["Async Workers"]
-\`\`\`
+## 2. Scale & Capacity Estimates
+- 
 
-## Deep Dive Trade-offs
-- Partitioning key & hot-key mitigation
-- Consistency model (eventual vs strong)
+## 3. API & Data Model
+- 
+
+## 4. Architecture & Deep Dive
+- 
 `,
   },
   {
@@ -121,24 +118,14 @@ flowchart LR
       'Handle concurrency, locking & error states',
       'Walk through extensibility for new requirements',
     ],
-    template: `## Core Entities & Patterns
-- **Patterns**: Strategy for pricing, State for lifecycle transitions
+    template: `## 1. Requirements & Actors
+- 
 
-\`\`\`mermaid
-classDiagram
-    class Service {
-      +execute(request)
-    }
-    class Repository {
-      <<interface>>
-      +save(entity)
-      +findById(id)
-    }
-    Service --> Repository
-\`\`\`
+## 2. Entities, Interfaces & Patterns
+- 
 
-## Concurrency & Edge Cases
-- Optimistic locking / idempotency keys for duplicate requests
+## 3. Implementation & Concurrency
+- 
 `,
   },
   {
@@ -153,11 +140,11 @@ classDiagram
       'Action: trade-offs you drove (use "I", not "we")',
       'Result: quantified metric + reflection learned',
     ],
-    template: `## Story Brief (STAR)
-- **Situation**: Production latency spiked 3x during peak traffic
-- **Task**: Own root-cause investigation and restore SLA < 200ms
-- **Action**: Profiled DB queries, added composite index & read-through cache
-- **Result**: Cut p99 latency by 68% and documented runbook for team
+    template: `## Story Notes (STAR)
+- **Situation**: 
+- **Task**: 
+- **Action**: 
+- **Result**: 
 `,
   },
 ];
@@ -315,13 +302,55 @@ export function removeSavedRoom(roomId) {
   return next;
 }
 
-export function createDefaultRoomState(mode = 'dsa', { problemSlug = '', promptTitle = '' } = {}) {
+export function buildRoomNotesTemplate(mode = 'dsa', { problem = null, problemTitle = '', promptTitle = '', topicLabel = '' } = {}) {
+  const fmt = getRoomFormat(mode);
+  if (problem) {
+    const heading = problem.leetcode_id
+      ? `# ${problem.leetcode_id}. ${problemTitle || problem.slug}`
+      : `# ${problemTitle || problem.slug}`;
+    const meta = [
+      problem.difficulty ? `**Difficulty**: ${problem.difficulty}` : '',
+      topicLabel ? `**Topic**: ${topicLabel}` : '',
+    ].filter(Boolean).join(' · ');
+    return [
+      heading,
+      meta ? `> ${meta}` : '',
+      '',
+      fmt.template.trim(),
+      '',
+    ].filter((line, idx) => !(idx === 1 && !line)).join('\n');
+  }
+  if (promptTitle) {
+    return `# ${promptTitle}\n\n${fmt.template}`;
+  }
+  return fmt.template;
+}
+
+const LEGACY_BOILERPLATE_MARKERS = [
+  '## Scale Estimates\n- **DAU**: 50M',
+  '## Approach Notes\n- **Constraints**: $n \\le 10^5$',
+  '## Core Entities & Patterns\n- **Patterns**: Strategy for pricing',
+  '## Story Brief (STAR)\n- **Situation**: Production latency spiked 3x',
+];
+
+export function isLegacyOrDefaultNotes(notes) {
+  const text = String(notes || '').trim();
+  if (!text) return true;
+  if (LEGACY_BOILERPLATE_MARKERS.some((marker) => text.startsWith(marker))) return true;
+  if (ROOM_FORMATS.some((f) => f.template.trim() === text)) return true;
+  // Also match an unedited header-prefixed default template
+  const withoutHeader = text.replace(/^# [^\n]+\n(?:> [^\n]+\n)?\n*/, '').trim();
+  if (ROOM_FORMATS.some((f) => f.template.trim() === withoutHeader)) return true;
+  return false;
+}
+
+export function createDefaultRoomState(mode = 'dsa', { problem = null, problemSlug = '', problemTitle = '', promptTitle = '', topicLabel = '' } = {}) {
   const fmt = getRoomFormat(mode);
   return {
     mode: fmt.id,
-    problemSlug: problemSlug || '',
-    promptTitle: promptTitle || '',
-    notes: fmt.template,
+    problemSlug: problem?.slug || problemSlug || '',
+    promptTitle: promptTitle || problemTitle || '',
+    notes: buildRoomNotesTemplate(fmt.id, { problem, problemTitle, promptTitle, topicLabel }),
     checklist: fmt.stages.map(() => false),
     scores: { approach: 0, communication: 0, execution: 0, tradeoffs: 0 },
     timerDurationSec: fmt.minutes * 60,

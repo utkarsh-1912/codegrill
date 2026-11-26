@@ -4,6 +4,7 @@ import {
   ArrowLeft,
   ArrowRight,
   ArrowUpRight,
+  BookOpen,
   Boxes,
   Check,
   Clock,
@@ -11,6 +12,9 @@ import {
   Copy,
   Download,
   ExternalLink,
+  Eye,
+  FileCode2,
+  Lightbulb,
   Maximize2,
   MessageSquare,
   Minimize2,
@@ -30,9 +34,11 @@ import {
   ROOM_ROLES,
   RUBRIC_DIMENSIONS,
   buildRoomDebriefMarkdown,
+  buildRoomNotesTemplate,
   buildRoomShareUrl,
   createDefaultRoomState,
   getRoomFormat,
+  isLegacyOrDefaultNotes,
   isValidRoomId,
   newRoomId,
   parseRoomInput,
@@ -46,6 +52,7 @@ import {
   writeRoomProfile,
   writeRoomState,
 } from './rooms.mjs';
+import { resourcesFor } from './catalog.mjs';
 import { RichTextInterpreter } from './RichTextInterpreter.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
 import { Mascot } from './Mascot.jsx';
@@ -87,15 +94,24 @@ export function StudyRooms({
   locale,
   defaultLocale = 'en',
   problems = [],
+  categories = [],
+  languages = {},
   activeRoomId = '',
   activeMode = '',
   sharedProblem = '',
   onNavigate,
   onOpenProblem,
+  onOpenViewer,
   children,
 }) {
   const t = getMessages(locale);
   const validActiveRoom = isValidRoomId(activeRoomId) ? activeRoomId.trim() : '';
+
+  const getTopicLabel = (categoryId) => {
+    const cat = categories.find((c) => c.id === categoryId);
+    if (!cat) return '';
+    return cat.labels?.[locale] || cat.labels?.[defaultLocale] || cat.id;
+  };
 
   const [profile, setProfile] = useState(readRoomProfile);
   const [savedRooms, setSavedRooms] = useState(readSavedRooms);
@@ -115,6 +131,7 @@ export function StudyRooms({
       : createDefaultRoomState('dsa')
   ));
   const [editingNotes, setEditingNotes] = useState(false);
+  const [revealedHints, setRevealedHints] = useState({ pattern: false, complexity: false, impl: false });
   const [conductorTab, setConductorTab] = useState('session'); // 'session' | 'rubric'
   const [padExpanded, setPadExpanded] = useState(false);
   const [swapOpen, setSwapOpen] = useState(false);
@@ -133,19 +150,48 @@ export function StudyRooms({
 
   useEffect(() => {
     if (!validActiveRoom) return;
-    const loaded = readRoomState(validActiveRoom, activeMode || 'dsa', {
+    const requestedMode = ROOM_FORMATS.some((f) => f.id === activeMode)
+      ? activeMode
+      : (sharedProblem ? 'dsa' : '');
+    const loaded = readRoomState(validActiveRoom, requestedMode || 'dsa', {
       problemSlug: sharedProblem || '',
     });
-    if (sharedProblem && !loaded.problemSlug) {
+
+    // Honor explicit URL mode/problem overrides over stale localStorage
+    if (requestedMode && loaded.mode !== requestedMode) {
+      const nextFmt = getRoomFormat(requestedMode);
+      loaded.mode = nextFmt.id;
+      loaded.checklist = nextFmt.stages.map(() => false);
+      loaded.timerDurationSec = nextFmt.minutes * 60;
+      loaded.timerRemainingSec = nextFmt.minutes * 60;
+      loaded.timerRunning = false;
+    }
+    if (sharedProblem && loaded.problemSlug !== sharedProblem) {
       loaded.problemSlug = sharedProblem;
     }
+
+    const prob = problems.find((p) => p.slug === loaded.problemSlug) || null;
+    const probTitle = prob ? getProblemTitle(prob, locale, defaultLocale) : '';
+    const topicLabel = prob ? getTopicLabel(prob.category_id) : '';
+    if (prob && !loaded.promptTitle) {
+      loaded.promptTitle = probTitle;
+    }
+
+    // Automatically replace legacy rubbish boilerplate or unmodified defaults with clean problem/prompt outline
+    if (isLegacyOrDefaultNotes(loaded.notes)) {
+      loaded.notes = buildRoomNotesTemplate(loaded.mode, {
+        problem: prob,
+        problemTitle: probTitle,
+        promptTitle: loaded.promptTitle,
+        topicLabel,
+      });
+    }
+
+    setRevealedHints({ pattern: false, complexity: false, impl: false });
     setRoomState(loaded);
     writeRoomState(validActiveRoom, loaded);
 
-    const prob = problems.find((p) => p.slug === loaded.problemSlug);
-    const label = prob
-      ? getProblemTitle(prob, locale, defaultLocale)
-      : loaded.promptTitle || getRoomFormat(loaded.mode).label;
+    const label = probTitle || loaded.promptTitle || getRoomFormat(loaded.mode).label;
 
     setSavedRooms(upsertSavedRoom({
       roomId: validActiveRoom,
@@ -275,8 +321,11 @@ export function StudyRooms({
       : (selectedPrompt.trim() || ROOM_PROMPTS[setupMode]?.[0]?.title || fmt.label);
 
     const initial = createDefaultRoomState(fmt.id, {
+      problem: chosenProblem,
       problemSlug: chosenProblem?.slug || '',
+      problemTitle: chosenProblem ? getProblemTitle(chosenProblem, locale, defaultLocale) : '',
       promptTitle,
+      topicLabel: chosenProblem ? getTopicLabel(chosenProblem.category_id) : '',
     });
     writeRoomState(id, initial);
     setSavedRooms(upsertSavedRoom({
@@ -572,14 +621,33 @@ export function StudyRooms({
                     className={roomState.mode === f.id ? 'is-active' : ''}
                     onClick={() => {
                       const nextFmt = getRoomFormat(f.id);
-                      updateRoomState((prev) => ({
-                        ...prev,
-                        mode: nextFmt.id,
-                        checklist: nextFmt.stages.map(() => false),
-                        timerDurationSec: nextFmt.minutes * 60,
-                        timerRemainingSec: nextFmt.minutes * 60,
-                        timerRunning: false,
-                      }));
+                      updateRoomState((prev) => {
+                        const keepNotes = !isLegacyOrDefaultNotes(prev.notes);
+                        const nextSlug = nextFmt.id === 'dsa' ? prev.problemSlug : '';
+                        const prob = nextSlug ? problems.find((p) => p.slug === nextSlug) : null;
+                        const probTitle = prob ? getProblemTitle(prob, locale, defaultLocale) : '';
+                        const nextPrompt = nextFmt.id === 'dsa'
+                          ? probTitle
+                          : (ROOM_PROMPTS[nextFmt.id]?.[0]?.title || nextFmt.label);
+                        return {
+                          ...prev,
+                          mode: nextFmt.id,
+                          problemSlug: nextSlug,
+                          promptTitle: nextPrompt,
+                          notes: keepNotes
+                            ? prev.notes
+                            : buildRoomNotesTemplate(nextFmt.id, {
+                              problem: prob,
+                              problemTitle: probTitle,
+                              promptTitle: nextPrompt,
+                              topicLabel: prob ? getTopicLabel(prob.category_id) : '',
+                            }),
+                          checklist: nextFmt.stages.map(() => false),
+                          timerDurationSec: nextFmt.minutes * 60,
+                          timerRemainingSec: nextFmt.minutes * 60,
+                          timerRunning: false,
+                        };
+                      });
                     }}
                   >
                     {f.label}
@@ -603,7 +671,21 @@ export function StudyRooms({
                         className={`room-swap-item ${roomState.problemSlug === p.slug ? 'is-active' : ''}`}
                         onClick={() => {
                           const nextTitle = getProblemTitle(p, locale, defaultLocale);
-                          updateRoomState({ problemSlug: p.slug, promptTitle: nextTitle });
+                          const topicLabel = getTopicLabel(p.category_id);
+                          updateRoomState((prev) => ({
+                            ...prev,
+                            mode: 'dsa',
+                            problemSlug: p.slug,
+                            promptTitle: nextTitle,
+                            notes: isLegacyOrDefaultNotes(prev.notes)
+                              ? buildRoomNotesTemplate('dsa', {
+                                problem: p,
+                                problemTitle: nextTitle,
+                                topicLabel,
+                              })
+                              : prev.notes,
+                          }));
+                          setRevealedHints({ pattern: false, complexity: false, impl: false });
                           setSavedRooms(upsertSavedRoom({
                             roomId: validActiveRoom,
                             mode: 'dsa',
@@ -627,7 +709,14 @@ export function StudyRooms({
                       type="button"
                       className={`room-swap-item ${roomState.promptTitle === pr.title ? 'is-active' : ''}`}
                       onClick={() => {
-                        updateRoomState({ problemSlug: '', promptTitle: pr.title });
+                        updateRoomState((prev) => ({
+                          ...prev,
+                          problemSlug: '',
+                          promptTitle: pr.title,
+                          notes: isLegacyOrDefaultNotes(prev.notes)
+                            ? buildRoomNotesTemplate(prev.mode, { promptTitle: pr.title })
+                            : prev.notes,
+                        }));
                         setSavedRooms(upsertSavedRoom({
                           roomId: validActiveRoom,
                           mode: roomState.mode,
@@ -649,6 +738,129 @@ export function StudyRooms({
 
         <div className={`room-studio-grid ${padExpanded ? 'is-expanded' : ''}`}>
           <div className="room-main-pane">
+            {activeProblem && (() => {
+              const probTitle = getProblemTitle(activeProblem, locale, defaultLocale);
+              const topicLabel = getTopicLabel(activeProblem.category_id);
+              const solutionEntries = activeProblem.solutions
+                ? Object.entries(languages).filter(([id]) => activeProblem.solutions[id])
+                : [];
+              const resourceLinks = resourcesFor(activeProblem.resources, locale, defaultLocale).slice(0, 4);
+
+              return (
+                <Card variant="outlined" className="room-problem-brief-card">
+                  <div className="room-brief-top">
+                    <div className="room-brief-meta">
+                      <span className="room-brief-id">#{activeProblem.leetcode_id}</span>
+                      {topicLabel && <span className="room-brief-tag">{topicLabel}</span>}
+                      {activeProblem.neetcode_lists?.slice(0, 2).map((listName) => (
+                        <span key={listName} className="room-brief-tag is-subtle">{listName}</span>
+                      ))}
+                    </div>
+
+                    <div className="room-hint-toggles">
+                      <button
+                        type="button"
+                        className={`room-hint-toggle ${revealedHints.pattern ? 'is-open' : ''}`}
+                        onClick={() => setRevealedHints((h) => ({ ...h, pattern: !h.pattern }))}
+                      >
+                        <Lightbulb size={13} aria-hidden="true" />
+                        {revealedHints.pattern ? 'Hide Hint' : 'Hint 1: Pattern'}
+                      </button>
+                      <button
+                        type="button"
+                        className={`room-hint-toggle ${revealedHints.complexity ? 'is-open' : ''}`}
+                        onClick={() => setRevealedHints((h) => ({ ...h, complexity: !h.complexity }))}
+                      >
+                        <Eye size={13} aria-hidden="true" />
+                        {revealedHints.complexity ? 'Hide Complexity' : 'Hint 2: Complexity'}
+                      </button>
+                      {(solutionEntries.length > 0 || resourceLinks.length > 0) && (
+                        <button
+                          type="button"
+                          className={`room-hint-toggle ${revealedHints.impl ? 'is-open' : ''}`}
+                          onClick={() => setRevealedHints((h) => ({ ...h, impl: !h.impl }))}
+                        >
+                          <FileCode2 size={13} aria-hidden="true" />
+                          {revealedHints.impl ? 'Hide Solutions' : 'Implementation'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {(revealedHints.pattern || revealedHints.complexity || revealedHints.impl) && (
+                    <div className="room-hints-drawer">
+                      {revealedHints.pattern && (
+                        <div className="room-hint-item">
+                          <strong>Optimal Pattern</strong>
+                          <span>{activeProblem.optimal_approach || topicLabel || 'Break down by constraints & invariant'}</span>
+                        </div>
+                      )}
+                      {revealedHints.complexity && (
+                        <div className="room-hint-item">
+                          <strong>Target Complexity</strong>
+                          <span>
+                            Time <code>{activeProblem.time_complexity || 'O(n)'}</code> · Space <code>{activeProblem.space_complexity || 'O(n)'}</code>
+                          </span>
+                        </div>
+                      )}
+                      {revealedHints.impl && (
+                        <div className="room-hint-impl">
+                          {solutionEntries.length > 0 && (
+                            <div className="room-impl-group">
+                              <strong>Reference Code</strong>
+                              <div className="room-impl-pills">
+                                {solutionEntries.map(([langId, langName]) => (
+                                  <button
+                                    key={langId}
+                                    type="button"
+                                    className="room-impl-pill"
+                                    onClick={() => onOpenViewer?.({
+                                      url: activeProblem.solutions[langId],
+                                      title: `${probTitle} — ${langName}`,
+                                      kind: 'code',
+                                      solutionLang: langId,
+                                      solutions: activeProblem.solutions,
+                                      problemTitle: probTitle,
+                                      problemSlug: activeProblem.slug,
+                                    })}
+                                  >
+                                    <FileCode2 size={13} aria-hidden="true" /> {langName}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          {resourceLinks.length > 0 && (
+                            <div className="room-impl-group">
+                              <strong>Walkthroughs & Editorials</strong>
+                              <div className="room-impl-pills">
+                                {resourceLinks.map((link) => (
+                                  <button
+                                    key={link.kind + link.url}
+                                    type="button"
+                                    className="room-impl-pill is-resource"
+                                    onClick={() => onOpenViewer?.({
+                                      url: link.url,
+                                      title: `${probTitle} — ${link.title}`,
+                                      kind: link.kind === 'video' ? 'video' : 'article',
+                                      problemTitle: probTitle,
+                                    })}
+                                  >
+                                    {link.kind === 'video' ? <Play size={12} aria-hidden="true" /> : <BookOpen size={12} aria-hidden="true" />}
+                                    <span>{link.title}</span>
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </Card>
+              );
+            })()}
+
             <Card variant="outlined" className="room-pad-card">
               <div className="room-pad-toolbar">
                 <div className="room-pad-heading">

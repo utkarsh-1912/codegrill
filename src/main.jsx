@@ -632,11 +632,14 @@ function App() {
             defaultLocale={defaultLocale}
             title={t.nav.rooms}
             problems={problems}
+            categories={categories}
+            languages={languages}
             activeRoomId={roomId}
             activeMode={roomMode}
             sharedProblem={sharedProblem}
             onNavigate={navigate}
             onOpenProblem={openProblemBySlug}
+            onOpenViewer={setViewerItem}
           >
             {sharedProblem && <ProblemLink slug={sharedProblem} locale={locale} />}
           </StudyRooms>

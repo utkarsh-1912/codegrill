@@ -95,7 +95,7 @@ function resolveResourceUrl(href, sourceUrl, forRawImage = false) {
           const dirParts = parts[2] === 'blob' ? rest.slice(0, -1) : rest;
           const baseOrigin = forRawImage
             ? `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/`
-            : `https://github.com/${owner}/${repo}/blob/${ref}/`;
+            : `https://github.com/${owner}/${repo}/${clean.endsWith('/') ? 'tree' : 'blob'}/${ref}/`;
           const baseDir = clean.startsWith('/')
             ? baseOrigin
             : `${baseOrigin}${dirParts.length ? `${dirParts.join('/')}/` : ''}`;

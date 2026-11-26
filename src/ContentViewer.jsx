@@ -169,6 +169,16 @@ export function ContentViewerBody({
           onPageChange={setDirPage}
           locale={locale}
         />
+        {data.readme && (
+          <div className="github-dir-readme">
+            <RichTextInterpreter
+              content={data.readme}
+              format="markdown"
+              sourceUrl={data.readmeSourceUrl || data.sourceUrl || activeUrl}
+              onOpenLink={(nextUrl, nextTitle) => onSelectSubUrl?.(nextUrl, nextTitle)}
+            />
+          </div>
+        )}
       </div>
     );
   }

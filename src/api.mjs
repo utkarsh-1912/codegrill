@@ -48,12 +48,70 @@ function toGitHubRawClient(rawUrl) {
     return {
       rawUrl: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${rest.join('/')}`,
       filename: rest[rest.length - 1] || 'solution',
+      owner,
+      repoName: repo,
+      ref,
       repo: `${owner}/${repo}`,
       filePath: rest.join('/'),
+      trailingSlash: url.pathname.endsWith('/'),
     };
   } catch {
     return null;
   }
+}
+
+async function fetchGitHubDirectoryClient(owner, repo, ref, dirPath, fallbackUrl) {
+  const cleanDir = String(dirPath || '').replace(/^\/+|\/+$/g, '');
+  const apiPath = cleanDir ? `/${cleanDir}` : '';
+  const refQuery = ref ? `?ref=${encodeURIComponent(ref)}` : '';
+  const res = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/contents${apiPath}${refQuery}`,
+    {
+      signal: AbortSignal.timeout(8000),
+      headers: { Accept: 'application/vnd.github+json' },
+    },
+  );
+  if (!res.ok) return null;
+  const list = await res.json();
+  if (!Array.isArray(list)) return null;
+
+  const sorted = list
+    .slice(0, 150)
+    .sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+      return String(a.name || '').localeCompare(String(b.name || ''));
+    });
+
+  let readme = '';
+  let readmeSourceUrl = '';
+  const readmeEntry = sorted.find((e) => e.type === 'file' && /^readme(\.(md|markdown|txt))?$/i.test(e.name));
+  if (readmeEntry?.download_url) {
+    try {
+      const rmRes = await fetch(readmeEntry.download_url, { signal: AbortSignal.timeout(6000) });
+      if (rmRes.ok) {
+        readme = (await rmRes.text()).slice(0, 120000);
+        readmeSourceUrl = readmeEntry.html_url || '';
+      }
+    } catch {
+      // Optional README preview; ignore errors
+    }
+  }
+
+  return {
+    plugin: 'github-content-client',
+    kind: 'directory',
+    title: cleanDir || `${owner}/${repo}`,
+    repo: `${owner}/${repo}`,
+    entries: sorted.map((entry) => ({
+      name: entry.name,
+      type: entry.type,
+      path: entry.path,
+      url: entry.html_url || fallbackUrl,
+    })),
+    readme,
+    readmeSourceUrl,
+    sourceUrl: `https://github.com/${owner}/${repo}/tree/${ref || 'HEAD'}${apiPath}`,
+  };
 }
 
 function parseGitHubTreeClient(rawUrl) {
@@ -317,34 +375,8 @@ export async function fetchPluginContent(url, locale = 'en', baseUrl) {
   const ghTree = parseGitHubTreeClient(url);
   if (ghTree) {
     try {
-      const apiPath = ghTree.dirPath ? `/${ghTree.dirPath}` : '';
-      const refQuery = ghTree.ref ? `?ref=${encodeURIComponent(ghTree.ref)}` : '';
-      const res = await fetch(
-        `https://api.github.com/repos/${ghTree.owner}/${ghTree.repo}/contents${apiPath}${refQuery}`,
-        {
-          signal: AbortSignal.timeout(8000),
-          headers: { Accept: 'application/vnd.github+json' },
-        },
-      );
-      if (res.ok) {
-        const list = await res.json();
-        const entries = (Array.isArray(list) ? list : [])
-          .slice(0, 150)
-          .map((entry) => ({
-            name: entry.name,
-            type: entry.type,
-            path: entry.path,
-            url: entry.html_url || url,
-          }));
-        return {
-          plugin: 'github-content-client',
-          kind: 'directory',
-          title: ghTree.dirPath || `${ghTree.owner}/${ghTree.repo}`,
-          repo: `${ghTree.owner}/${ghTree.repo}`,
-          entries,
-          sourceUrl: url,
-        };
-      }
+      const dirPayload = await fetchGitHubDirectoryClient(ghTree.owner, ghTree.repo, ghTree.ref, ghTree.dirPath, url);
+      if (dirPayload) return dirPayload;
     } catch {
       // Ignore fallback error
     }
@@ -420,6 +452,14 @@ function parseMediumUrlClient(rawUrl) {
 
   const gh = toGitHubRawClient(url);
   if (gh) {
+    if (gh.trailingSlash && gh.owner && gh.repoName) {
+      try {
+        const dirPayload = await fetchGitHubDirectoryClient(gh.owner, gh.repoName, gh.ref, gh.filePath, url);
+        if (dirPayload) return dirPayload;
+      } catch {
+        // Fall through to raw fetch
+      }
+    }
     const lower = gh.filename.toLowerCase();
     if (/\.(png|jpe?g|gif|webp|svg|bmp|ico|avif)$/.test(lower)) {
       return {
@@ -518,6 +558,10 @@ function parseMediumUrlClient(rawUrl) {
           content,
           sourceUrl: url,
         };
+      }
+      if (res.status === 404 && gh.owner && gh.repoName) {
+        const dirPayload = await fetchGitHubDirectoryClient(gh.owner, gh.repoName, gh.ref, gh.filePath, url);
+        if (dirPayload) return dirPayload;
       }
     } catch {
       // Ignore fallback error

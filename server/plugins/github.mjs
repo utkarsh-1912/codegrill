@@ -65,10 +65,74 @@ export function toGitHubRawUrl(rawUrl) {
       repo,
       ref,
       filePath,
+      trailingSlash: url.pathname.endsWith('/'),
     };
   } catch {
     return null;
   }
+}
+
+async function fetchGitHubDirectory(owner, repo, ref, dirPath, rawUrl, signal) {
+  const cleanDir = String(dirPath || '').replace(/^\/+|\/+$/g, '');
+  const apiPath = cleanDir ? `/${cleanDir}` : '';
+  const refQuery = ref ? `?ref=${encodeURIComponent(ref)}` : '';
+  const apiEndpoint = `https://api.github.com/repos/${owner}/${repo}/contents${apiPath}${refQuery}`;
+  const response = await fetch(apiEndpoint, {
+    signal,
+    headers: {
+      'User-Agent': 'Codegrill-Plugin/1.0',
+      Accept: 'application/vnd.github+json',
+    },
+  });
+  if (!response.ok) {
+    throw new Error(`GitHub API returned HTTP ${response.status}`);
+  }
+  const list = await response.json();
+  if (!Array.isArray(list)) {
+    throw new Error('GitHub Contents API did not return a directory listing');
+  }
+  const entries = list
+    .slice(0, 150)
+    .sort((a, b) => {
+      if (a.type !== b.type) return a.type === 'dir' ? -1 : 1;
+      return String(a.name || '').localeCompare(String(b.name || ''));
+    })
+    .map((entry) => ({
+      name: entry.name,
+      type: entry.type, // 'file' | 'dir'
+      path: entry.path,
+      url: entry.html_url || rawUrl,
+      downloadUrl: entry.download_url || '',
+    }));
+
+  let readme = '';
+  let readmeSourceUrl = '';
+  const readmeEntry = entries.find((e) => e.type === 'file' && /^readme(\.(md|markdown|txt))?$/i.test(e.name));
+  if (readmeEntry?.downloadUrl) {
+    try {
+      const rmRes = await fetch(readmeEntry.downloadUrl, {
+        signal,
+        headers: { 'User-Agent': 'Codegrill-Plugin/1.0' },
+      });
+      if (rmRes.ok) {
+        readme = (await rmRes.text()).slice(0, 120000);
+        readmeSourceUrl = readmeEntry.url;
+      }
+    } catch {
+      // Optional README preview; ignore errors
+    }
+  }
+
+  return {
+    plugin: 'github-content',
+    kind: 'directory',
+    title: cleanDir || `${owner}/${repo}`,
+    repo: `${owner}/${repo}`,
+    entries: entries.map(({ name, type, path, url }) => ({ name, type, path, url })),
+    readme,
+    readmeSourceUrl,
+    sourceUrl: `https://github.com/${owner}/${repo}/tree/${ref || 'HEAD'}${apiPath}`,
+  };
 }
 
 export function parseGitHubTreeUrl(rawUrl) {
@@ -139,39 +203,16 @@ export const githubPlugin = {
 
     const tree = parseGitHubTreeUrl(rawUrl);
     if (tree) {
-      const apiPath = tree.dirPath ? `/${tree.dirPath}` : '';
-      const apiEndpoint = `https://api.github.com/repos/${tree.owner}/${tree.repo}/contents${apiPath}?ref=${encodeURIComponent(tree.ref)}`;
-      const response = await fetch(apiEndpoint, {
-        signal,
-        headers: {
-          'User-Agent': 'Codegrill-Plugin/1.0',
-          Accept: 'application/vnd.github+json',
-        },
-      });
-      if (!response.ok) {
-        throw new Error(`GitHub API returned HTTP ${response.status}`);
-      }
-      const list = await response.json();
-      const entries = (Array.isArray(list) ? list : [])
-        .slice(0, 120)
-        .map((entry) => ({
-          name: entry.name,
-          type: entry.type, // 'file' | 'dir'
-          path: entry.path,
-          url: entry.html_url || rawUrl,
-        }));
-      return {
-        plugin: 'github-content',
-        kind: 'directory',
-        title: tree.dirPath || `${tree.owner}/${tree.repo}`,
-        repo: `${tree.owner}/${tree.repo}`,
-        entries,
-        sourceUrl: rawUrl,
-      };
+      return fetchGitHubDirectory(tree.owner, tree.repo, tree.ref, tree.dirPath, rawUrl, signal);
     }
 
     const parsed = toGitHubRawUrl(rawUrl);
     if (!parsed) throw new Error('Unsupported GitHub URL');
+
+    // Relative links in GitHub READMEs sometimes resolve directories under /blob/.../
+    if (parsed.trailingSlash) {
+      return fetchGitHubDirectory(parsed.owner, parsed.repo, parsed.ref, parsed.filePath, rawUrl, signal);
+    }
 
     const filename = parsed.filePath.split('/').pop() || 'solution';
     const ext = filename.includes('.') ? filename.split('.').pop().toLowerCase() : '';
@@ -217,6 +258,14 @@ export const githubPlugin = {
       headers: { 'User-Agent': 'Codegrill-Plugin/1.0' },
     });
     if (!response.ok) {
+      // A /blob/<ref>/<dir> link without trailing slash 404s on raw.githubusercontent.com; try directory API
+      if (response.status === 404) {
+        try {
+          return await fetchGitHubDirectory(parsed.owner, parsed.repo, parsed.ref, parsed.filePath, rawUrl, signal);
+        } catch {
+          // Fall through to original HTTP 404 error
+        }
+      }
       throw new Error(`GitHub returned HTTP ${response.status}`);
     }
     const text = await response.text();
