@@ -1959,7 +1959,7 @@ progress.diff-hard::-moz-progress-bar { background: #dc2626; }
 
 @keyframes drawerSlideIn {
   from {
-    transform: translateX(-100%);
+    transform: translateX(100%);
   }
   to {
     transform: translateX(0);
@@ -2867,7 +2867,8 @@ body,
     display: grid !important;
   }
 
-  .app-header .desktop-search {
+  .app-header .desktop-search,
+  .app-header .settings-anchor {
     display: none;
   }
 
@@ -3648,7 +3649,7 @@ body,
 }
 
 
-/* Overhauled Mobile Sidebar (Portal, 100dvh, Scrollable Body, Inline Language Pills) + Mobile Component Fixes */
+/* Overhauled Mobile Sidebar (Portal, 100dvh, Full-Sidebar Y-Scroll, Inline Language Pills) + Mobile Component Fixes */
 .mobile-sidebar-backdrop {
   position: fixed;
   inset: 0;
@@ -3656,6 +3657,7 @@ body,
   background: #0d0907b8;
   backdrop-filter: blur(2px);
   display: flex;
+  justify-content: flex-end;
   align-items: stretch;
 }
 
@@ -3665,11 +3667,14 @@ body,
   max-height: 100dvh;
   background: var(--ut-bg-2);
   color: var(--ink);
-  border-right: 1px solid var(--ut-line);
+  border-left: 1px solid var(--ut-line);
   display: flex;
   flex-direction: column;
-  box-shadow: 16px 0 44px #00000055;
-  overflow: hidden;
+  box-shadow: -16px 0 44px #00000055;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .mobile-sidebar-head {
@@ -3683,12 +3688,10 @@ body,
 }
 
 .mobile-sidebar-scroll {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  padding-bottom: max(18px, env(safe-area-inset-bottom));
+  padding-bottom: max(22px, env(safe-area-inset-bottom));
 }
 
 .mobile-sidebar-nav {

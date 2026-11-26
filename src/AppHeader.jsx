@@ -159,16 +159,6 @@ export function AppHeader({
       <header className="app-header">
         <div className="header-inner">
           <div className="header-left">
-            <button
-              type="button"
-              className="locale-field icon-only-control mobile-menu-btn"
-              onClick={() => setSidebarOpen(true)}
-              aria-label={t.palette.menu}
-              aria-expanded={sidebarOpen}
-              aria-controls="mobile-sidebar"
-            >
-              <Menu size={19} aria-hidden="true" />
-            </button>
             <a className="brand" href="/" aria-label={brandName} onClick={linkClick('/')}>
               <BrandLogo name={brandName} size={32} />
             </a>
@@ -201,6 +191,20 @@ export function AppHeader({
               title={t.palette.placeholder}
             >
               <Search size={18} aria-hidden="true" />
+            </button>
+
+            <button
+              type="button"
+              className="locale-field icon-only-control mobile-menu-btn"
+              onClick={() => {
+                setSidebarOpen(true);
+                setMobileSearchOpen(false);
+              }}
+              aria-label={t.palette.menu}
+              aria-expanded={sidebarOpen}
+              aria-controls="mobile-sidebar"
+            >
+              <Menu size={19} aria-hidden="true" />
             </button>
 
             <div className="navbar-search-wrap desktop-search" ref={searchRef}>
