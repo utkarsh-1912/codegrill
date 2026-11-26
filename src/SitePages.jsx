@@ -1,12 +1,35 @@
 import React from 'react';
 import { Button, Card } from '@utkristi/ui';
+import {
+  ArrowRight,
+  BookOpen,
+  Boxes,
+  Code2,
+  Cpu,
+  Database,
+  Flame,
+  Network,
+  Sparkles,
+  Trophy,
+  Users,
+} from 'lucide-react';
 import { getMessages } from './i18n.mjs';
 import { BrandLogo } from './BrandLogo.jsx';
 import { ForgeAtlas } from './ForgeAtlas.jsx';
+import { ROADMAP_DOMAINS } from './domainRoadmaps.mjs';
 
 export const sitePages = ['home', 'how-it-works', 'about', 'help', 'privacy', 'terms', 'copyright'];
 
 const workflowLinks = ['/sheets', '/problems', '/roadmap', '/profile'];
+
+const DOMAIN_ICONS = {
+  dsa: Code2,
+  'system-design': Network,
+  lld: Boxes,
+  sql: Database,
+  concurrency: Cpu,
+  'ai-behavioral': Sparkles,
+};
 
 function navHandler(onNavigate, path) {
   return (event) => {
@@ -34,32 +57,182 @@ export function Workflow({ locale = 'en', onNavigate }) {
   );
 }
 
-export function SitePages({ page, locale = 'en', topicCount, problemCount, sheetCount, config, onNavigate }) {
+export function SitePages({
+  page,
+  locale = 'en',
+  topicCount,
+  problemCount,
+  sheetCount,
+  solvedCount = 0,
+  streak = 0,
+  dailyChallenge = null,
+  config,
+  onNavigate,
+  onOpenDaily,
+}) {
   const t = getMessages(locale);
   const brandName = config?.brand?.name || 'codegrill';
   const ecosystem = config?.brand?.ecosystem || 'Utkristi';
   const year = new Date().getFullYear();
 
   if (page === 'home') {
+    const dailyTitle = dailyChallenge
+      ? (dailyChallenge.translations?.[locale]?.title || dailyChallenge.translations?.en?.title || dailyChallenge.slug)
+      : '';
+
     return (
-      <div className="marketing-page">
-        <section className="landing-hero">
-          <div>
+      <div className="marketing-page home-page">
+        <section className="landing-hero landing-hero-v2">
+          <div className="landing-hero-copy">
+            <span className="landing-eyebrow">6 DOMAINS · 6 LANGUAGES · IN-APP VIEWERS</span>
             <h1 lang={locale}>{t.site.landingTitle}<span>.</span></h1>
             <p>{t.site.landingDesc}</p>
-            <div className="rooms-actions">
-              <Button variant="solid" href="/sheets" onClick={navHandler(onNavigate, '/sheets')}>{t.hero.exploreSheets}</Button>
-              <Button variant="outlined" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>{t.site.exploreRoadmap}</Button>
+            <div className="rooms-actions landing-cta-row">
+              <Button variant="solid" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
+                {t.site.exploreRoadmap} <ArrowRight size={15} aria-hidden="true" />
+              </Button>
+              <Button variant="outlined" href="/sheets" onClick={navHandler(onNavigate, '/sheets')}>
+                {t.hero.exploreSheets}
+              </Button>
+              <Button variant="quiet" href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
+                {t.nav.rooms}
+              </Button>
+            </div>
+            <div className="landing-domain-pills" aria-label="Jump to domain roadmap">
+              {ROADMAP_DOMAINS.map((dom) => (
+                <a
+                  key={dom.id}
+                  href={`/roadmap?domain=${dom.id}`}
+                  className="landing-domain-pill"
+                  onClick={navHandler(onNavigate, `/roadmap?domain=${dom.id}`)}
+                >
+                  {dom.shortLabel}
+                </a>
+              ))}
             </div>
           </div>
           <ForgeAtlas variant="dark" className="landing-atlas" />
         </section>
 
-        <dl className="site-stats">
-          <div><dt>{t.site.statProblems}</dt><dd>{problemCount}</dd></div>
-          <div><dt>{t.site.statTopics}</dt><dd>{topicCount}</dd></div>
-          <div><dt>{t.site.statSheets}</dt><dd>{sheetCount}</dd></div>
-        </dl>
+        <section className="home-pulse-strip">
+          <dl className="site-stats home-stats-grid">
+            <div><dt>{t.site.statProblems}</dt><dd>{problemCount}</dd></div>
+            <div><dt>Domains</dt><dd>{ROADMAP_DOMAINS.length}</dd></div>
+            <div><dt>{t.site.statTopics}</dt><dd>{topicCount}</dd></div>
+            <div><dt>{t.site.statSheets}</dt><dd>{sheetCount}</dd></div>
+          </dl>
+
+          <Card variant="outlined" className="home-daily-card">
+            <div className="home-daily-meta">
+              <span className="eyebrow">
+                <Flame size={13} aria-hidden="true" /> {t.ledger.dailyEyebrow}
+              </span>
+              {solvedCount > 0 && (
+                <a href="/profile" className="home-streak-pill" onClick={navHandler(onNavigate, '/profile')}>
+                  {solvedCount} solved · {streak}d streak
+                </a>
+              )}
+            </div>
+            {dailyChallenge ? (
+              <div className="home-daily-row">
+                <div className="home-daily-info">
+                  <strong>{dailyChallenge.leetcode_id}. {dailyTitle}</strong>
+                  <span className="difficulty-badge" data-level={dailyChallenge.difficulty}>
+                    {dailyChallenge.difficulty}
+                  </span>
+                </div>
+                <Button
+                  variant="solid"
+                  size="sm"
+                  onClick={() => (onOpenDaily ? onOpenDaily(dailyChallenge.slug) : onNavigate?.(`/problems?problem=${dailyChallenge.slug}`))}
+                >
+                  Solve now <ArrowRight size={14} aria-hidden="true" />
+                </Button>
+              </div>
+            ) : (
+              <div className="home-daily-row">
+                <strong>Pick a sheet or launch a timed mock room</strong>
+                <Button variant="outlined" size="sm" href="/problems" onClick={navHandler(onNavigate, '/problems')}>
+                  Browse library
+                </Button>
+              </div>
+            )}
+          </Card>
+        </section>
+
+        <section className="marketing-section">
+          <div className="home-section-head">
+            <div>
+              <h2>Complete Engineering Interview Atlas</h2>
+              <p>Structured prerequisite roadmaps with built-in guides, Mermaid diagrams, and curated references beyond DSA.</p>
+            </div>
+            <a className="home-section-link" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
+              Open full roadmap <ArrowRight size={14} aria-hidden="true" />
+            </a>
+          </div>
+          <div className="home-domain-grid">
+            {ROADMAP_DOMAINS.map((dom) => {
+              const Icon = DOMAIN_ICONS[dom.id] || Code2;
+              return (
+                <a
+                  key={dom.id}
+                  href={`/roadmap?domain=${dom.id}`}
+                  className="home-domain-card"
+                  onClick={navHandler(onNavigate, `/roadmap?domain=${dom.id}`)}
+                >
+                  <div className="home-domain-card-top">
+                    <span className="home-domain-icon" aria-hidden="true">
+                      <Icon size={17} />
+                    </span>
+                    <span className="home-domain-tag">{dom.shortLabel}</span>
+                  </div>
+                  <h3>{dom.label}</h3>
+                  <p>{dom.subtitle}</p>
+                  <span className="home-domain-cta">
+                    Explore track <ArrowRight size={13} aria-hidden="true" />
+                  </span>
+                </a>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="marketing-section">
+          <div className="home-section-head">
+            <div>
+              <h2>Built for Deep Practice</h2>
+              <p>Everything you need to read, watch, diagram, and rehearse in one keyboard-first workspace.</p>
+            </div>
+          </div>
+          <div className="home-bento-grid">
+            <Card variant="outlined" className="home-bento-card">
+              <span className="home-bento-icon" aria-hidden="true"><BookOpen size={18} /></span>
+              <h3>In-App Study Viewer</h3>
+              <p>Watch walkthroughs with synchronized transcripts, browse GitHub repos, and render Markdown, KaTeX math, Mermaid diagrams, Jupyter notebooks, and Anki decks inline.</p>
+              <a href="/resources" onClick={navHandler(onNavigate, '/resources')}>
+                Explore resources <ArrowRight size={13} aria-hidden="true" />
+              </a>
+            </Card>
+
+            <Card variant="outlined" className="home-bento-card">
+              <span className="home-bento-icon" aria-hidden="true"><Users size={18} /></span>
+              <h3>Mock Interview Studio</h3>
+              <p>Run timed Pair DSA, System Design, LLD, or Behavioral sessions with a shared Markdown/Mermaid scratchpad, stage checklist, interviewer rubric, and Utkristi Colabs sync.</p>
+              <a href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
+                Launch a room <ArrowRight size={13} aria-hidden="true" />
+              </a>
+            </Card>
+
+            <Card variant="outlined" className="home-bento-card">
+              <span className="home-bento-icon" aria-hidden="true"><Trophy size={18} /></span>
+              <h3>Multi-Platform Profile</h3>
+              <p>Sync handles across LeetCode, Codeforces, AtCoder, CodeChef, GeeksforGeeks, HackerRank, and GitHub alongside your 28-day streak ledger and Favorites queue.</p>
+              <a href="/profile" onClick={navHandler(onNavigate, '/profile')}>
+                Open profile <ArrowRight size={13} aria-hidden="true" />
+              </a>
+            </Card>
+          </div>
+        </section>
 
         <section className="marketing-section">
           <h2>{t.site.fromTopic}</h2>

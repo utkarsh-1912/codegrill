@@ -452,8 +452,12 @@ function App() {
             topicCount={categories.length}
             problemCount={problems.length}
             sheetCount={allSheets.length}
+            solvedCount={completed.size}
+            streak={streak}
+            dailyChallenge={dailyChallenge ? problems.find((p) => p.slug === dailyChallenge.slug) || dailyChallenge : null}
             config={appConfig}
             onNavigate={navigate}
+            onOpenDaily={openProblemBySlug}
           />
         )}
 
