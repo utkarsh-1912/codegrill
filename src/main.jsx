@@ -15,7 +15,7 @@ import { problemShareUrl, studyLocation } from './rooms.mjs';
 import { StudyRooms } from './StudyRooms.jsx';
 import { SiteFooter, SitePages, Workflow, sitePages } from './SitePages.jsx';
 import { SheetsPage } from './SheetsPage.jsx';
-import { ContentViewer, buildViewerPath } from './ContentViewer.jsx';
+import { ContentViewer, buildViewerPath, formatViewerTitle } from './ContentViewer.jsx';
 import { ViewerPage } from './ViewerPage.jsx';
 import { LedgerDashboard } from './LedgerDashboard.jsx';
 import { CommandPalette } from './CommandPalette.jsx';
@@ -23,6 +23,7 @@ import { ProblemPracticeBar } from './ProblemPracticeBar.jsx';
 import { AppHeader } from './AppHeader.jsx';
 import { ForgeAtlas } from './ForgeAtlas.jsx';
 import { ErrorBoundary, ErrorPage, NotFoundPage } from './StatusPages.jsx';
+import { SelectDropdown } from './SelectDropdown.jsx';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from './sheets.mjs';
 import { DEFAULT_APP_CONFIG } from './config.mjs';
 import { getMessages } from './i18n.mjs';
@@ -672,22 +673,37 @@ function ProblemLibrary({
             onChange={(event) => setQuery(event.target.value)}
           />
         </label>
-        <select aria-label={t.problems.allTopics} value={topic} onChange={(event) => setTopic(event.target.value)}>
-          <option value="">{t.problems.allTopics}</option>
-          {categories.map(({ id, labels }) => <option key={id} value={id}>{pickLabel(labels, locale)}</option>)}
-        </select>
-        <select aria-label={t.problems.allDifficulties} value={difficulty} onChange={(event) => setDifficulty(event.target.value)}>
-          <option value="">{t.problems.allDifficulties}</option>
-          <option value="Easy">{t.sheets.easy}</option>
-          <option value="Medium">{t.sheets.medium}</option>
-          <option value="Hard">{t.sheets.hard}</option>
-        </select>
-        <select aria-label={t.problems.anyProgress} value={progressFilter} onChange={(event) => setProgressFilter(event.target.value)}>
-          <option value="">{t.problems.anyProgress}</option>
-          <option value="unsolved">{t.problems.unsolved}</option>
-          <option value="solved">{t.problems.solved}</option>
-          <option value="revision">{t.problems.revision}</option>
-        </select>
+        <SelectDropdown
+          ariaLabel={t.problems.allTopics}
+          value={topic}
+          onChange={setTopic}
+          options={[
+            { value: '', label: t.problems.allTopics },
+            ...categories.map(({ id, labels }) => ({ value: id, label: pickLabel(labels, locale), lang: locale })),
+          ]}
+        />
+        <SelectDropdown
+          ariaLabel={t.problems.allDifficulties}
+          value={difficulty}
+          onChange={setDifficulty}
+          options={[
+            { value: '', label: t.problems.allDifficulties },
+            { value: 'Easy', label: t.sheets.easy },
+            { value: 'Medium', label: t.sheets.medium },
+            { value: 'Hard', label: t.sheets.hard },
+          ]}
+        />
+        <SelectDropdown
+          ariaLabel={t.problems.anyProgress}
+          value={progressFilter}
+          onChange={setProgressFilter}
+          options={[
+            { value: '', label: t.problems.anyProgress },
+            { value: 'unsolved', label: t.problems.unsolved },
+            { value: 'solved', label: t.problems.solved },
+            { value: 'revision', label: t.problems.revision },
+          ]}
+        />
       </div>
 
       <div className="library-summary">
@@ -889,10 +905,16 @@ function ResourceDirectory({ locale, title, onOpenViewer }) {
         </div>
       </div>
       <div className="filters">
-        <select aria-label={t.resources.allLanguages} value={language} onChange={(event) => setLanguage(event.target.value)}>
-          <option value="">{t.resources.allLanguages}</option>
-          {locales.map(({ code, native_name }) => <option key={code} lang={code} value={code}>{native_name}</option>)}
-        </select>
+        <SelectDropdown
+          ariaLabel={t.resources.allLanguages}
+          value={language}
+          onChange={setLanguage}
+          prefix={language || undefined}
+          options={[
+            { value: '', label: t.resources.allLanguages },
+            ...locales.map(({ code, native_name }) => ({ value: code, label: native_name, badge: code, lang: code })),
+          ]}
+        />
       </div>
       <p className="result-count" role="status">{visible.length} {t.resources.directoriesUnit}</p>
       <ul className="directory-list">
@@ -961,7 +983,7 @@ function ResourceLinks({ links, problemTitle, onOpenViewer }) {
               className="resource-open-btn"
               onClick={() => onOpenViewer({
                 url,
-                title: problemTitle ? `${problemTitle} — ${cleanTitle}` : cleanTitle,
+                title: formatViewerTitle(problemTitle, cleanTitle),
                 kind: kind === 'video' ? 'video' : 'article',
                 problemTitle,
               })}
@@ -997,18 +1019,24 @@ function InterviewTracks({ locale, title, onOpenViewer }) {
         </div>
       </div>
       <div className="filters track-filters">
-        <label>
-          {t.tracks.targetRole}
-          <select value={roleId} onChange={(event) => setRoleId(event.target.value)}>
-            {roles.map(({ id, labels }) => <option key={id} value={id}>{pickLabel(labels, locale)}</option>)}
-          </select>
-        </label>
-        <label>
-          {t.tracks.experienceLevel}
-          <select value={levelId} onChange={(event) => setLevelId(event.target.value)}>
-            {levels.map(({ id, labels }) => <option key={id} value={id}>{pickLabel(labels, locale)}</option>)}
-          </select>
-        </label>
+        <div className="track-filter-field">
+          <span>{t.tracks.targetRole}</span>
+          <SelectDropdown
+            ariaLabel={t.tracks.targetRole}
+            value={roleId}
+            onChange={setRoleId}
+            options={roles.map(({ id, labels }) => ({ value: id, label: pickLabel(labels, locale), lang: locale }))}
+          />
+        </div>
+        <div className="track-filter-field">
+          <span>{t.tracks.experienceLevel}</span>
+          <SelectDropdown
+            ariaLabel={t.tracks.experienceLevel}
+            value={levelId}
+            onChange={setLevelId}
+            options={levels.map(({ id, labels }) => ({ value: id, label: pickLabel(labels, locale), lang: locale }))}
+          />
+        </div>
       </div>
       <Card variant="outlined" className="study-weights">
         <h2>{t.tracks.suggestedTime}</h2>

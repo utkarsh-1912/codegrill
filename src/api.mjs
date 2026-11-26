@@ -241,9 +241,15 @@ export async function fetchPluginContent(url, locale = 'en', baseUrl) {
       const res = await fetch(gh.rawUrl, { signal: AbortSignal.timeout(7000) });
       if (res.ok) {
         const content = await res.text();
+        const lower = gh.filename.toLowerCase();
+        const kind = lower.endsWith('.md') || lower.endsWith('.markdown')
+          ? 'markdown'
+          : lower.endsWith('.txt')
+            ? 'text'
+            : 'code';
         return {
           plugin: 'github-content-client',
-          kind: gh.filename.endsWith('.md') ? 'markdown' : 'code',
+          kind,
           title: gh.filename,
           repo: gh.repo,
           language: gh.filename.split('.').pop() || 'text',

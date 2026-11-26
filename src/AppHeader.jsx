@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Badge } from '@utkristi/ui';
 import { Maximize2, Menu, Minimize2, Moon, Search, Settings, Sun, X } from 'lucide-react';
 import { BrandLogo } from './BrandLogo.jsx';
+import { SelectDropdown } from './SelectDropdown.jsx';
 import { getMessages } from './i18n.mjs';
 
 export function AppHeader({
@@ -258,32 +259,21 @@ export function AppHeader({
                   </div>
 
                   <div className="settings-row">
-                    <span>{t.palette.quickSearch}</span>
-                    <button
-                      type="button"
-                      className="locale-field icon-only-control"
-                      onClick={() => { setSettingsOpen(false); onOpenPalette(); }}
-                      aria-label={t.palette.open}
-                      title={t.palette.open}
-                    >
-                      <Search size={17} aria-hidden="true" />
-                    </button>
-                  </div>
-
-                  <div className="settings-row">
                     <span>{t.controls.language}</span>
-                    <label className="settings-lang-select">
-                      <span className="lang-code-badge" aria-hidden="true">{locale}</span>
-                      <select
-                        aria-label={t.controls.language}
-                        value={locale}
-                        onChange={(e) => onLocaleChange(e.target.value)}
-                      >
-                        {locales.map(({ code, native_name }) => (
-                          <option key={code} value={code} lang={code}>{code.toUpperCase()} · {native_name}</option>
-                        ))}
-                      </select>
-                    </label>
+                    <SelectDropdown
+                      compact
+                      align="right"
+                      ariaLabel={t.controls.language}
+                      prefix={locale}
+                      value={locale}
+                      onChange={onLocaleChange}
+                      options={locales.map(({ code, native_name }) => ({
+                        value: code,
+                        label: native_name,
+                        badge: code,
+                        lang: code,
+                      }))}
+                    />
                   </div>
                 </div>
               )}
@@ -353,18 +343,20 @@ export function AppHeader({
               </div>
               <div className="settings-row">
                 <span>{t.controls.language}</span>
-                <label className="settings-lang-select">
-                  <span className="lang-code-badge" aria-hidden="true">{locale}</span>
-                  <select
-                    aria-label={t.controls.language}
-                    value={locale}
-                    onChange={(e) => onLocaleChange(e.target.value)}
-                  >
-                    {locales.map(({ code, native_name }) => (
-                      <option key={code} value={code} lang={code}>{code.toUpperCase()} · {native_name}</option>
-                    ))}
-                  </select>
-                </label>
+                <SelectDropdown
+                  compact
+                  align="right"
+                  ariaLabel={t.controls.language}
+                  prefix={locale}
+                  value={locale}
+                  onChange={onLocaleChange}
+                  options={locales.map(({ code, native_name }) => ({
+                    value: code,
+                    label: native_name,
+                    badge: code,
+                    lang: code,
+                  }))}
+                />
               </div>
             </div>
           </aside>

@@ -4,6 +4,24 @@ import { Check, Copy, ExternalLink, FileCode2, Folder, Maximize2, Play, X } from
 import { fetchPluginContent } from './api.mjs';
 import { getMessages } from './i18n.mjs';
 import { LoadingState } from './LoadingState.jsx';
+import { RichTextInterpreter } from './RichTextInterpreter.jsx';
+
+export function formatViewerTitle(problemTitle, resourceTitle) {
+  const cleanProb = String(problemTitle || '').trim();
+  const cleanRes = String(resourceTitle || '').trim();
+  if (!cleanProb) return cleanRes;
+  if (!cleanRes) return cleanProb;
+  if (cleanRes.toLowerCase().includes(cleanProb.toLowerCase())) return cleanRes;
+  return `${cleanProb} — ${cleanRes}`;
+}
+
+export function formatPluginBadge(data, fallback) {
+  if (!data?.plugin) return fallback;
+  if (data.plugin.startsWith('youtube')) return 'YouTube';
+  if (data.plugin.startsWith('github')) return 'GitHub';
+  if (data.plugin === 'web-article') return data.siteName || 'Article';
+  return fallback;
+}
 
 export function buildViewerPath(item) {
   const params = new URLSearchParams();
@@ -107,7 +125,11 @@ export function ContentViewerBody({
     );
   }
 
-  if (data?.kind === 'code' || data?.kind === 'markdown') {
+  if (data?.kind === 'markdown' || data?.kind === 'text') {
+    return <RichTextInterpreter content={data.content} format={data.kind} />;
+  }
+
+  if (data?.kind === 'code') {
     return (
       <div className="code-viewer">
         <div className="code-toolbar">
@@ -204,11 +226,15 @@ export function ContentViewer({ item, locale, languages, onClose, onExpand }) {
       <div className="viewer-panel">
         <div className="viewer-header">
           <div className="viewer-title-group">
-            <Badge variant="outlined">{data?.plugin || t.viewer.pluginBadge}</Badge>
+            <Badge variant="outlined">{formatPluginBadge(data, t.viewer.pluginBadge)}</Badge>
             <h2>{activeTitle || data?.title}</h2>
-            {data?.author && <p className="viewer-meta">{data.author}</p>}
+            {data?.author && data.author.toLowerCase() !== formatPluginBadge(data, '').toLowerCase() && (
+              <p className="viewer-meta">{data.author}</p>
+            )}
             {data?.repo && <p className="viewer-meta">{data.repo} · {data.filePath || data.title}</p>}
-            {data?.siteName && <p className="viewer-meta">{data.siteName}</p>}
+            {data?.siteName && data.siteName !== formatPluginBadge(data, '') && (
+              <p className="viewer-meta">{data.siteName}</p>
+            )}
           </div>
           <div className="viewer-header-actions">
             {onExpand && (

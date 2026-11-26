@@ -3,7 +3,7 @@ import { Badge, Button, Card } from '@utkristi/ui';
 import { ArrowLeft, ExternalLink } from 'lucide-react';
 import { fetchPluginContent } from './api.mjs';
 import { getMessages } from './i18n.mjs';
-import { ContentViewerBody } from './ContentViewer.jsx';
+import { ContentViewerBody, formatPluginBadge } from './ContentViewer.jsx';
 
 export function ViewerPage({
   url,
@@ -85,11 +85,15 @@ export function ViewerPage({
 
       <Card variant="outlined" className="viewer-page-card">
         <div className="viewer-page-head">
-          <Badge variant="outlined">{data?.plugin || t.viewer.pluginBadge}</Badge>
+          <Badge variant="outlined">{formatPluginBadge(data, t.viewer.pluginBadge)}</Badge>
           <h1>{activeTitle || data?.title || t.viewer.pluginBadge}</h1>
-          {data?.author && <p className="viewer-meta">{data.author}</p>}
+          {data?.author && data.author.toLowerCase() !== formatPluginBadge(data, '').toLowerCase() && (
+            <p className="viewer-meta">{data.author}</p>
+          )}
           {data?.repo && <p className="viewer-meta">{data.repo} · {data.filePath || data.title}</p>}
-          {data?.siteName && <p className="viewer-meta">{data.siteName}</p>}
+          {data?.siteName && data.siteName !== formatPluginBadge(data, '') && (
+            <p className="viewer-meta">{data.siteName}</p>
+          )}
         </div>
 
         {solutionEntries.length > 0 && kind === 'code' && (

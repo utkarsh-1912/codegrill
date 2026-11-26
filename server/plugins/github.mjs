@@ -20,6 +20,8 @@ const EXT_TO_LANG = {
   scala: 'scala',
   dart: 'dart',
   md: 'markdown',
+  markdown: 'markdown',
+  txt: 'text',
 };
 
 export function toGitHubRawUrl(rawUrl) {
@@ -126,11 +128,11 @@ export const githubPlugin = {
     const filename = parsed.filePath.split('/').pop() || 'solution';
     const ext = filename.includes('.') ? filename.split('.').pop().toLowerCase() : '';
     const language = EXT_TO_LANG[ext] || 'text';
-    const isMarkdown = language === 'markdown';
+    const kind = language === 'markdown' ? 'markdown' : ext === 'txt' ? 'text' : 'code';
 
     return {
       plugin: 'github-content',
-      kind: isMarkdown ? 'markdown' : 'code',
+      kind,
       title: filename,
       repo: `${parsed.owner}/${parsed.repo}`,
       filePath: parsed.filePath,

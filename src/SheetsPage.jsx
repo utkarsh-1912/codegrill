@@ -4,6 +4,8 @@ import { BookOpen, ChevronDown, FileCode2, Play, Plus, Search, Star, StickyNote,
 import { buildWeeklyPlan, resolveSheetProblems } from './sheets.mjs';
 import { resourcesFor } from './catalog.mjs';
 import { getMessages } from './i18n.mjs';
+import { formatViewerTitle } from './ContentViewer.jsx';
+import { SelectDropdown } from './SelectDropdown.jsx';
 
 export function SheetsPage({
   sheets,
@@ -75,7 +77,7 @@ export function SheetsPage({
     const video = links.find((l) => l.kind === 'video');
     if (!video) return;
     const title = problem.translations[locale]?.title || problem.translations[defaultLocale].title;
-    onOpenViewer({ url: video.url, title: `${title} — ${video.title}`, kind: 'video', problemTitle: title });
+    onOpenViewer({ url: video.url, title: formatViewerTitle(title, video.title), kind: 'video', problemTitle: title, problemSlug: problem.slug });
   }
 
   function openFirstArticle(problem) {
@@ -83,7 +85,7 @@ export function SheetsPage({
     const article = links.find((l) => l.kind === 'article');
     if (!article) return;
     const title = problem.translations[locale]?.title || problem.translations[defaultLocale].title;
-    onOpenViewer({ url: article.url, title: `${title} — ${article.title}`, kind: 'article', problemTitle: title });
+    onOpenViewer({ url: article.url, title: formatViewerTitle(title, article.title), kind: 'article', problemTitle: title, problemSlug: problem.slug });
   }
 
   function openCode(problem) {
@@ -287,12 +289,18 @@ export function SheetsPage({
             </div>
 
             <div className="sheet-filters">
-              <select aria-label={t.problems.allDifficulties} value={difficulty} onChange={(e) => setDifficulty(e.target.value)}>
-                <option value="">{t.problems.allDifficulties}</option>
-                <option value="Easy">{t.sheets.easy}</option>
-                <option value="Medium">{t.sheets.medium}</option>
-                <option value="Hard">{t.sheets.hard}</option>
-              </select>
+              <SelectDropdown
+                compact
+                ariaLabel={t.problems.allDifficulties}
+                value={difficulty}
+                onChange={setDifficulty}
+                options={[
+                  { value: '', label: t.problems.allDifficulties },
+                  { value: 'Easy', label: t.sheets.easy },
+                  { value: 'Medium', label: t.sheets.medium },
+                  { value: 'Hard', label: t.sheets.hard },
+                ]}
+              />
               <button
                 type="button"
                 className={`pill-toggle ${onlyRevision ? 'is-active' : ''}`}
@@ -445,12 +453,15 @@ function CustomSeriesModal({ problems, categories, locale, defaultLocale, onClos
               <input type="search" value={search} placeholder={t.problems.searchPlaceholder}
                 onChange={(e) => setSearch(e.target.value)} />
             </label>
-            <select value={topicFilter} onChange={(e) => setTopicFilter(e.target.value)}>
-              <option value="">{t.problems.allTopics}</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.labels[locale] ?? c.labels[defaultLocale]}</option>
-              ))}
-            </select>
+            <SelectDropdown
+              ariaLabel={t.problems.allTopics}
+              value={topicFilter}
+              onChange={setTopicFilter}
+              options={[
+                { value: '', label: t.problems.allTopics },
+                ...categories.map((c) => ({ value: c.id, label: c.labels[locale] ?? c.labels[defaultLocale], lang: locale })),
+              ]}
+            />
           </div>
 
           <p className="result-count">{selected.size} {t.sheets.selectedCount}</p>
