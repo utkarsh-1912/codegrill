@@ -64,6 +64,24 @@ function navHandler(onNavigate, path) {
   };
 }
 
+function MarketingHero({ title, subtitle, mood = 'idle', caption = '', actions = null, locale = 'en' }) {
+  return (
+    <div className="marketing-hero-banner">
+      <div className="marketing-hero-copy">
+        <h1 lang={locale}>{title}<span>.</span></h1>
+        <p>{subtitle}</p>
+        {actions && <div className="marketing-hero-actions">{actions}</div>}
+      </div>
+      <div className="marketing-hero-stage" aria-hidden="true">
+        <div className="legal-orbit-ring ring-1" />
+        <div className="legal-orbit-ring ring-2" />
+        <Mascot mood={mood} size={132} label={`${title} mascot`} />
+        {caption && <span className="marketing-hero-caption">{caption}</span>}
+      </div>
+    </div>
+  );
+}
+
 export function Workflow({ locale = 'en', onNavigate }) {
   const t = getMessages(locale);
   return (
@@ -275,12 +293,23 @@ export function SitePages({
   if (page === 'how-it-works') {
     return (
       <section className="page-section marketing-page">
-        <div className="section-heading">
-          <div>
-            <h1>{t.site.howItWorks}</h1>
-            <p>{t.site.landingDesc}</p>
-          </div>
-        </div>
+        <MarketingHero
+          locale={locale}
+          title={t.site.howItWorks}
+          subtitle={t.site.landingDesc}
+          mood="loading"
+          caption="4-step mastery loop"
+          actions={(
+            <>
+              <Button variant="solid" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
+                {t.site.exploreRoadmap} <ArrowRight size={15} aria-hidden="true" />
+              </Button>
+              <Button variant="outlined" href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
+                {t.site.goToRooms}
+              </Button>
+            </>
+          )}
+        />
         <Workflow locale={locale} onNavigate={onNavigate} />
         <div className="marketing-section study-options">
           <Card variant="outlined">
@@ -301,22 +330,47 @@ export function SitePages({
   if (page === 'about') {
     return (
       <section className="page-section marketing-page">
-        <div className="section-heading">
-          <div>
-            <h1>{t.site.aboutTitle}</h1>
-            <p>{t.site.aboutDesc}</p>
-          </div>
-        </div>
-        <div className="study-options">
-          <Card variant="outlined">
-            <h2>{t.sheets.title}</h2>
+        <MarketingHero
+          locale={locale}
+          title={t.site.aboutTitle}
+          subtitle={t.site.aboutDesc}
+          mood="happy"
+          caption={`${ecosystem} · ${problemCount} problems · 6 domains`}
+          actions={(
+            <>
+              <Button variant="solid" href="/sheets" onClick={navHandler(onNavigate, '/sheets')}>
+                {t.hero.exploreSheets} <ArrowRight size={15} aria-hidden="true" />
+              </Button>
+              <Button variant="outlined" href="/profile" onClick={navHandler(onNavigate, '/profile')}>
+                {t.nav.profile}
+              </Button>
+            </>
+          )}
+        />
+        <div className="home-bento-grid marketing-section">
+          <Card variant="outlined" className="home-bento-card">
+            <span className="home-bento-icon" aria-hidden="true"><BookOpen size={18} /></span>
+            <h3>{t.sheets.title}</h3>
             <p>{t.sheets.subtitle}</p>
-            <a href="/sheets" onClick={navHandler(onNavigate, '/sheets')}>{t.hero.exploreSheets}</a>
+            <a href="/sheets" onClick={navHandler(onNavigate, '/sheets')}>
+              {t.hero.exploreSheets} <ArrowRight size={13} aria-hidden="true" />
+            </a>
           </Card>
-          <Card variant="outlined">
-            <h2>{t.progress.title}</h2>
+          <Card variant="outlined" className="home-bento-card">
+            <span className="home-bento-icon" aria-hidden="true"><Trophy size={18} /></span>
+            <h3>{t.progress.title}</h3>
             <p>{t.site.workflow[3].desc}</p>
-            <a href="/profile" onClick={navHandler(onNavigate, '/profile')}>{t.site.workflow[3].action}</a>
+            <a href="/profile" onClick={navHandler(onNavigate, '/profile')}>
+              {t.site.workflow[3].action} <ArrowRight size={13} aria-hidden="true" />
+            </a>
+          </Card>
+          <Card variant="outlined" className="home-bento-card">
+            <span className="home-bento-icon" aria-hidden="true"><Users size={18} /></span>
+            <h3>{t.site.partnerTitle}</h3>
+            <p>{t.site.partnerDesc}</p>
+            <a href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
+              {t.site.goToRooms} <ArrowRight size={13} aria-hidden="true" />
+            </a>
           </Card>
         </div>
       </section>
@@ -416,12 +470,23 @@ export function SitePages({
 
   return (
     <section className="page-section marketing-page">
-      <div className="section-heading">
-        <div>
-          <h1>{t.site.helpTitle}</h1>
-          <p>{t.site.helpDesc}</p>
-        </div>
-      </div>
+      <MarketingHero
+        locale={locale}
+        title={t.site.helpTitle}
+        subtitle={t.site.helpDesc}
+        mood="lost"
+        caption="Quick answers & study tips"
+        actions={(
+          <>
+            <Button variant="solid" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
+              {t.site.exploreRoadmap} <ArrowRight size={15} aria-hidden="true" />
+            </Button>
+            <Button variant="outlined" href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
+              {t.site.goToRooms}
+            </Button>
+          </>
+        )}
+      />
       <div className="module-list">
         {t.faq.map(([question, answer]) => (
           <Card key={question} variant="outlined">
