@@ -24,6 +24,7 @@ import { AppHeader } from './AppHeader.jsx';
 import { ForgeAtlas } from './ForgeAtlas.jsx';
 import { ErrorBoundary, ErrorPage, NotFoundPage } from './StatusPages.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
+import { Pagination } from './Pagination.jsx';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from './sheets.mjs';
 import { DEFAULT_APP_CONFIG } from './config.mjs';
 import { getMessages } from './i18n.mjs';
@@ -459,19 +460,29 @@ function App() {
             setTopic={openProblems}
             title={t.nav.problems}
             timerMinutes={appConfig.interview.defaultTimerMinutes}
+            pageSize={appConfig.pagination.problemsPerPage}
             onOpenViewer={setViewerItem}
             onNavigate={navigate}
           />
         )}
 
         {page === 'tracks' && <InterviewTracks locale={locale} title={t.nav.tracks} onOpenViewer={setViewerItem} />}
-        {page === 'resources' && <ResourceDirectory locale={locale} title={t.nav.resources} onOpenViewer={setViewerItem} />}
+        {page === 'resources' && (
+          <ResourceDirectory
+            locale={locale}
+            title={t.nav.resources}
+            pageSize={appConfig.pagination.resourcesPerPage}
+            onOpenViewer={setViewerItem}
+          />
+        )}
         {page === 'viewer' && (
           <ViewerPage
             url={viewerUrl}
             title={viewerTitle}
             kind={viewerKind}
             problem={sharedProblem ? problems.find((p) => p.slug === sharedProblem) : null}
+            allProblems={problems}
+            directories={directories}
             initialLang={viewerLang}
             languages={languages}
             locale={locale}
@@ -622,13 +633,14 @@ function Roadmap({ roadmap, next, locale, title, onOpen }) {
 
 function ProblemLibrary({
   locale, title, topic, setTopic, completed, bookmarked, notes,
-  toggleComplete, toggleBookmark, saveNote, sharedProblem, timerMinutes, onOpenViewer, onNavigate,
+  toggleComplete, toggleBookmark, saveNote, sharedProblem, timerMinutes, pageSize = 20, onOpenViewer, onNavigate,
 }) {
   const t = getMessages(locale);
   const [query, setQuery] = useState('');
   const [difficulty, setDifficulty] = useState('');
   const [progressFilter, setProgressFilter] = useState('');
   const [openSlug, setOpenSlug] = useState(sharedProblem);
+  const [pageNum, setPageNum] = useState(1);
   const [noteDrafts, setNoteDrafts] = useState({});
   const [savedNotice, setSavedNotice] = useState('');
 
@@ -638,8 +650,13 @@ function ProblemLibrary({
       setQuery('');
       setDifficulty('');
       setProgressFilter('');
+      setPageNum(1);
     }
   }, [sharedProblem]);
+
+  useEffect(() => {
+    setPageNum(1);
+  }, [query, difficulty, topic, progressFilter]);
 
   const matches = matchingProblems(problems, categories, { query, difficulty, topic, locale })
     .filter(({ slug }) => {
@@ -649,9 +666,13 @@ function ProblemLibrary({
     });
 
   const sharedIndex = matches.findIndex(({ slug }) => slug === sharedProblem);
-  const visible = sharedIndex > 0
+  const ordered = sharedIndex > 0
     ? [matches[sharedIndex], ...matches.slice(0, sharedIndex), ...matches.slice(sharedIndex + 1)]
     : matches;
+
+  const totalPages = Math.max(1, Math.ceil(ordered.length / pageSize));
+  const currentPageNum = Math.min(pageNum, totalPages);
+  const visible = ordered.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
 
   return (
     <section className="library page-section">
@@ -708,7 +729,7 @@ function ProblemLibrary({
 
       <div className="library-summary">
         <p className="result-count" role="status">
-          {visible.length} {t.sheets.problemsCount} · {visible.filter(({ slug }) => completed.has(slug)).length} {t.sheets.solvedCount}
+          {ordered.length} {t.sheets.problemsCount} · {ordered.filter(({ slug }) => completed.has(slug)).length} {t.sheets.solvedCount}
         </p>
         {(query || topic || difficulty || progressFilter) && (
           <Button variant="quiet" size="sm" onClick={() => {
@@ -824,13 +845,67 @@ function ProblemLibrary({
                   </div>
 
                   <ProblemLink slug={problem.slug} locale={locale} />
+                  <RelatedProblems
+                    current={problem}
+                    allProblems={problems}
+                    completed={completed}
+                    locale={locale}
+                    onSelect={(slug) => {
+                      setOpenSlug(slug);
+                      onNavigate(`/problems?${new URLSearchParams({ problem: slug })}`);
+                    }}
+                  />
                 </>}
               </div>
             </Card>
           );
         })}
       </div>
+
+      <Pagination
+        page={currentPageNum}
+        totalItems={ordered.length}
+        pageSize={pageSize}
+        locale={locale}
+        onPageChange={(nextPage) => {
+          setPageNum(nextPage);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </section>
+  );
+}
+
+function RelatedProblems({ current, allProblems, completed, locale, onSelect }) {
+  const t = getMessages(locale);
+  const related = allProblems
+    .filter((p) => p.category_id === current.category_id && p.slug !== current.slug)
+    .slice(0, 4);
+  if (!related.length) return null;
+
+  return (
+    <div className="related-section">
+      <h4>{t.related.problemsTitle} <span>{t.related.sameTopic}</span></h4>
+      <div className="related-grid">
+        {related.map((item) => {
+          const itemLocale = item.translations[locale] ? locale : defaultLocale;
+          return (
+            <button
+              key={item.slug}
+              type="button"
+              className={`related-card ${completed.has(item.slug) ? 'is-solved' : ''}`}
+              onClick={() => onSelect(item.slug)}
+            >
+              <span className="problem-number">#{item.leetcode_id}</span>
+              <strong lang={itemLocale}>{item.translations[itemLocale].title}</strong>
+              <Badge tone={{ Easy: 'ok', Medium: 'warn', Hard: 'bad' }[item.difficulty]}>
+                {t.sheets[item.difficulty.toLowerCase()] || item.difficulty}
+              </Badge>
+            </button>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 
@@ -891,11 +966,16 @@ function ProblemLink({ slug, locale = 'en' }) {
   );
 }
 
-function ResourceDirectory({ locale, title, onOpenViewer }) {
+function ResourceDirectory({ locale, title, pageSize = 12, onOpenViewer }) {
   const t = getMessages(locale);
   const [language, setLanguage] = useState(locale);
-  useEffect(() => setLanguage(locale), [locale]);
-  const visible = directories.filter((entry) => !language || entry.locale === language);
+  const [pageNum, setPageNum] = useState(1);
+  useEffect(() => { setLanguage(locale); setPageNum(1); }, [locale]);
+  const allVisible = directories.filter((entry) => !language || entry.locale === language);
+  const totalPages = Math.max(1, Math.ceil(allVisible.length / pageSize));
+  const currentPageNum = Math.min(pageNum, totalPages);
+  const visible = allVisible.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
+
   return (
     <section className="page-section">
       <div className="section-heading">
@@ -908,7 +988,7 @@ function ResourceDirectory({ locale, title, onOpenViewer }) {
         <SelectDropdown
           ariaLabel={t.resources.allLanguages}
           value={language}
-          onChange={setLanguage}
+          onChange={(val) => { setLanguage(val); setPageNum(1); }}
           prefix={language || undefined}
           options={[
             { value: '', label: t.resources.allLanguages },
@@ -916,7 +996,7 @@ function ResourceDirectory({ locale, title, onOpenViewer }) {
           ]}
         />
       </div>
-      <p className="result-count" role="status">{visible.length} {t.resources.directoriesUnit}</p>
+      <p className="result-count" role="status">{allVisible.length} {t.resources.directoriesUnit}</p>
       <ul className="directory-list">
         {visible.map((entry) => {
           const platform = sourcePlatform(entry.url);
@@ -945,6 +1025,16 @@ function ResourceDirectory({ locale, title, onOpenViewer }) {
           );
         })}
       </ul>
+      <Pagination
+        page={currentPageNum}
+        totalItems={allVisible.length}
+        pageSize={pageSize}
+        locale={locale}
+        onPageChange={(nextPage) => {
+          setPageNum(nextPage);
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
     </section>
   );
 }

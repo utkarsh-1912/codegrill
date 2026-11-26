@@ -46,6 +46,10 @@ export function loadServerConfig() {
       defaultTimerMinutes: envInt('INTERVIEW_TIMER_MINUTES', 35, 5, 120),
       activityDays: envInt('ACTIVITY_LEDGER_DAYS', 28, 7, 90),
     },
+    pagination: {
+      problemsPerPage: envInt('PROBLEMS_PER_PAGE', 20, 5, 100),
+      resourcesPerPage: envInt('RESOURCES_PER_PAGE', 12, 4, 50),
+    },
     sources: [
       { label: 'LeetCode', url: process.env.SOURCE_LEETCODE_URL || 'https://leetcode.com/' },
       { label: 'GitHub', url: process.env.SOURCE_GITHUB_URL || 'https://github.com/doocs/leetcode/tree/main/solution' },
@@ -59,6 +63,7 @@ export function getPublicConfig(serverConfig, pluginList = []) {
     defaultProfile: serverConfig.defaultProfile,
     planner: serverConfig.planner,
     interview: serverConfig.interview,
+    pagination: serverConfig.pagination,
     sources: serverConfig.sources,
     plugins: pluginList,
   };

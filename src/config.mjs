@@ -20,6 +20,10 @@ export const DEFAULT_APP_CONFIG = {
     defaultTimerMinutes: 35,
     activityDays: 28,
   },
+  pagination: {
+    problemsPerPage: 20,
+    resourcesPerPage: 12,
+  },
   sources: [
     { label: 'LeetCode', url: 'https://leetcode.com/' },
     { label: 'GitHub', url: 'https://github.com/doocs/leetcode/tree/main/solution' },
@@ -42,6 +46,7 @@ export function mergeAppConfig(remote) {
       },
     },
     interview: { ...DEFAULT_APP_CONFIG.interview, ...(remote.interview || {}) },
+    pagination: { ...DEFAULT_APP_CONFIG.pagination, ...(remote.pagination || {}) },
     sources: Array.isArray(remote.sources) && remote.sources.length ? remote.sources : DEFAULT_APP_CONFIG.sources,
     plugins: Array.isArray(remote.plugins) ? remote.plugins : DEFAULT_APP_CONFIG.plugins,
   };

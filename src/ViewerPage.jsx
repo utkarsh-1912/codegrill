@@ -1,15 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Button, Card } from '@utkristi/ui';
-import { ArrowLeft, ExternalLink } from 'lucide-react';
+import { ArrowLeft, ChevronRight, ExternalLink, Play } from 'lucide-react';
 import { fetchPluginContent } from './api.mjs';
 import { getMessages } from './i18n.mjs';
-import { ContentViewerBody, formatPluginBadge } from './ContentViewer.jsx';
+import { ContentViewerBody, buildViewerPath, formatPluginBadge } from './ContentViewer.jsx';
 
 export function ViewerPage({
   url,
   title,
   kind,
   problem,
+  allProblems = [],
+  directories = [],
   initialLang,
   languages,
   locale,
@@ -132,6 +134,56 @@ export function ViewerPage({
           />
         </div>
       </Card>
+
+      {problem ? (
+        <section className="related-section viewer-related">
+          <h2>{t.related.problemsTitle}</h2>
+          <div className="related-grid">
+            {allProblems
+              .filter((p) => p.category_id === problem.category_id && p.slug !== problem.slug)
+              .slice(0, 4)
+              .map((item) => {
+                const itemLocale = item.translations[locale] ? locale : defaultLocale;
+                return (
+                  <button
+                    key={item.slug}
+                    type="button"
+                    className="related-card"
+                    onClick={() => onNavigate(`/problems?${new URLSearchParams({ problem: item.slug })}`)}
+                  >
+                    <span className="problem-number">#{item.leetcode_id}</span>
+                    <strong lang={itemLocale}>{item.translations[itemLocale].title}</strong>
+                    <Badge tone={{ Easy: 'ok', Medium: 'warn', Hard: 'bad' }[item.difficulty]}>
+                      {t.sheets[item.difficulty.toLowerCase()] || item.difficulty}
+                    </Badge>
+                  </button>
+                );
+              })}
+          </div>
+        </section>
+      ) : (
+        directories.length > 0 && (
+          <section className="related-section viewer-related">
+            <h2>{t.related.contentTitle}</h2>
+            <div className="related-grid">
+              {directories
+                .filter((d) => d.url !== activeUrl && (d.locale === locale || d.locale === defaultLocale))
+                .slice(0, 4)
+                .map((entry) => (
+                  <button
+                    key={entry.url}
+                    type="button"
+                    className="related-card"
+                    onClick={() => onNavigate(buildViewerPath({ url: entry.url, title: entry.name, kind: entry.url.includes('youtube') ? 'video' : 'article' }))}
+                  >
+                    <strong>{entry.name}</strong>
+                    {entry.url.includes('youtube') ? <Play size={15} aria-hidden="true" /> : <ChevronRight size={15} aria-hidden="true" />}
+                  </button>
+                ))}
+            </div>
+          </section>
+        )
+      )}
     </section>
   );
 }
