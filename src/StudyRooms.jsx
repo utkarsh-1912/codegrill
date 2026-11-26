@@ -2,12 +2,17 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card } from '@utkristi/ui';
 import {
   ArrowLeft,
+  ArrowRight,
   ArrowUpRight,
+  Boxes,
   Check,
   Clock,
+  Code2,
   Copy,
   Download,
   ExternalLink,
+  MessageSquare,
+  Network,
   Pause,
   Play,
   Plus,
@@ -40,9 +45,17 @@ import {
 } from './rooms.mjs';
 import { RichTextInterpreter } from './RichTextInterpreter.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
+import { Mascot } from './Mascot.jsx';
 import { getMessages } from './i18n.mjs';
 
 const directory = roomsDirectory(import.meta.env.VITE_COLLAB_ROOMS_URL || undefined);
+
+const FORMAT_ICONS = {
+  dsa: Code2,
+  hld: Network,
+  lld: Boxes,
+  behavioral: MessageSquare,
+};
 
 function formatClock(totalSeconds) {
   const clamped = Math.max(0, Math.floor(totalSeconds));
@@ -81,11 +94,9 @@ export function StudyRooms({
   const t = getMessages(locale);
   const validActiveRoom = isValidRoomId(activeRoomId) ? activeRoomId.trim() : '';
 
-  // Profile (name + role) persisted locally
   const [profile, setProfile] = useState(readRoomProfile);
   const [savedRooms, setSavedRooms] = useState(readSavedRooms);
 
-  // Lobby state
   const [setupMode, setSetupMode] = useState(() => (
     ROOM_FORMATS.some((f) => f.id === activeMode) ? activeMode : 'dsa'
   ));
@@ -95,13 +106,12 @@ export function StudyRooms({
   const [error, setError] = useState('');
   const [copiedId, setCopiedId] = useState('');
 
-  // Active room state
   const [roomState, setRoomState] = useState(() => (
     validActiveRoom
       ? readRoomState(validActiveRoom, activeMode || 'dsa', { problemSlug: sharedProblem })
       : createDefaultRoomState('dsa')
   ));
-  const [editorTab, setEditorTab] = useState('write'); // 'write' | 'preview' | 'split'
+  const [editorTab, setEditorTab] = useState('write');
   const [swapOpen, setSwapOpen] = useState(false);
   const [swapQuery, setSwapQuery] = useState('');
   const [copiedInvite, setCopiedInvite] = useState(false);
@@ -115,7 +125,6 @@ export function StudyRooms({
     if (sharedProblem) setSelectedSlug(sharedProblem);
   }, [sharedProblem]);
 
-  // Hydrate room state whenever activeRoomId changes
   useEffect(() => {
     if (!validActiveRoom) return;
     const loaded = readRoomState(validActiveRoom, activeMode || 'dsa', {
@@ -140,7 +149,6 @@ export function StudyRooms({
     }));
   }, [validActiveRoom, activeMode, sharedProblem]);
 
-  // BroadcastChannel multi-tab sync for presence, notes, timer, checklist, and rubric
   useEffect(() => {
     if (!validActiveRoom || typeof window === 'undefined' || typeof BroadcastChannel === 'undefined') {
       return undefined;
@@ -206,7 +214,6 @@ export function StudyRooms({
     };
   }, [validActiveRoom, profile.name, profile.role]);
 
-  // Live countdown tick when timer is running
   useEffect(() => {
     if (!validActiveRoom || !roomState.timerRunning) return undefined;
     const timer = window.setInterval(() => {
@@ -284,7 +291,7 @@ export function StudyRooms({
     onNavigate?.(`/rooms?${params.toString()}`);
   }
 
-  function handleJoin(event, openExternalOnly = false) {
+  function handleJoin(event) {
     event?.preventDefault();
     const parsed = parseRoomInput(invite, directory);
     if (!parsed) {
@@ -292,10 +299,6 @@ export function StudyRooms({
       return;
     }
     setError('');
-    if (openExternalOnly && parsed.colabsUrl) {
-      window.open(parsed.colabsUrl.href, '_blank', 'noopener,noreferrer');
-      return;
-    }
     const params = new URLSearchParams({ room: parsed.roomId });
     if (parsed.mode) params.set('mode', parsed.mode);
     if (parsed.problem) params.set('problem', parsed.problem);
@@ -419,7 +422,13 @@ export function StudyRooms({
   if (validActiveRoom) {
     const colabsUrl = directory ? roomEditor(validActiveRoom, directory) : null;
     const completedStages = roomState.checklist.filter(Boolean).length;
+    const stagePct = Math.round((completedStages / Math.max(1, activeFormat.stages.length)) * 100);
+    const timerPct = Math.max(
+      0,
+      Math.min(100, Math.round((roomState.timerRemainingSec / Math.max(1, roomState.timerDurationSec)) * 100)),
+    );
     const isLowTime = roomState.timerRemainingSec > 0 && roomState.timerRemainingSec <= 300;
+    const lineCount = (roomState.notes || '').split('\n').length;
 
     return (
       <section className="page-section rooms-page room-workspace">
@@ -428,7 +437,9 @@ export function StudyRooms({
             <Button variant="quiet" size="sm" onClick={() => onNavigate?.('/rooms')}>
               <ArrowLeft size={15} aria-hidden="true" /> Lobby
             </Button>
-            <span className="room-id-pill">#{validActiveRoom}</span>
+            <span className="room-id-pill">
+              <span className="room-live-dot" aria-hidden="true" />#{validActiveRoom}
+            </span>
             <span className="room-format-pill">{activeFormat.label}</span>
             <span className="room-presence-pill" title={participantList.join(', ')}>
               <Users size={13} aria-hidden="true" /> {participantList.length} active
@@ -467,7 +478,6 @@ export function StudyRooms({
         </div>
 
         <div className="room-studio-grid">
-          {/* Left Main Pane: Exercise Brief + Shared Scratchpad */}
           <div className="room-main-pane">
             <Card variant="outlined" className="room-brief-card">
               <div className="room-brief-head">
@@ -642,10 +652,14 @@ export function StudyRooms({
                   </div>
                 )}
               </div>
+
+              <div className="room-pad-footer">
+                <span>Markdown · KaTeX · Mermaid</span>
+                <span>{lineCount} lines · auto-saved</span>
+              </div>
             </Card>
           </div>
 
-          {/* Right Conductor Pane: Timer + Stage Checklist + Rubric */}
           <aside className="room-side-pane">
             <Card variant="outlined" className="room-widget-card">
               <div className="room-widget-head">
@@ -673,6 +687,9 @@ export function StudyRooms({
 
               <div className={`room-timer-display ${isLowTime ? 'is-warning' : ''}`}>
                 {formatClock(roomState.timerRemainingSec)}
+              </div>
+              <div className="room-progress-track" aria-hidden="true">
+                <div className="room-progress-fill" style={{ width: `${timerPct}%` }} />
               </div>
 
               <div className="room-timer-controls">
@@ -707,6 +724,9 @@ export function StudyRooms({
               <div className="room-widget-head">
                 <span className="room-widget-title">Stage Checklist</span>
                 <span className="room-stage-count">{completedStages}/{activeFormat.stages.length}</span>
+              </div>
+              <div className="room-progress-track" aria-hidden="true">
+                <div className="room-progress-fill" style={{ width: `${stagePct}%` }} />
               </div>
               <ul className="room-stage-list">
                 {activeFormat.stages.map((stage, idx) => (
@@ -781,51 +801,92 @@ export function StudyRooms({
     );
   }
 
-  // ==================== ROOMS LOBBY ====================
+  // ==================== OVERHAULED ROOMS LOBBY ====================
   return (
-    <section className="page-section rooms-page">
-      <div className="section-heading">
-        <div>
-          <h1 lang={locale}>{title}</h1>
+    <section className="page-section rooms-page rooms-lobby-v2">
+      <div className="rooms-hero-banner">
+        <div className="rooms-hero-copy">
+          <h1 lang={locale}>{title}<span>.</span></h1>
           <p>{t.rooms.subtitle}</p>
+
+          {directory && (
+            <form className="rooms-quick-join" onSubmit={handleJoin}>
+              <label className="visually-hidden" htmlFor="room-invite">{t.rooms.placeholder}</label>
+              <input
+                id="room-invite"
+                type="text"
+                value={invite}
+                required
+                placeholder={t.rooms.placeholder}
+                autoCapitalize="none"
+                spellCheck={false}
+                aria-invalid={Boolean(error)}
+                aria-describedby={error ? 'invite-error' : undefined}
+                onChange={(event) => { setInvite(event.target.value); setError(''); }}
+              />
+              <Button variant="solid" type="submit">
+                {t.rooms.joinBtn} <ArrowRight size={15} aria-hidden="true" />
+              </Button>
+            </form>
+          )}
+          {error && <p id="invite-error" className="rooms-hero-error" role="alert">{error}</p>}
+        </div>
+
+        <div className="rooms-hero-stage" aria-hidden="true">
+          <div className="legal-orbit-ring ring-1" />
+          <div className="legal-orbit-ring ring-2" />
+          <Mascot mood="happy" size={134} label="Ember mock interview host" />
+          <span className="rooms-hero-status">
+            <span className="room-live-dot" /> Live Sync · Colabs Ready
+          </span>
         </div>
       </div>
 
       {directory ? (
-        <>
-          <div className="room-grid room-lobby-grid">
-            <Card variant="outlined" className="study-panel room-setup-card">
-              <div className="rooms-intro">
-                <div>
-                  <h2>{t.rooms.startTitle}</h2>
-                  <p>{t.rooms.startDesc}</p>
-                </div>
+        <div className="room-grid room-lobby-grid">
+          <Card variant="outlined" className="study-panel room-setup-card">
+            <div className="rooms-intro">
+              <div>
+                <h2>{t.rooms.startTitle}</h2>
+                <p>{t.rooms.startDesc}</p>
               </div>
+            </div>
 
+            <div className="room-step-block">
+              <span className="room-step-label">01 · Session format</span>
               <div className="room-format-grid" role="radiogroup" aria-label="Interview format">
-                {ROOM_FORMATS.map((fmt) => (
-                  <button
-                    key={fmt.id}
-                    type="button"
-                    className={`room-format-tile ${setupMode === fmt.id ? 'is-active' : ''}`}
-                    aria-checked={setupMode === fmt.id}
-                    role="radio"
-                    onClick={() => {
-                      setSetupMode(fmt.id);
-                      if (fmt.id !== 'dsa') {
-                        setSelectedPrompt(ROOM_PROMPTS[fmt.id]?.[0]?.title || '');
-                      }
-                    }}
-                  >
-                    <div className="room-format-tile-top">
-                      <strong>{fmt.label}</strong>
-                      <span>{fmt.minutes}m</span>
-                    </div>
-                    <small>{fmt.description}</small>
-                  </button>
-                ))}
+                {ROOM_FORMATS.map((fmt) => {
+                  const Icon = FORMAT_ICONS[fmt.id] || Code2;
+                  return (
+                    <button
+                      key={fmt.id}
+                      type="button"
+                      className={`room-format-tile ${setupMode === fmt.id ? 'is-active' : ''}`}
+                      aria-checked={setupMode === fmt.id}
+                      role="radio"
+                      onClick={() => {
+                        setSetupMode(fmt.id);
+                        if (fmt.id !== 'dsa') {
+                          setSelectedPrompt(ROOM_PROMPTS[fmt.id]?.[0]?.title || '');
+                        }
+                      }}
+                    >
+                      <div className="room-format-tile-top">
+                        <span className="room-format-tile-title">
+                          <Icon size={15} aria-hidden="true" />
+                          <strong>{fmt.label}</strong>
+                        </span>
+                        <span>{fmt.minutes}m</span>
+                      </div>
+                      <small>{fmt.description}</small>
+                    </button>
+                  );
+                })}
               </div>
+            </div>
 
+            <div className="room-step-block">
+              <span className="room-step-label">02 · Your identity & role</span>
               <div className="room-identity-row">
                 <label className="room-field-stack">
                   <span>Display name</span>
@@ -854,7 +915,10 @@ export function StudyRooms({
                   </div>
                 </div>
               </div>
+            </div>
 
+            <div className="room-step-block">
+              <span className="room-step-label">03 · Attach exercise</span>
               {setupMode === 'dsa' ? (
                 <div className="room-attach-row">
                   <div className="room-attach-select">
@@ -883,124 +947,104 @@ export function StudyRooms({
                   ))}
                 </div>
               )}
+            </div>
 
-              <div className="rooms-actions">
-                <Button variant="solid" onClick={() => launchNewRoom(false)}>
-                  <Plus size={15} aria-hidden="true" /> {t.rooms.createRoom}
-                </Button>
-                <Button variant="outlined" onClick={() => launchNewRoom(true)}>
-                  {t.rooms.openColabs} <ArrowUpRight size={15} aria-hidden="true" />
-                </Button>
+            <div className="rooms-actions room-launch-bar">
+              <Button variant="solid" onClick={() => launchNewRoom(false)}>
+                <Plus size={15} aria-hidden="true" /> {t.rooms.createRoom}
+              </Button>
+              <Button variant="outlined" onClick={() => launchNewRoom(true)}>
+                {t.rooms.openColabs} <ArrowUpRight size={15} aria-hidden="true" />
+              </Button>
+            </div>
+            {children}
+          </Card>
+
+          <Card variant="outlined" className="study-panel room-recent-card">
+            <div className="room-widget-head">
+              <div>
+                <h2>Recent sessions</h2>
+                <p className="room-recent-sub">Rejoin with your saved notes, timer, and scorecard.</p>
               </div>
-              {children}
-            </Card>
+              <span className="room-stage-count">{savedRooms.length}</span>
+            </div>
 
-            <div className="room-lobby-side">
-              <Card variant="outlined" className="study-panel">
-                <div className="rooms-intro">
-                  <div>
-                    <h2>{t.rooms.joinTitle}</h2>
-                    <p>{t.rooms.joinDesc}</p>
-                  </div>
-                </div>
-                <form className="invite-form" onSubmit={(e) => handleJoin(e, false)}>
-                  <label className="visually-hidden" htmlFor="room-invite">{t.rooms.placeholder}</label>
-                  <div>
-                    <input
-                      id="room-invite"
-                      type="text"
-                      value={invite}
-                      required
-                      placeholder={t.rooms.placeholder}
-                      autoCapitalize="none"
-                      spellCheck={false}
-                      aria-invalid={Boolean(error)}
-                      aria-describedby={error ? 'invite-error' : undefined}
-                      onChange={(event) => { setInvite(event.target.value); setError(''); }}
-                    />
-                    <Button variant="solid" type="submit">{t.rooms.joinBtn}</Button>
-                  </div>
-                  {error && <p id="invite-error" role="alert">{error}</p>}
-                </form>
+            {savedRooms.length === 0 ? (
+              <div className="room-recent-empty">
+                <Mascot mood="idle" size={88} label="No recent rooms yet" />
+                <p>Rooms you create or join appear here so you can pick up right where you left off.</p>
+                <a className="external-room" href={directory.href} target="_blank" rel="noopener noreferrer">
+                  {t.rooms.openColabs} <ArrowUpRight size={15} aria-hidden="true" />
+                </a>
+              </div>
+            ) : (
+              <>
+                <ul className="room-recent-list">
+                  {savedRooms.map((item) => {
+                    const fmt = getRoomFormat(item.mode);
+                    const colabs = roomEditor(item.roomId, directory);
+                    return (
+                      <li key={item.roomId} className="room-recent-item">
+                        <button
+                          type="button"
+                          className="room-recent-open"
+                          onClick={() => {
+                            const params = new URLSearchParams({ room: item.roomId, mode: item.mode });
+                            if (item.problemSlug) params.set('problem', item.problemSlug);
+                            onNavigate?.(`/rooms?${params.toString()}`);
+                          }}
+                        >
+                          <span className="room-format-pill">{fmt.short}</span>
+                          <span className="room-recent-copy">
+                            <strong>{item.title || fmt.label}</strong>
+                            <small>#{item.roomId} · {formatRelativeTime(item.updatedAt)}</small>
+                          </span>
+                        </button>
+                        <div className="room-recent-actions">
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            aria-label="Copy room invite"
+                            title="Copy room invite"
+                            onClick={() => copyRoomLink(item.roomId, item.mode, item.problemSlug)}
+                          >
+                            {copiedId === item.roomId ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+                          </button>
+                          {colabs && (
+                            <a
+                              className="icon-btn"
+                              href={colabs.href}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label="Open in Colabs"
+                              title="Open in Colabs"
+                            >
+                              <ExternalLink size={14} aria-hidden="true" />
+                            </a>
+                          )}
+                          <button
+                            type="button"
+                            className="icon-btn"
+                            aria-label="Remove room"
+                            title="Remove room"
+                            onClick={() => setSavedRooms(removeSavedRoom(item.roomId))}
+                          >
+                            <Trash2 size={14} aria-hidden="true" />
+                          </button>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
                 <div className="room-join-secondary">
                   <a className="external-room" href={directory.href} target="_blank" rel="noopener noreferrer">
                     {t.rooms.openColabs} <ArrowUpRight size={15} aria-hidden="true" />
                   </a>
                 </div>
-              </Card>
-
-              <Card variant="outlined" className="study-panel room-recent-card">
-                <div className="room-widget-head">
-                  <h2>Recent rooms</h2>
-                  <span className="room-stage-count">{savedRooms.length}</span>
-                </div>
-                {savedRooms.length === 0 ? (
-                  <p className="room-empty-hint">
-                    Rooms you create or join appear here with your saved scratchpad, timer, and rubric.
-                  </p>
-                ) : (
-                  <ul className="room-recent-list">
-                    {savedRooms.map((item) => {
-                      const fmt = getRoomFormat(item.mode);
-                      const colabs = roomEditor(item.roomId, directory);
-                      return (
-                        <li key={item.roomId} className="room-recent-item">
-                          <button
-                            type="button"
-                            className="room-recent-open"
-                            onClick={() => {
-                              const params = new URLSearchParams({ room: item.roomId, mode: item.mode });
-                              if (item.problemSlug) params.set('problem', item.problemSlug);
-                              onNavigate?.(`/rooms?${params.toString()}`);
-                            }}
-                          >
-                            <span className="room-format-pill">{fmt.short}</span>
-                            <span className="room-recent-copy">
-                              <strong>{item.title || fmt.label}</strong>
-                              <small>#{item.roomId} · {formatRelativeTime(item.updatedAt)}</small>
-                            </span>
-                          </button>
-                          <div className="room-recent-actions">
-                            <button
-                              type="button"
-                              className="icon-btn"
-                              aria-label="Copy room invite"
-                              title="Copy room invite"
-                              onClick={() => copyRoomLink(item.roomId, item.mode, item.problemSlug)}
-                            >
-                              {copiedId === item.roomId ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-                            </button>
-                            {colabs && (
-                              <a
-                                className="icon-btn"
-                                href={colabs.href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                aria-label="Open in Colabs"
-                                title="Open in Colabs"
-                              >
-                                <ExternalLink size={14} aria-hidden="true" />
-                              </a>
-                            )}
-                            <button
-                              type="button"
-                              className="icon-btn"
-                              aria-label="Remove room"
-                              title="Remove room"
-                              onClick={() => setSavedRooms(removeSavedRoom(item.roomId))}
-                            >
-                              <Trash2 size={14} aria-hidden="true" />
-                            </button>
-                          </div>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </Card>
-            </div>
-          </div>
-        </>
+              </>
+            )}
+          </Card>
+        </div>
       ) : (
         <p>{t.rooms.unavailable}</p>
       )}
