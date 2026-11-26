@@ -622,6 +622,7 @@ export function SiteFooter({ locale = 'en', config, onNavigate }) {
   const t = getMessages(locale);
   const brandName = config?.brand?.name || 'codegrill';
   const ecosystem = config?.brand?.ecosystem || 'Utkristi';
+  const ecosystemUrl = 'https://utkristi-io.netlify.app/';
   const sources = config?.sources || [];
   const navEntries = [
     ['/roadmap', t.nav.roadmap],
@@ -638,7 +639,11 @@ export function SiteFooter({ locale = 'en', config, onNavigate }) {
           <a className="brand" href="/" aria-label={brandName} onClick={navHandler(onNavigate, '/')}>
             <BrandLogo name={brandName} size={28} />
           </a>
-          <p>{t.site.footerTagline}</p>
+          <p>
+            <a className="footer-ecosystem-link" href={ecosystemUrl} target="_blank" rel="noopener noreferrer">
+              {t.site.footerTagline}
+            </a>
+          </p>
         </div>
         <nav aria-label={t.site.footerStudy}>
           <h2>{t.site.footerStudy}</h2>
@@ -660,7 +665,12 @@ export function SiteFooter({ locale = 'en', config, onNavigate }) {
         </nav>
       </div>
       <div className="shell footer-bottom">
-        <span>© {new Date().getFullYear()} {brandName} · {ecosystem}</span>
+        <span>
+          © {new Date().getFullYear()} {brandName} ·{' '}
+          <a className="footer-ecosystem-link" href={ecosystemUrl} target="_blank" rel="noopener noreferrer">
+            {ecosystem}
+          </a>
+        </span>
         <div className="footer-legal">
           <a href="/privacy" onClick={navHandler(onNavigate, '/privacy')}>Privacy</a>
           <a href="/terms" onClick={navHandler(onNavigate, '/terms')}>Terms</a>
