@@ -526,19 +526,6 @@ export function StudyRooms({
                 <Clock size={13} aria-hidden="true" /> {formatClock(roomState.timerRemainingSec)}
               </span>
 
-              <div className="room-role-pills is-dark" role="group" aria-label={t.studio.rooms.role}>
-                {ROOM_ROLES.map((r) => (
-                  <button
-                    key={r.id}
-                    type="button"
-                    className={profile.role === r.id ? 'is-active' : ''}
-                    onClick={() => updateProfile({ role: r.id })}
-                  >
-                    {t.studio.rooms.roles[r.id] || r.label}
-                  </button>
-                ))}
-              </div>
-
               <Button
                 variant="outlined"
                 size="sm"
@@ -1227,22 +1214,6 @@ export function StudyRooms({
                     maxLength={32}
                   />
                 </label>
-
-                <div className="room-field-stack">
-                  <span>{t.studio.rooms.role}</span>
-                  <div className="room-role-pills" role="group" aria-label={t.studio.rooms.role}>
-                    {ROOM_ROLES.map((r) => (
-                      <button
-                        key={r.id}
-                        type="button"
-                        className={profile.role === r.id ? 'is-active' : ''}
-                        onClick={() => updateProfile({ role: r.id })}
-                      >
-                        {t.studio.rooms.roles[r.id] || r.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
               </div>
             </div>
 
