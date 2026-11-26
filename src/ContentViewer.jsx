@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Button } from '@utkristi/ui';
-import { ArrowLeft, ArrowRight, Check, Copy, ExternalLink, FileCode2, Folder, Maximize2, Play, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Copy, ExternalLink, FileCode2, Folder, Maximize2, Play, Star, X } from 'lucide-react';
 import { fetchPluginContent } from './api.mjs';
 import { getMessages } from './i18n.mjs';
 import { LoadingState } from './LoadingState.jsx';
@@ -8,6 +8,7 @@ import { RichTextInterpreter } from './RichTextInterpreter.jsx';
 import { CustomVideoPlayer } from './CustomVideoPlayer.jsx';
 import { Pagination } from './Pagination.jsx';
 import { AnkiDeckViewer, NotebookViewer } from './MediaViewers.jsx';
+import { isContentFavorited, toggleFavoriteContent } from './favorites.mjs';
 
 export function formatViewerTitle(problemTitle, resourceTitle) {
   const cleanProb = String(problemTitle || '').trim();
@@ -277,6 +278,7 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [favorited, setFavorited] = useState(false);
 
   useEffect(() => {
     if (!item) return;
@@ -296,6 +298,22 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
   const activeTitle = currentEntry.title;
   const canGoBack = historyIndex > 0;
   const canGoForward = historyIndex < history.length - 1;
+
+  useEffect(() => {
+    setFavorited(isContentFavorited({ url: activeUrl, title: activeTitle }));
+  }, [activeUrl, activeTitle]);
+
+  function handleToggleFav() {
+    const res = toggleFavoriteContent({
+      url: activeUrl,
+      title: activeTitle || data?.title || activeUrl,
+      kind: data?.kind || item?.kind || 'article',
+      badge: formatPluginBadge(data, t.viewer.pluginBadge),
+      content: currentEntry.inlineContent || '',
+      sourceUrl: currentEntry.inlineSource || activeUrl,
+    });
+    setFavorited(res.favorited);
+  }
 
   function navigateNested(nextUrl, nextTitle) {
     if (!nextUrl || nextUrl === activeUrl) return;
@@ -380,6 +398,16 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
             )}
           </div>
           <div className="viewer-header-actions">
+            <button
+              type="button"
+              className={`icon-btn ${favorited ? 'is-active' : ''}`}
+              onClick={handleToggleFav}
+              aria-pressed={favorited}
+              aria-label={favorited ? 'Remove from favorites' : 'Mark favorite / read again'}
+              title={favorited ? 'Saved to favorites' : 'Mark favorite / read again'}
+            >
+              <Star size={17} fill={favorited ? 'currentColor' : 'none'} aria-hidden="true" />
+            </button>
             {onExpand && (
               <button
                 type="button"

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Button, Card } from '@utkristi/ui';
-import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ExternalLink, Play } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ExternalLink, Play, Star } from 'lucide-react';
 import { fetchPluginContent } from './api.mjs';
 import { resourcesFor } from './catalog.mjs';
 import { getMessages } from './i18n.mjs';
 import { ContentViewerBody, buildViewerPath, formatPluginBadge, formatViewerTitle } from './ContentViewer.jsx';
+import { isContentFavorited, toggleFavoriteContent } from './favorites.mjs';
 
 export function ViewerPage({
   url,
@@ -29,6 +30,7 @@ export function ViewerPage({
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [favorited, setFavorited] = useState(false);
 
   useEffect(() => {
     setHistory([{ url: url || '', title: title || '' }]);
@@ -41,6 +43,21 @@ export function ViewerPage({
   const activeTitle = currentEntry.title;
   const canGoBack = historyIndex > 0;
   const canGoForward = historyIndex < history.length - 1;
+
+  useEffect(() => {
+    setFavorited(isContentFavorited({ url: activeUrl, title: activeTitle }));
+  }, [activeUrl, activeTitle]);
+
+  function handleToggleFav() {
+    const res = toggleFavoriteContent({
+      url: activeUrl,
+      title: activeTitle || data?.title || activeUrl,
+      kind: data?.kind || kind || 'article',
+      badge: formatPluginBadge(data, t.viewer.pluginBadge),
+      sourceUrl: activeUrl,
+    });
+    setFavorited(res.favorited);
+  }
 
   function navigateNested(nextUrl, nextTitle) {
     if (!nextUrl || nextUrl === activeUrl) return;
@@ -263,11 +280,23 @@ export function ViewerPage({
             </div>
           )}
         </div>
-        {activeUrl && (
-          <Button variant="outlined" size="sm" href={activeUrl} target="_blank" rel="noopener noreferrer">
-            {t.viewer.openOriginal} <ExternalLink size={14} aria-hidden="true" />
-          </Button>
-        )}
+        <div className="viewer-page-bar-left">
+          <button
+            type="button"
+            className={`icon-btn ${favorited ? 'is-active' : ''}`}
+            onClick={handleToggleFav}
+            aria-pressed={favorited}
+            aria-label={favorited ? 'Remove from favorites' : 'Mark favorite / read again'}
+            title={favorited ? 'Saved to favorites' : 'Mark favorite / read again'}
+          >
+            <Star size={17} fill={favorited ? 'currentColor' : 'none'} aria-hidden="true" />
+          </button>
+          {activeUrl && (
+            <Button variant="outlined" size="sm" href={activeUrl} target="_blank" rel="noopener noreferrer">
+              {t.viewer.openOriginal} <ExternalLink size={14} aria-hidden="true" />
+            </Button>
+          )}
+        </div>
       </div>
 
       {isVideoView ? (

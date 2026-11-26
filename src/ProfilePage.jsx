@@ -5,6 +5,7 @@ import { LedgerDashboard } from './LedgerDashboard.jsx';
 import { PlatformProfiles } from './PlatformProfiles.jsx';
 import { DOMAIN_TOPICS, ROADMAP_DOMAINS, buildDomainRoadmap } from './domainRoadmaps.mjs';
 import { getChecklistStudyGuide } from './studyMaterial.mjs';
+import { readFavoriteContent, toggleFavoriteContent } from './favorites.mjs';
 import { getMessages } from './i18n.mjs';
 
 const DOMAIN_CHECKS_KEY = 'codegrill:domain-roadmap:v1';
@@ -37,6 +38,7 @@ export function ProfilePage({
       return [];
     }
   });
+  const [savedContent, setSavedContent] = useState(() => Object.values(readFavoriteContent()));
 
   function removeSavedGuide(key) {
     try {
@@ -47,6 +49,11 @@ export function ProfilePage({
     } catch {
       // ignore storage errors
     }
+  }
+
+  function removeSavedContent(item) {
+    const res = toggleFavoriteContent(item);
+    setSavedContent(Object.values(res.all));
   }
 
   const platformBreakdown = useMemo(() => {
@@ -161,15 +168,45 @@ export function ProfilePage({
         </Card>
       </div>
 
-      {savedGuides.length > 0 && (
+      {(savedGuides.length > 0 || savedContent.length > 0) && (
         <Card variant="outlined" className="profile-saved-guides">
           <div className="profile-saved-head">
             <h3>
               <Star size={16} fill="currentColor" aria-hidden="true" /> Favorites &amp; Read Again
             </h3>
-            <span>{savedGuides.length}</span>
+            <span>{savedGuides.length + savedContent.length}</span>
           </div>
           <div className="profile-saved-list">
+            {savedContent.map((fav) => (
+              <div key={fav.id} className="profile-saved-row">
+                <button
+                  type="button"
+                  className="profile-saved-open"
+                  onClick={() => onOpenViewer?.({
+                    url: fav.url,
+                    title: fav.title,
+                    kind: fav.kind,
+                    content: fav.content || '',
+                    sourceUrl: fav.sourceUrl || fav.url || '',
+                  })}
+                >
+                  <BookOpen size={15} aria-hidden="true" />
+                  <span>
+                    <strong>{fav.title}</strong>
+                    <small>{fav.badge || fav.kind}</small>
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="icon-btn is-active"
+                  aria-label="Remove from favorites"
+                  title="Remove from favorites"
+                  onClick={() => removeSavedContent(fav)}
+                >
+                  <Star size={14} fill="currentColor" aria-hidden="true" />
+                </button>
+              </div>
+            ))}
             {savedGuides.map((fav) => {
               const topicObj = (DOMAIN_TOPICS[fav.domainId] || []).find((x) => x.id === fav.topicId);
               return (
