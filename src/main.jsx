@@ -72,7 +72,7 @@ const defaultLocale = metadata.default_locale;
 const modules = [...seed.system_design_modules, ...seed.ai_engineer_modules, ...seed.fde_modules];
 const problemSlugs = new Set(problems.map(({ slug }) => slug));
 
-const pathIds = ['roadmap', 'sheets', 'problems', 'tracks', 'resources', 'rooms', 'profile'];
+const pathIds = ['roadmap', 'sheets', 'problems', 'tracks', 'resources', 'rooms'];
 const preferenceKey = 'codegrill:study:v1';
 const pickLabel = (labels, locale) => labels[locale] ?? labels[defaultLocale];
 
@@ -97,7 +97,7 @@ function readPreferences() {
   }
 }
 
-const validPages = new Set([...pathIds, ...sitePages, 'viewer', 'error']);
+const validPages = new Set([...pathIds, ...sitePages, 'profile', 'viewer', 'error']);
 
 function currentPage() {
   // Support legacy hash URLs seamlessly by reading them if present
@@ -145,7 +145,7 @@ function App() {
   const hydratedRef = useRef(false);
 
   const t = getMessages(locale);
-  const navLabels = [t.nav.roadmap, t.nav.sheets, t.nav.problems, t.nav.tracks, t.nav.resources, t.nav.rooms, t.nav.profile];
+  const navLabels = [t.nav.roadmap, t.nav.sheets, t.nav.problems, t.nav.tracks, t.nav.resources, t.nav.rooms];
   const allSheets = [...BUILTIN_SHEETS, ...customSheets];
   const roadmap = roadmapFor(categories, problems, completed);
   const next = roadmap.find((category) => category.ready && !category.complete && category.total);

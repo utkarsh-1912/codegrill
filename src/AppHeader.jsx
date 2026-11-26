@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Badge } from '@utkristi/ui';
-import { Maximize2, Menu, Minimize2, Moon, RotateCcw, Search, Settings, Sun, X } from 'lucide-react';
+import { Maximize2, Menu, Minimize2, Moon, RotateCcw, Search, Settings, Sun, User, X } from 'lucide-react';
 import { BrandLogo } from './BrandLogo.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
 import { getMessages } from './i18n.mjs';
@@ -94,7 +94,8 @@ export function AppHeader({
 
     const matchedProblems = problems
       .filter((p) => (
-        String(p.leetcode_id).includes(needle) ||
+        String(p.display_id || p.leetcode_id).toLowerCase().includes(needle) ||
+        String(p.platform || 'leetcode').toLowerCase().includes(needle) ||
         p.slug.includes(needle) ||
         Object.values(p.translations).some((tr) => tr.title.toLowerCase().includes(needle))
       ))
@@ -102,7 +103,7 @@ export function AppHeader({
       .map((p) => ({
         kind: 'problem',
         id: p.slug,
-        label: `#${p.leetcode_id} ${p.translations[locale]?.title || p.translations[defaultLocale].title}`,
+        label: `${p.display_id || `#${p.leetcode_id}`} ${p.translations[locale]?.title || p.translations[defaultLocale].title}`,
         meta: p.difficulty,
       }));
 
@@ -193,20 +194,6 @@ export function AppHeader({
               <Search size={18} aria-hidden="true" />
             </button>
 
-            <button
-              type="button"
-              className="locale-field icon-only-control mobile-menu-btn"
-              onClick={() => {
-                setSidebarOpen(true);
-                setMobileSearchOpen(false);
-              }}
-              aria-label={t.palette.menu}
-              aria-expanded={sidebarOpen}
-              aria-controls="mobile-sidebar"
-            >
-              <Menu size={19} aria-hidden="true" />
-            </button>
-
             <div className="navbar-search-wrap desktop-search" ref={searchRef}>
               <form className="navbar-search" onSubmit={handleSearchSubmit} role="search">
                 <Search size={16} aria-hidden="true" />
@@ -218,7 +205,7 @@ export function AppHeader({
                   onFocus={() => setSearchFocused(true)}
                   onChange={(e) => { setNavQuery(e.target.value); setSearchFocused(true); }}
                 />
-                {navQuery && (
+                {navQuery ? (
                   <button
                     type="button"
                     className="navbar-search-clear"
@@ -227,6 +214,8 @@ export function AppHeader({
                   >
                     <X size={14} aria-hidden="true" />
                   </button>
+                ) : (
+                  <kbd className="navbar-search-kbd" aria-hidden="true">⌘K</kbd>
                 )}
               </form>
               {searchFocused && navQuery.trim() && (
@@ -249,18 +238,30 @@ export function AppHeader({
               )}
             </div>
 
-            <div className="settings-anchor" ref={settingsRef}>
-              <button
-                type="button"
-                className={`locale-field icon-only-control ${settingsOpen ? 'is-active' : ''}`}
-                onClick={() => setSettingsOpen((v) => !v)}
-                aria-expanded={settingsOpen}
-                aria-haspopup="true"
-                aria-label={t.palette.settings}
-                title={t.palette.settings}
+            <div className="header-utility-group">
+              <a
+                href="/profile"
+                className={`locale-field icon-only-control ${page === 'profile' ? 'is-active' : ''}`}
+                aria-current={page === 'profile' ? 'page' : undefined}
+                aria-label={t.nav.profile}
+                title={t.nav.profile}
+                onClick={linkClick('/profile')}
               >
-                <Settings size={18} aria-hidden="true" />
-              </button>
+                <User size={18} aria-hidden="true" />
+              </a>
+
+              <div className="settings-anchor" ref={settingsRef}>
+                <button
+                  type="button"
+                  className={`locale-field icon-only-control ${settingsOpen ? 'is-active' : ''}`}
+                  onClick={() => setSettingsOpen((v) => !v)}
+                  aria-expanded={settingsOpen}
+                  aria-haspopup="true"
+                  aria-label={t.palette.settings}
+                  title={t.palette.settings}
+                >
+                  <Settings size={18} aria-hidden="true" />
+                </button>
 
               {settingsOpen && (
                 <div className="settings-popover" role="dialog" aria-label={t.palette.settings}>
@@ -344,7 +345,7 @@ export function AppHeader({
                             setSettingsOpen(false);
                           }}
                         >
-                          Confirm reset
+                          {t.ui.confirmReset}
                         </button>
                         <button
                           type="button"
@@ -358,6 +359,21 @@ export function AppHeader({
                   </div>
                 </div>
               )}
+              </div>
+
+              <button
+                type="button"
+                className="locale-field icon-only-control mobile-menu-btn"
+                onClick={() => {
+                  setSidebarOpen(true);
+                  setMobileSearchOpen(false);
+                }}
+                aria-label={t.palette.menu}
+                aria-expanded={sidebarOpen}
+                aria-controls="mobile-sidebar"
+              >
+                <Menu size={19} aria-hidden="true" />
+              </button>
             </div>
           </div>
         </div>

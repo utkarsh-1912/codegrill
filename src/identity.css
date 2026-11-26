@@ -5251,3 +5251,36 @@ body,
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Grouped Profile + Settings Utility Controls & Navbar Search Kbd */
+.header-utility-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.header-utility-group a.locale-field {
+  text-decoration: none;
+}
+
+.header-utility-group a.locale-field:hover,
+.header-utility-group a.locale-field.is-active {
+  background: var(--ember-soft);
+  border-color: var(--ember);
+  color: var(--ut-accent);
+}
+
+.navbar-search-kbd {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--muted);
+  padding: 2px 5px;
+  border-radius: 5px;
+  border: 1px solid var(--ut-line);
+  background: var(--ut-bg-2);
+  flex-shrink: 0;
+  user-select: none;
+}
