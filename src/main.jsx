@@ -15,7 +15,8 @@ import { problemShareUrl, studyLocation } from './rooms.mjs';
 import { StudyRooms } from './StudyRooms.jsx';
 import { SiteFooter, SitePages, Workflow, sitePages } from './SitePages.jsx';
 import { SheetsPage } from './SheetsPage.jsx';
-import { ContentViewer } from './ContentViewer.jsx';
+import { ContentViewer, buildViewerPath } from './ContentViewer.jsx';
+import { ViewerPage } from './ViewerPage.jsx';
 import { LedgerDashboard } from './LedgerDashboard.jsx';
 import { CommandPalette } from './CommandPalette.jsx';
 import { ProblemPracticeBar } from './ProblemPracticeBar.jsx';
@@ -88,7 +89,7 @@ function readPreferences() {
   }
 }
 
-const validPages = new Set([...pathIds, ...sitePages, 'error']);
+const validPages = new Set([...pathIds, ...sitePages, 'viewer', 'error']);
 
 function currentPage() {
   // Support legacy hash URLs seamlessly by reading them if present
@@ -110,8 +111,12 @@ function currentPage() {
   return {
     page,
     pathname: window.location.pathname,
-    problem: (page === 'problems' || page === 'rooms') && problemSlugs.has(problemParam) ? problemParam : '',
+    problem: (page === 'problems' || page === 'rooms' || page === 'viewer') && problemSlugs.has(problemParam) ? problemParam : '',
     topic: page === 'problems' && !problemParam && categories.some(({ id }) => id === topicParam) ? topicParam : '',
+    viewerUrl: page === 'viewer' ? (params.get('url') || '') : '',
+    viewerTitle: page === 'viewer' ? (params.get('title') || '') : '',
+    viewerKind: page === 'viewer' ? (params.get('kind') || '') : '',
+    viewerLang: page === 'viewer' ? (params.get('lang') || '') : '',
   };
 }
 
@@ -119,7 +124,7 @@ function App() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [preferences, setPreferences] = useState(readPreferences);
   const { locale, completed, bookmarked, notes, activity, streak, longestStreak } = preferences;
-  const [{ page, pathname, problem: sharedProblem, topic }, setLocation] = useState(currentPage);
+  const [{ page, pathname, problem: sharedProblem, topic, viewerUrl, viewerTitle, viewerKind, viewerLang }, setLocation] = useState(currentPage);
   const [zenMode, setZenMode] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [appConfig, setAppConfig] = useState(DEFAULT_APP_CONFIG);
@@ -459,7 +464,20 @@ function App() {
         )}
 
         {page === 'tracks' && <InterviewTracks locale={locale} title={t.nav.tracks} onOpenViewer={setViewerItem} />}
-        {page === 'resources' && <ResourceDirectory locale={locale} title={t.nav.resources} />}
+        {page === 'resources' && <ResourceDirectory locale={locale} title={t.nav.resources} onOpenViewer={setViewerItem} />}
+        {page === 'viewer' && (
+          <ViewerPage
+            url={viewerUrl}
+            title={viewerTitle}
+            kind={viewerKind}
+            problem={sharedProblem ? problems.find((p) => p.slug === sharedProblem) : null}
+            initialLang={viewerLang}
+            languages={languages}
+            locale={locale}
+            defaultLocale={defaultLocale}
+            onNavigate={navigate}
+          />
+        )}
         {page === 'rooms' && (
           <StudyRooms locale={locale} title={t.nav.rooms}>
             {sharedProblem && <ProblemLink slug={sharedProblem} locale={locale} />}
@@ -474,6 +492,10 @@ function App() {
         locale={locale}
         languages={languages}
         onClose={() => setViewerItem(null)}
+        onExpand={(expandedItem) => {
+          setViewerItem(null);
+          navigate(buildViewerPath(expandedItem));
+        }}
       />
 
       <CommandPalette
@@ -759,6 +781,7 @@ function ProblemLibrary({
                   <SolutionFiles
                     solutions={problem.solutions}
                     problemTitle={name}
+                    problemSlug={problem.slug}
                     locale={locale}
                     onOpenViewer={onOpenViewer}
                   />
@@ -795,7 +818,7 @@ function ProblemLibrary({
   );
 }
 
-function SolutionFiles({ solutions, problemTitle, locale, onOpenViewer }) {
+function SolutionFiles({ solutions, problemTitle, problemSlug, locale, onOpenViewer }) {
   const t = getMessages(locale);
   const entries = Object.entries(languages).filter(([id]) => solutions[id]);
   if (!entries.length) return null;
@@ -815,6 +838,7 @@ function SolutionFiles({ solutions, problemTitle, locale, onOpenViewer }) {
               solutionLang: id,
               solutions,
               problemTitle,
+              problemSlug,
             })}
           >
             <FileCode2 size={14} aria-hidden="true" /> {name}
@@ -851,7 +875,7 @@ function ProblemLink({ slug, locale = 'en' }) {
   );
 }
 
-function ResourceDirectory({ locale, title }) {
+function ResourceDirectory({ locale, title, onOpenViewer }) {
   const t = getMessages(locale);
   const [language, setLanguage] = useState(locale);
   useEffect(() => setLanguage(locale), [locale]);
@@ -872,20 +896,32 @@ function ResourceDirectory({ locale, title }) {
       </div>
       <p className="result-count" role="status">{visible.length} {t.resources.directoriesUnit}</p>
       <ul className="directory-list">
-        {visible.map((entry) => (
-          <li key={entry.url}>
-            <Card variant="outlined">
-              <a href={entry.url} target="_blank" rel="noopener noreferrer">
-                <span>
-                  <strong>{entry.name}</strong>
-                  <small>{sourcePlatform(entry.url)}</small>
-                  {entry.description && <small>{entry.description}</small>}
-                </span>
-                <ExternalLink size={16} aria-hidden="true" />
-              </a>
-            </Card>
-          </li>
-        ))}
+        {visible.map((entry) => {
+          const platform = sourcePlatform(entry.url);
+          const isVideo = platform === 'YouTube';
+          return (
+            <li key={entry.url}>
+              <Card variant="outlined">
+                <button
+                  type="button"
+                  className="directory-open-btn"
+                  onClick={() => onOpenViewer({
+                    url: entry.url,
+                    title: entry.name,
+                    kind: isVideo ? 'video' : 'article',
+                  })}
+                >
+                  <span>
+                    <strong>{entry.name}</strong>
+                    <small>{platform}</small>
+                    {entry.description && <small>{entry.description}</small>}
+                  </span>
+                  {isVideo ? <Play size={16} aria-hidden="true" /> : <ChevronRight size={16} aria-hidden="true" />}
+                </button>
+              </Card>
+            </li>
+          );
+        })}
       </ul>
     </section>
   );

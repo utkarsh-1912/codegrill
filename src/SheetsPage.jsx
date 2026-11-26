@@ -98,6 +98,7 @@ export function SheetsPage({
       solutionLang: langId,
       solutions: problem.solutions,
       problemTitle: title,
+      problemSlug: problem.slug,
     });
   }
 

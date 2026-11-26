@@ -176,6 +176,17 @@ export async function deleteCustomSheetApi(id, baseUrl) {
   }
 }
 
+function extractYouTubeChannelIdClient(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    if (!url.hostname.endsWith('youtube.com')) return null;
+    const m = /^\/channel\/(UC[a-zA-Z0-9_-]{20,})/.exec(url.pathname);
+    return m ? m[1] : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchPluginContent(url, locale = 'en', baseUrl) {
   try {
     const res = await fetch(
@@ -185,6 +196,25 @@ export async function fetchPluginContent(url, locale = 'en', baseUrl) {
     if (res.ok) return await res.json();
   } catch {
     // Fall back to client-side plugin handling when static/offline
+  }
+
+  const channelId = extractYouTubeChannelIdClient(url);
+  if (channelId) {
+    const uploadsId = `UU${channelId.slice(2)}`;
+    const embed = new URL('https://www.youtube-nocookie.com/embed/videoseries');
+    embed.searchParams.set('list', uploadsId);
+    embed.searchParams.set('rel', '0');
+    return {
+      plugin: 'youtube-channel-client',
+      kind: 'channel',
+      channelId,
+      title: 'YouTube Channel',
+      author: 'YouTube',
+      embedUrl: embed.href,
+      playlistEmbedUrl: embed.href,
+      videos: [],
+      sourceUrl: url,
+    };
   }
 
   const videoId = extractYouTubeIdClient(url);

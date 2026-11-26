@@ -1,11 +1,148 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Button } from '@utkristi/ui';
-import { Check, Copy, ExternalLink, X } from 'lucide-react';
+import { Check, Copy, ExternalLink, FileCode2, Folder, Maximize2, Play, X } from 'lucide-react';
 import { fetchPluginContent } from './api.mjs';
 import { getMessages } from './i18n.mjs';
 import { LoadingState } from './LoadingState.jsx';
 
-export function ContentViewer({ item, locale, languages, onClose }) {
+export function buildViewerPath(item) {
+  const params = new URLSearchParams();
+  if (item?.url) params.set('url', item.url);
+  if (item?.title) params.set('title', item.title);
+  if (item?.kind) params.set('kind', item.kind);
+  if (item?.problemSlug) params.set('problem', item.problemSlug);
+  if (item?.solutionLang) params.set('lang', item.solutionLang);
+  return `/viewer?${params.toString()}`;
+}
+
+export function ContentViewerBody({
+  activeUrl,
+  activeTitle,
+  locale,
+  data,
+  loading,
+  copied,
+  onCopyCode,
+  onSelectSubUrl,
+}) {
+  const t = getMessages(locale);
+  const [selectedVideoId, setSelectedVideoId] = useState('');
+
+  useEffect(() => {
+    setSelectedVideoId('');
+  }, [activeUrl]);
+
+  const activeChannelEmbed = selectedVideoId
+    ? `https://www.youtube-nocookie.com/embed/${selectedVideoId}?rel=0&modestbranding=1&cc_lang_pref=${encodeURIComponent(locale)}&hl=${encodeURIComponent(locale)}`
+    : data?.embedUrl;
+
+  if (loading) {
+    return <LoadingState locale={locale} message={t.viewer.loading} compact />;
+  }
+
+  if (data?.kind === 'video') {
+    return (
+      <div className="video-frame-wrap">
+        <iframe
+          src={data.embedUrl}
+          title={data.title || activeTitle}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+        />
+      </div>
+    );
+  }
+
+  if (data?.kind === 'channel') {
+    return (
+      <div className="channel-viewer">
+        <div className="video-frame-wrap">
+          <iframe
+            src={activeChannelEmbed}
+            title={data.title || activeTitle}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+        {data.videos?.length > 0 && (
+          <div className="channel-video-grid">
+            {data.videos.map((vid) => (
+              <button
+                key={vid.videoId}
+                type="button"
+                className={`channel-video-card ${selectedVideoId === vid.videoId ? 'is-selected' : ''}`}
+                onClick={() => setSelectedVideoId(vid.videoId)}
+              >
+                <div className="channel-thumb-wrap">
+                  <img src={vid.thumbnailUrl} alt="" loading="lazy" />
+                  <span className="channel-play-pill"><Play size={13} aria-hidden="true" /></span>
+                </div>
+                <div className="channel-video-info">
+                  <strong>{vid.title}</strong>
+                  {vid.published && <small>{vid.published}</small>}
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (data?.kind === 'directory') {
+    return (
+      <div className="github-dir-list">
+        {data.entries?.map((entry) => (
+          <button
+            key={entry.path}
+            type="button"
+            className="github-dir-item"
+            onClick={() => onSelectSubUrl?.(entry.url, `${data.repo} — ${entry.name}`)}
+          >
+            {entry.type === 'dir' ? <Folder size={16} aria-hidden="true" /> : <FileCode2 size={16} aria-hidden="true" />}
+            <span>{entry.name}</span>
+          </button>
+        ))}
+      </div>
+    );
+  }
+
+  if (data?.kind === 'code' || data?.kind === 'markdown') {
+    return (
+      <div className="code-viewer">
+        <div className="code-toolbar">
+          <span>{data.language}</span>
+          <button type="button" className="icon-btn" onClick={onCopyCode} aria-label={t.viewer.copyCode} title={copied ? t.viewer.copiedCode : t.viewer.copyCode}>
+            {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
+          </button>
+        </div>
+        <pre><code>{data.content}</code></pre>
+      </div>
+    );
+  }
+
+  if (data?.kind === 'article') {
+    return (
+      <article className="article-reader">
+        {data.description && <p className="article-lead">{data.description}</p>}
+        {data.blocks?.length > 0 ? data.blocks.map((block, index) => {
+          if (block.tag === 'h1' || block.tag === 'h2') return <h3 key={index}>{block.text}</h3>;
+          if (block.tag === 'h3') return <h4 key={index}>{block.text}</h4>;
+          if (block.tag === 'pre') return <pre key={index}><code>{block.text}</code></pre>;
+          return <p key={index}>{block.text}</p>;
+        }) : <p className="viewer-fallback-note">{t.viewer.emptyBlocks}</p>}
+      </article>
+    );
+  }
+
+  return (
+    <div className="viewer-error">
+      <p>{t.viewer.errorNote}</p>
+    </div>
+  );
+}
+
+export function ContentViewer({ item, locale, languages, onClose, onExpand }) {
   const t = getMessages(locale);
   const [activeUrl, setActiveUrl] = useState(item?.url || '');
   const [activeTitle, setActiveTitle] = useState(item?.title || '');
@@ -73,9 +210,27 @@ export function ContentViewer({ item, locale, languages, onClose }) {
             {data?.repo && <p className="viewer-meta">{data.repo} · {data.filePath || data.title}</p>}
             {data?.siteName && <p className="viewer-meta">{data.siteName}</p>}
           </div>
-          <button type="button" className="icon-btn" onClick={onClose} aria-label={t.viewer.close} title={t.viewer.close}>
-            <X size={20} aria-hidden="true" />
-          </button>
+          <div className="viewer-header-actions">
+            {onExpand && (
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => onExpand({
+                  ...item,
+                  url: activeUrl,
+                  title: activeTitle || data?.title || '',
+                  solutionLang: selectedLang,
+                })}
+                aria-label="Expand to full page"
+                title="Expand to full page"
+              >
+                <Maximize2 size={18} aria-hidden="true" />
+              </button>
+            )}
+            <button type="button" className="icon-btn" onClick={onClose} aria-label={t.viewer.close} title={t.viewer.close}>
+              <X size={20} aria-hidden="true" />
+            </button>
+          </div>
         </div>
 
         {solutionEntries.length > 0 && item.kind === 'code' && (
@@ -99,48 +254,19 @@ export function ContentViewer({ item, locale, languages, onClose }) {
         )}
 
         <div className="viewer-body">
-          {loading && <LoadingState locale={locale} message={t.viewer.loading} compact />}
-
-          {!loading && data?.kind === 'video' && (
-            <div className="video-frame-wrap">
-              <iframe
-                src={data.embedUrl}
-                title={data.title || activeTitle}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-              />
-            </div>
-          )}
-
-          {!loading && (data?.kind === 'code' || data?.kind === 'markdown') && (
-            <div className="code-viewer">
-              <div className="code-toolbar">
-                <span>{data.language}</span>
-                <button type="button" className="icon-btn" onClick={copyCode} aria-label={t.viewer.copyCode} title={copied ? t.viewer.copiedCode : t.viewer.copyCode}>
-                  {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
-                </button>
-              </div>
-              <pre><code>{data.content}</code></pre>
-            </div>
-          )}
-
-          {!loading && data?.kind === 'article' && (
-            <article className="article-reader">
-              {data.description && <p className="article-lead">{data.description}</p>}
-              {data.blocks?.length > 0 ? data.blocks.map((block, index) => {
-                if (block.tag === 'h1' || block.tag === 'h2') return <h3 key={index}>{block.text}</h3>;
-                if (block.tag === 'h3') return <h4 key={index}>{block.text}</h4>;
-                if (block.tag === 'pre') return <pre key={index}><code>{block.text}</code></pre>;
-                return <p key={index}>{block.text}</p>;
-              }) : <p className="viewer-fallback-note">{t.viewer.emptyBlocks}</p>}
-            </article>
-          )}
-
-          {!loading && data?.kind === 'error' && (
-            <div className="viewer-error">
-              <p>{t.viewer.errorNote}</p>
-            </div>
-          )}
+          <ContentViewerBody
+            activeUrl={activeUrl}
+            activeTitle={activeTitle}
+            locale={locale}
+            data={data}
+            loading={loading}
+            copied={copied}
+            onCopyCode={copyCode}
+            onSelectSubUrl={(nextUrl, nextTitle) => {
+              setActiveUrl(nextUrl);
+              setActiveTitle(nextTitle);
+            }}
+          />
         </div>
 
         <div className="viewer-footer">
