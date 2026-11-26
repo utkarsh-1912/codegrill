@@ -5175,3 +5175,79 @@ body,
   line-height: 1.5;
   white-space: nowrap;
 }
+
+
+/* Dedicated Profile & Progress Page */
+.progress-profile-link {
+  color: var(--ut-accent);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.progress-profile-link:hover {
+  text-decoration: underline;
+}
+
+.profile-breakdown-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-block: 16px 22px;
+}
+
+.profile-breakdown-card {
+  padding: 18px 20px;
+  background: var(--ut-bg-2);
+  border-radius: 12px;
+  display: grid;
+  gap: 14px;
+}
+
+.profile-breakdown-card h3 {
+  font-family: var(--display-font);
+  font-size: 1.18rem;
+  margin: 0;
+}
+
+.profile-progress-list {
+  display: grid;
+  gap: 11px;
+}
+
+.profile-progress-row {
+  display: grid;
+  gap: 5px;
+}
+
+.profile-progress-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.86rem;
+}
+
+.profile-progress-name {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.profile-progress-top strong {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+.profile-progress-top strong span {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+@media (max-width: 720px) {
+  .profile-breakdown-grid {
+    grid-template-columns: 1fr;
+  }
+}

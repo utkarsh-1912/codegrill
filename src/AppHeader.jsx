@@ -501,12 +501,12 @@ export function AppHeader({
                 <div className="settings-row">
                   {!confirmReset ? (
                     <>
-                      <span>Reset progress</span>
+                      <span>{t.ui.resetProgress}</span>
                       <button
                         type="button"
                         className="locale-field icon-only-control reset-trigger-btn"
                         onClick={() => setConfirmReset(true)}
-                        aria-label="Reset progress"
+                        aria-label={t.ui.resetProgress}
                       >
                         <RotateCcw size={16} aria-hidden="true" />
                       </button>
@@ -522,7 +522,7 @@ export function AppHeader({
                           setSidebarOpen(false);
                         }}
                       >
-                        Confirm reset
+                        {t.ui.confirmReset}
                       </button>
                       <button
                         type="button"

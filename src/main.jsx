@@ -17,8 +17,7 @@ import { SiteFooter, SitePages, Workflow, sitePages } from './SitePages.jsx';
 import { SheetsPage } from './SheetsPage.jsx';
 import { ContentViewer, buildViewerPath, formatViewerTitle } from './ContentViewer.jsx';
 import { ViewerPage } from './ViewerPage.jsx';
-import { LedgerDashboard } from './LedgerDashboard.jsx';
-import { PlatformProfiles } from './PlatformProfiles.jsx';
+import { ProfilePage } from './ProfilePage.jsx';
 import { CommandPalette } from './CommandPalette.jsx';
 import { ProblemPracticeBar } from './ProblemPracticeBar.jsx';
 import { AppHeader } from './AppHeader.jsx';
@@ -73,7 +72,7 @@ const defaultLocale = metadata.default_locale;
 const modules = [...seed.system_design_modules, ...seed.ai_engineer_modules, ...seed.fde_modules];
 const problemSlugs = new Set(problems.map(({ slug }) => slug));
 
-const pathIds = ['roadmap', 'sheets', 'problems', 'tracks', 'resources', 'rooms'];
+const pathIds = ['roadmap', 'sheets', 'problems', 'tracks', 'resources', 'rooms', 'profile'];
 const preferenceKey = 'codegrill:study:v1';
 const pickLabel = (labels, locale) => labels[locale] ?? labels[defaultLocale];
 
@@ -146,7 +145,7 @@ function App() {
   const hydratedRef = useRef(false);
 
   const t = getMessages(locale);
-  const navLabels = [t.nav.roadmap, t.nav.sheets, t.nav.problems, t.nav.tracks, t.nav.resources, t.nav.rooms];
+  const navLabels = [t.nav.roadmap, t.nav.sheets, t.nav.problems, t.nav.tracks, t.nav.resources, t.nav.rooms, t.nav.profile];
   const allSheets = [...BUILTIN_SHEETS, ...customSheets];
   const roadmap = roadmapFor(categories, problems, completed);
   const next = roadmap.find((category) => category.ready && !category.complete && category.total);
@@ -450,29 +449,16 @@ function App() {
               {next ? <>{t.progress.nextLabel} <span lang={locale}>{pickLabel(next.labels, locale)}</span></> : t.progress.allDone}
               {streak > 0 && <> · <strong>{streak}</strong> {t.progress.streak}</>}
               {bookmarked.size > 0 && <> · <strong>{bookmarked.size}</strong> {t.progress.bookmarked}</>}
+              {' · '}
+              <a
+                href="/profile"
+                className="progress-profile-link"
+                onClick={(e) => { e.preventDefault(); navigate('/profile'); }}
+              >
+                {t.ui.viewProfile}
+              </a>
             </p>
           </Card>
-          <LedgerDashboard
-            problems={problems}
-            categories={categories}
-            completed={completed}
-            bookmarked={bookmarked}
-            activity={activity}
-            dailyChallenge={dailyChallenge}
-            streak={streak}
-            longestStreak={longestStreak}
-            activityDays={appConfig.interview.activityDays}
-            locale={locale}
-            defaultLocale={defaultLocale}
-            onOpenProblem={openProblemBySlug}
-          />
-          <PlatformProfiles
-            linkedProfiles={linkedProfiles}
-            codegrillSolved={completed.size}
-            apiBaseUrl={appConfig.apiBaseUrl}
-            locale={locale}
-            onSaveProfiles={handleSaveProfiles}
-          />
           <Roadmap
             roadmap={roadmap}
             next={next}
@@ -489,6 +475,27 @@ function App() {
             </section>
           )}
         </>}
+
+        {page === 'profile' && (
+          <ProfilePage
+            problems={problems}
+            categories={categories}
+            completed={completed}
+            bookmarked={bookmarked}
+            activity={activity}
+            dailyChallenge={dailyChallenge}
+            streak={streak}
+            longestStreak={longestStreak}
+            activityDays={appConfig.interview.activityDays}
+            linkedProfiles={linkedProfiles}
+            apiBaseUrl={appConfig.apiBaseUrl}
+            locale={locale}
+            defaultLocale={defaultLocale}
+            onSaveProfiles={handleSaveProfiles}
+            onOpenProblem={openProblemBySlug}
+            onNavigate={navigate}
+          />
+        )}
 
         {page === 'sheets' && (
           <SheetsPage
@@ -762,7 +769,7 @@ function Roadmap({ roadmap, next, locale, title, onOpen, onOpenViewer, onNavigat
 
               {!isDsa && selected.interviewPrompts?.length > 0 && (
                 <div className="domain-prompts">
-                  <h4>Interview prompts</h4>
+                  <h4>{t.ui.interviewPrompts}</h4>
                   <ul>
                     {selected.interviewPrompts.map((promptText, idx) => (
                       <li key={idx}>{promptText}</li>
@@ -795,7 +802,7 @@ function Roadmap({ roadmap, next, locale, title, onOpen, onOpenViewer, onNavigat
 
               {!isDsa && selected.resources?.length > 0 && (
                 <div className="domain-resources">
-                  <h4>Study guides</h4>
+                  <h4>{t.ui.studyGuides}</h4>
                   {selected.resources.map((res) => (
                     <button
                       key={res.url}
@@ -912,11 +919,11 @@ function ProblemLibrary({
           ]}
         />
         <SelectDropdown
-          ariaLabel="Platform"
+          ariaLabel={t.ui.platformLabel}
           value={platformFilter}
           onChange={setPlatformFilter}
           options={[
-            { value: '', label: 'All platforms' },
+            { value: '', label: t.ui.allPlatforms },
             { value: 'leetcode', label: 'LeetCode', badge: 'LC' },
             { value: 'codeforces', label: 'Codeforces', badge: 'CF' },
             { value: 'hackerrank', label: 'HackerRank', badge: 'HR' },
@@ -1005,7 +1012,7 @@ function ProblemLibrary({
                     {safeUrl(problem.problem_url || problem.leetcode_url) && (
                       <Button variant="solid" href={problem.problem_url || problem.leetcode_url} target="_blank" rel="noopener noreferrer">
                         {problem.platform && problem.platform !== 'leetcode'
-                          ? `Practice on ${problemPlatformLabel(problem.platform)}`
+                          ? `${t.ui.practiceOn} ${problemPlatformLabel(problem.platform)}`
                           : t.problems.practiceLeetCode}
                       </Button>
                     )}

@@ -793,6 +793,21 @@
       "translations": {
         "en": {
           "title": "Top K Frequent Elements"
+        },
+        "ja": {
+          "title": "上位K個の頻出要素"
+        },
+        "hi": {
+          "title": "शीर्ष K बारंबार तत्व"
+        },
+        "es": {
+          "title": "K elementos más frecuentes"
+        },
+        "zh": {
+          "title": "前 K 个高频元素"
+        },
+        "ko": {
+          "title": "상위 K 빈도 요소"
         }
       },
       "resources": {
@@ -853,6 +868,21 @@
       "translations": {
         "en": {
           "title": "Product of Array Except Self"
+        },
+        "ja": {
+          "title": "自身以外の配列の積"
+        },
+        "hi": {
+          "title": "स्वयं को छोड़कर एरे का गुणनफल"
+        },
+        "es": {
+          "title": "Producto del arreglo excepto sí mismo"
+        },
+        "zh": {
+          "title": "除自身以外数组的乘积"
+        },
+        "ko": {
+          "title": "자신을 제외한 배열의 곱"
         }
       },
       "resources": {
@@ -910,6 +940,21 @@
       "translations": {
         "en": {
           "title": "Valid Sudoku"
+        },
+        "ja": {
+          "title": "有効な数独"
+        },
+        "hi": {
+          "title": "मान्य सुडोकू"
+        },
+        "es": {
+          "title": "Sudoku válido"
+        },
+        "zh": {
+          "title": "有效的数独"
+        },
+        "ko": {
+          "title": "유효한 스도쿠"
         }
       },
       "resources": {
@@ -969,6 +1014,21 @@
       "translations": {
         "en": {
           "title": "Encode and Decode Strings"
+        },
+        "ja": {
+          "title": "文字列のエンコードとデコード"
+        },
+        "hi": {
+          "title": "स्ट्रिंग्स का एन्कोड और डिकोड"
+        },
+        "es": {
+          "title": "Codificar y decodificar cadenas"
+        },
+        "zh": {
+          "title": "字符串的编码与解码"
+        },
+        "ko": {
+          "title": "문자열 인코딩과 디코딩"
         }
       },
       "resources": {
@@ -1026,6 +1086,21 @@
       "translations": {
         "en": {
           "title": "Longest Consecutive Sequence"
+        },
+        "ja": {
+          "title": "最長連続数列"
+        },
+        "hi": {
+          "title": "सबसे लंबा क्रमिक अनुक्रम"
+        },
+        "es": {
+          "title": "Secuencia consecutiva más larga"
+        },
+        "zh": {
+          "title": "最长连续序列"
+        },
+        "ko": {
+          "title": "가장 긴 연속 수열"
         }
       },
       "resources": {
@@ -1198,6 +1273,21 @@
       "translations": {
         "en": {
           "title": "Two Sum II Input Array Is Sorted"
+        },
+        "ja": {
+          "title": "2数の和 II（ソート済み配列）"
+        },
+        "hi": {
+          "title": "दो संख्याओं का योग II (क्रमबद्ध एरे)"
+        },
+        "es": {
+          "title": "Dos sumas II (arreglo ordenado)"
+        },
+        "zh": {
+          "title": "两数之和 II - 输入有序数组"
+        },
+        "ko": {
+          "title": "두 수의 합 II (정렬된 배열)"
         }
       },
       "resources": {
@@ -1372,6 +1462,21 @@
       "translations": {
         "en": {
           "title": "Container With Most Water"
+        },
+        "ja": {
+          "title": "最大水量のコンテナ"
+        },
+        "hi": {
+          "title": "सर्वाधिक पानी वाला कंटेनर"
+        },
+        "es": {
+          "title": "Contenedor con más agua"
+        },
+        "zh": {
+          "title": "盛最多水的容器"
+        },
+        "ko": {
+          "title": "가장 많은 물을 담는 컨테이너"
         }
       },
       "resources": {
@@ -1431,6 +1536,21 @@
       "translations": {
         "en": {
           "title": "Trapping Rain Water"
+        },
+        "ja": {
+          "title": "雨水の貯留"
+        },
+        "hi": {
+          "title": "वर्षा जल संचयन"
+        },
+        "es": {
+          "title": "Atrapar agua de lluvia"
+        },
+        "zh": {
+          "title": "接雨水"
+        },
+        "ko": {
+          "title": "빗물 트래핑"
         }
       },
       "resources": {
@@ -1720,6 +1840,21 @@
       "translations": {
         "en": {
           "title": "Longest Repeating Character Replacement"
+        },
+        "ja": {
+          "title": "文字置換後の最長繰り返し部分文字列"
+        },
+        "hi": {
+          "title": "अक्षर प्रतिस्थापन के साथ सबसे लंबी दोहराई स्ट्रिंग"
+        },
+        "es": {
+          "title": "Reemplazo de carácter repetido más largo"
+        },
+        "zh": {
+          "title": "替换后的最长重复字符"
+        },
+        "ko": {
+          "title": "가장 긴 반복 문자 대체"
         }
       },
       "resources": {
@@ -1777,6 +1912,21 @@
       "translations": {
         "en": {
           "title": "Permutation In String"
+        },
+        "ja": {
+          "title": "文字列内の順列"
+        },
+        "hi": {
+          "title": "स्ट्रिंग में क्रमचय"
+        },
+        "es": {
+          "title": "Permutación en cadena"
+        },
+        "zh": {
+          "title": "字符串的排列"
+        },
+        "ko": {
+          "title": "문자열 내 순열"
         }
       },
       "resources": {
@@ -1834,6 +1984,21 @@
       "translations": {
         "en": {
           "title": "Minimum Window Substring"
+        },
+        "ja": {
+          "title": "最小ウィンドウ部分文字列"
+        },
+        "hi": {
+          "title": "न्यूनतम विंडो सबस्ट्रिंग"
+        },
+        "es": {
+          "title": "Subcadena de ventana mínima"
+        },
+        "zh": {
+          "title": "最小覆盖子串"
+        },
+        "ko": {
+          "title": "최소 윈도우 부분 문자열"
         }
       },
       "resources": {
@@ -1891,6 +2056,21 @@
       "translations": {
         "en": {
           "title": "Sliding Window Maximum"
+        },
+        "ja": {
+          "title": "スライディングウィンドウの最大値"
+        },
+        "hi": {
+          "title": "स्लाइडिंग विंडो अधिकतम"
+        },
+        "es": {
+          "title": "Máximo de ventana deslizante"
+        },
+        "zh": {
+          "title": "滑动窗口最大值"
+        },
+        "ko": {
+          "title": "슬라이딩 윈도우 최댓값"
         }
       },
       "resources": {
@@ -2072,6 +2252,21 @@
       "translations": {
         "en": {
           "title": "Min Stack"
+        },
+        "ja": {
+          "title": "最小スタック"
+        },
+        "hi": {
+          "title": "मिनिमम स्टैक"
+        },
+        "es": {
+          "title": "Pila mínima"
+        },
+        "zh": {
+          "title": "最小栈"
+        },
+        "ko": {
+          "title": "최소 스택"
         }
       },
       "resources": {
@@ -2130,6 +2325,21 @@
       "translations": {
         "en": {
           "title": "Evaluate Reverse Polish Notation"
+        },
+        "ja": {
+          "title": "逆ポーランド記法の評価"
+        },
+        "hi": {
+          "title": "रिवर्स पोलिश नोटेशन का मूल्यांकन"
+        },
+        "es": {
+          "title": "Evaluar notación polaca inversa"
+        },
+        "zh": {
+          "title": "逆波兰表达式求值"
+        },
+        "ko": {
+          "title": "역폴란드 표기법 계산"
         }
       },
       "resources": {
@@ -2188,6 +2398,21 @@
       "translations": {
         "en": {
           "title": "Generate Parentheses"
+        },
+        "ja": {
+          "title": "括弧の生成"
+        },
+        "hi": {
+          "title": "कोष्ठक उत्पन्न करें"
+        },
+        "es": {
+          "title": "Generar paréntesis"
+        },
+        "zh": {
+          "title": "括号生成"
+        },
+        "ko": {
+          "title": "괄호 생성"
         }
       },
       "resources": {
@@ -2245,6 +2470,21 @@
       "translations": {
         "en": {
           "title": "Daily Temperatures"
+        },
+        "ja": {
+          "title": "毎日の気温"
+        },
+        "hi": {
+          "title": "दैनिक तापमान"
+        },
+        "es": {
+          "title": "Temperaturas diarias"
+        },
+        "zh": {
+          "title": "每日温度"
+        },
+        "ko": {
+          "title": "일일 온도"
         }
       },
       "resources": {
@@ -2302,6 +2542,21 @@
       "translations": {
         "en": {
           "title": "Car Fleet"
+        },
+        "ja": {
+          "title": "車の編隊"
+        },
+        "hi": {
+          "title": "कार काफिला"
+        },
+        "es": {
+          "title": "Flota de autos"
+        },
+        "zh": {
+          "title": "车队"
+        },
+        "ko": {
+          "title": "차량 행렬"
         }
       },
       "resources": {
@@ -2359,6 +2614,21 @@
       "translations": {
         "en": {
           "title": "Largest Rectangle In Histogram"
+        },
+        "ja": {
+          "title": "ヒストグラム内の最大長方形"
+        },
+        "hi": {
+          "title": "हिस्टोग्राम में सबसे बड़ा आयत"
+        },
+        "es": {
+          "title": "Rectángulo más grande en histograma"
+        },
+        "zh": {
+          "title": "柱状图中最大的矩形"
+        },
+        "ko": {
+          "title": "히스토그램에서 가장 큰 직사각형"
         }
       },
       "resources": {
@@ -2540,6 +2810,21 @@
       "translations": {
         "en": {
           "title": "Search a 2D Matrix"
+        },
+        "ja": {
+          "title": "2次元行列の探索"
+        },
+        "hi": {
+          "title": "2D मैट्रिक्स में खोज"
+        },
+        "es": {
+          "title": "Buscar en matriz 2D"
+        },
+        "zh": {
+          "title": "搜索二维矩阵"
+        },
+        "ko": {
+          "title": "2D 행렬 탐색"
         }
       },
       "resources": {
@@ -2597,6 +2882,21 @@
       "translations": {
         "en": {
           "title": "Koko Eating Bananas"
+        },
+        "ja": {
+          "title": "バナナを食べるココ"
+        },
+        "hi": {
+          "title": "केले खाने वाली कोको"
+        },
+        "es": {
+          "title": "Koko comiendo plátanos"
+        },
+        "zh": {
+          "title": "爱吃香蕉的珂珂"
+        },
+        "ko": {
+          "title": "바나나를 먹는 코코"
         }
       },
       "resources": {
@@ -2655,6 +2955,21 @@
       "translations": {
         "en": {
           "title": "Find Minimum In Rotated Sorted Array"
+        },
+        "ja": {
+          "title": "回転ソート済み配列の最小値"
+        },
+        "hi": {
+          "title": "घुमाए गए क्रमबद्ध एरे में न्यूनतम"
+        },
+        "es": {
+          "title": "Mínimo en arreglo ordenado rotado"
+        },
+        "zh": {
+          "title": "寻找旋转排序数组中的最小值"
+        },
+        "ko": {
+          "title": "회전된 정렬 배열의 최솟값"
         }
       },
       "resources": {
@@ -2714,6 +3029,21 @@
       "translations": {
         "en": {
           "title": "Search In Rotated Sorted Array"
+        },
+        "ja": {
+          "title": "回転ソート済み配列の探索"
+        },
+        "hi": {
+          "title": "घुमाए गए क्रमबद्ध एरे में खोज"
+        },
+        "es": {
+          "title": "Buscar en arreglo ordenado rotado"
+        },
+        "zh": {
+          "title": "搜索旋转排序数组"
+        },
+        "ko": {
+          "title": "회전된 정렬 배열 탐색"
         }
       },
       "resources": {
@@ -2771,6 +3101,21 @@
       "translations": {
         "en": {
           "title": "Time Based Key Value Store"
+        },
+        "ja": {
+          "title": "時刻ベースのキー・バリューストア"
+        },
+        "hi": {
+          "title": "समय-आधारित की-वैल्यू स्टोर"
+        },
+        "es": {
+          "title": "Almacén clave-valor basado en tiempo"
+        },
+        "zh": {
+          "title": "基于时间的键值存储"
+        },
+        "ko": {
+          "title": "시간 기반 키-값 저장소"
         }
       },
       "resources": {
@@ -2828,6 +3173,21 @@
       "translations": {
         "en": {
           "title": "Median of Two Sorted Arrays"
+        },
+        "ja": {
+          "title": "2つのソート済み配列の中央値"
+        },
+        "hi": {
+          "title": "दो क्रमबद्ध एरे का माध्यिका"
+        },
+        "es": {
+          "title": "Mediana de dos arreglos ordenados"
+        },
+        "zh": {
+          "title": "寻找两个正序数组的中位数"
+        },
+        "ko": {
+          "title": "두 정렬 배열의 중앙값"
         }
       },
       "resources": {
@@ -3116,6 +3476,21 @@
       "translations": {
         "en": {
           "title": "Reorder List"
+        },
+        "ja": {
+          "title": "リストの並び替え"
+        },
+        "hi": {
+          "title": "लिस्ट को पुनः व्यवस्थित करें"
+        },
+        "es": {
+          "title": "Reordenar lista"
+        },
+        "zh": {
+          "title": "重排链表"
+        },
+        "ko": {
+          "title": "연결 리스트 재정렬"
         }
       },
       "resources": {
@@ -3173,6 +3548,21 @@
       "translations": {
         "en": {
           "title": "Remove Nth Node From End of List"
+        },
+        "ja": {
+          "title": "末尾からN番目のノード削除"
+        },
+        "hi": {
+          "title": "अंत से N-वां नोड हटाएं"
+        },
+        "es": {
+          "title": "Eliminar el n-ésimo nodo desde el final"
+        },
+        "zh": {
+          "title": "删除链表的倒数第 N 个结点"
+        },
+        "ko": {
+          "title": "끝에서 N번째 노드 제거"
         }
       },
       "resources": {
@@ -3229,6 +3619,21 @@
       "translations": {
         "en": {
           "title": "Copy List With Random Pointer"
+        },
+        "ja": {
+          "title": "ランダムポインタ付きリストの複製"
+        },
+        "hi": {
+          "title": "रैंडम पॉइंटर सहित लिस्ट की प्रतिलिपि"
+        },
+        "es": {
+          "title": "Copiar lista con puntero aleatorio"
+        },
+        "zh": {
+          "title": "随机链表的复制"
+        },
+        "ko": {
+          "title": "랜덤 포인터 리스트 복사"
         }
       },
       "resources": {
@@ -3285,6 +3690,21 @@
       "translations": {
         "en": {
           "title": "Add Two Numbers"
+        },
+        "ja": {
+          "title": "2つの数の加算"
+        },
+        "hi": {
+          "title": "दो संख्याओं को जोड़ें"
+        },
+        "es": {
+          "title": "Sumar dos números"
+        },
+        "zh": {
+          "title": "两数相加"
+        },
+        "ko": {
+          "title": "두 수의 덧셈"
         }
       },
       "resources": {
@@ -3345,6 +3765,21 @@
       "translations": {
         "en": {
           "title": "Linked List Cycle"
+        },
+        "ja": {
+          "title": "連結リストの閉路検出"
+        },
+        "hi": {
+          "title": "लिंक्ड लिस्ट चक्र"
+        },
+        "es": {
+          "title": "Ciclo en lista enlazada"
+        },
+        "zh": {
+          "title": "环形链表"
+        },
+        "ko": {
+          "title": "연결 리스트 순환"
         }
       },
       "resources": {
@@ -3403,6 +3838,21 @@
       "translations": {
         "en": {
           "title": "Find The Duplicate Number"
+        },
+        "ja": {
+          "title": "重複する数値の探索"
+        },
+        "hi": {
+          "title": "डुप्लिकेट संख्या खोजें"
+        },
+        "es": {
+          "title": "Encontrar el número duplicado"
+        },
+        "zh": {
+          "title": "寻找重复数"
+        },
+        "ko": {
+          "title": "중복 숫자 찾기"
         }
       },
       "resources": {
@@ -3460,6 +3910,21 @@
       "translations": {
         "en": {
           "title": "LRU Cache"
+        },
+        "ja": {
+          "title": "LRUキャッシュ"
+        },
+        "hi": {
+          "title": "LRU कैश"
+        },
+        "es": {
+          "title": "Caché LRU"
+        },
+        "zh": {
+          "title": "LRU 缓存"
+        },
+        "ko": {
+          "title": "LRU 캐시"
         }
       },
       "resources": {
@@ -3517,6 +3982,21 @@
       "translations": {
         "en": {
           "title": "Merge K Sorted Lists"
+        },
+        "ja": {
+          "title": "K個のソート済みリストのマージ"
+        },
+        "hi": {
+          "title": "K क्रमबद्ध सूचियों का विलय"
+        },
+        "es": {
+          "title": "Fusionar K listas ordenadas"
+        },
+        "zh": {
+          "title": "合并 K 个升序链表"
+        },
+        "ko": {
+          "title": "K개의 정렬된 리스트 병합"
         }
       },
       "resources": {
@@ -3573,6 +4053,21 @@
       "translations": {
         "en": {
           "title": "Reverse Nodes In K Group"
+        },
+        "ja": {
+          "title": "K個ごとのノード反転"
+        },
+        "hi": {
+          "title": "K-समूह में नोड्स उलटें"
+        },
+        "es": {
+          "title": "Invertir nodos en grupos de K"
+        },
+        "zh": {
+          "title": "K 个一组翻转链表"
+        },
+        "ko": {
+          "title": "K개 그룹으로 노드 뒤집기"
         }
       },
       "resources": {
@@ -3749,6 +4244,21 @@
       "translations": {
         "en": {
           "title": "Maximum Depth of Binary Tree"
+        },
+        "ja": {
+          "title": "二分木の最大深さ"
+        },
+        "hi": {
+          "title": "बाइनरी ट्री की अधिकतम गहराई"
+        },
+        "es": {
+          "title": "Profundidad máxima de árbol binario"
+        },
+        "zh": {
+          "title": "二叉树的最大深度"
+        },
+        "ko": {
+          "title": "이진 트리의 최대 깊이"
         }
       },
       "resources": {
@@ -3806,6 +4316,21 @@
       "translations": {
         "en": {
           "title": "Diameter of Binary Tree"
+        },
+        "ja": {
+          "title": "二分木の直径"
+        },
+        "hi": {
+          "title": "बाइनरी ट्री का व्यास"
+        },
+        "es": {
+          "title": "Diámetro de árbol binario"
+        },
+        "zh": {
+          "title": "二叉树的直径"
+        },
+        "ko": {
+          "title": "이진 트리의 지름"
         }
       },
       "resources": {
@@ -3863,6 +4388,21 @@
       "translations": {
         "en": {
           "title": "Balanced Binary Tree"
+        },
+        "ja": {
+          "title": "平衡二分木"
+        },
+        "hi": {
+          "title": "संतुलित बाइनरी ट्री"
+        },
+        "es": {
+          "title": "Árbol binario balanceado"
+        },
+        "zh": {
+          "title": "平衡二叉树"
+        },
+        "ko": {
+          "title": "균형 이진 트리"
         }
       },
       "resources": {
@@ -3921,6 +4461,21 @@
       "translations": {
         "en": {
           "title": "Same Tree"
+        },
+        "ja": {
+          "title": "同じ木"
+        },
+        "hi": {
+          "title": "समान ट्री"
+        },
+        "es": {
+          "title": "Mismo árbol"
+        },
+        "zh": {
+          "title": "相同的树"
+        },
+        "ko": {
+          "title": "같은 트리"
         }
       },
       "resources": {
@@ -3979,6 +4534,21 @@
       "translations": {
         "en": {
           "title": "Subtree of Another Tree"
+        },
+        "ja": {
+          "title": "別の木の部分木"
+        },
+        "hi": {
+          "title": "किसी अन्य ट्री का सबट्री"
+        },
+        "es": {
+          "title": "Subárbol de otro árbol"
+        },
+        "zh": {
+          "title": "另一棵树的子树"
+        },
+        "ko": {
+          "title": "다른 트리의 서브트리"
         }
       },
       "resources": {
@@ -4038,6 +4608,21 @@
       "translations": {
         "en": {
           "title": "Lowest Common Ancestor of a Binary Search Tree"
+        },
+        "ja": {
+          "title": "二分探索木の最小共通祖先"
+        },
+        "hi": {
+          "title": "BST का निम्नतम साझा पूर्वज"
+        },
+        "es": {
+          "title": "Ancestro común más bajo de un BST"
+        },
+        "zh": {
+          "title": "二叉搜索树的最近公共祖先"
+        },
+        "ko": {
+          "title": "이진 탐색 트리의 최소 공통 조상"
         }
       },
       "resources": {
@@ -4097,6 +4682,21 @@
       "translations": {
         "en": {
           "title": "Binary Tree Level Order Traversal"
+        },
+        "ja": {
+          "title": "二分木のレベル順走査"
+        },
+        "hi": {
+          "title": "बाइनरी ट्री लेवल ऑर्डर ट्रैवर्सल"
+        },
+        "es": {
+          "title": "Recorrido por niveles de árbol binario"
+        },
+        "zh": {
+          "title": "二叉树的层序遍历"
+        },
+        "ko": {
+          "title": "이진 트리 레벨 순회"
         }
       },
       "resources": {
@@ -4154,6 +4754,21 @@
       "translations": {
         "en": {
           "title": "Binary Tree Right Side View"
+        },
+        "ja": {
+          "title": "二分木の右側面ビュー"
+        },
+        "hi": {
+          "title": "बाइनरी ट्री का दायाँ दृश्य"
+        },
+        "es": {
+          "title": "Vista derecha de árbol binario"
+        },
+        "zh": {
+          "title": "二叉树的右视图"
+        },
+        "ko": {
+          "title": "이진 트리 오른쪽 뷰"
         }
       },
       "resources": {
@@ -4210,6 +4825,21 @@
       "translations": {
         "en": {
           "title": "Count Good Nodes In Binary Tree"
+        },
+        "ja": {
+          "title": "二分木の良いノード数"
+        },
+        "hi": {
+          "title": "बाइनरी ट्री में अच्छे नोड्स गिनें"
+        },
+        "es": {
+          "title": "Contar nodos buenos en árbol binario"
+        },
+        "zh": {
+          "title": "统计二叉树中好节点的数目"
+        },
+        "ko": {
+          "title": "이진 트리의 좋은 노드 개수"
         }
       },
       "resources": {
@@ -4267,6 +4897,21 @@
       "translations": {
         "en": {
           "title": "Validate Binary Search Tree"
+        },
+        "ja": {
+          "title": "二分探索木の検証"
+        },
+        "hi": {
+          "title": "बाइनरी सर्च ट्री सत्यापित करें"
+        },
+        "es": {
+          "title": "Validar árbol binario de búsqueda"
+        },
+        "zh": {
+          "title": "验证二叉搜索树"
+        },
+        "ko": {
+          "title": "이진 탐색 트리 검증"
         }
       },
       "resources": {
@@ -4324,6 +4969,21 @@
       "translations": {
         "en": {
           "title": "Kth Smallest Element In a Bst"
+        },
+        "ja": {
+          "title": "BSTのK番目に小さい要素"
+        },
+        "hi": {
+          "title": "BST में K-वां सबसे छोटा तत्व"
+        },
+        "es": {
+          "title": "K-ésimo elemento más pequeño en BST"
+        },
+        "zh": {
+          "title": "二叉搜索树中第 K 小的元素"
+        },
+        "ko": {
+          "title": "BST에서 K번째 작은 요소"
         }
       },
       "resources": {
@@ -4382,6 +5042,21 @@
       "translations": {
         "en": {
           "title": "Construct Binary Tree From Preorder And Inorder Traversal"
+        },
+        "ja": {
+          "title": "先行順と中間順から二分木を構築"
+        },
+        "hi": {
+          "title": "प्रीऑर्डर और इनऑर्डर से बाइनरी ट्री बनाएं"
+        },
+        "es": {
+          "title": "Construir árbol binario desde preorden e inorden"
+        },
+        "zh": {
+          "title": "从前序与中序遍历序列构造二叉树"
+        },
+        "ko": {
+          "title": "전위·중위 순회로 이진 트리 구성"
         }
       },
       "resources": {
@@ -4438,6 +5113,21 @@
       "translations": {
         "en": {
           "title": "Binary Tree Maximum Path Sum"
+        },
+        "ja": {
+          "title": "二分木の最大パス和"
+        },
+        "hi": {
+          "title": "बाइनरी ट्री का अधिकतम पाथ योग"
+        },
+        "es": {
+          "title": "Suma máxima de camino en árbol binario"
+        },
+        "zh": {
+          "title": "二叉树中的最大路径和"
+        },
+        "ko": {
+          "title": "이진 트리 최대 경로 합"
         }
       },
       "resources": {
@@ -4495,6 +5185,21 @@
       "translations": {
         "en": {
           "title": "Serialize And Deserialize Binary Tree"
+        },
+        "ja": {
+          "title": "二分木のシリアライズとデシリアライズ"
+        },
+        "hi": {
+          "title": "बाइनरी ट्री सीरियलाइज़ और डीसीरियलाइज़"
+        },
+        "es": {
+          "title": "Serializar y deserializar árbol binario"
+        },
+        "zh": {
+          "title": "二叉树的序列化与反序列化"
+        },
+        "ko": {
+          "title": "이진 트리 직렬화 및 역직렬화"
         }
       },
       "resources": {
@@ -4551,6 +5256,21 @@
       "translations": {
         "en": {
           "title": "Implement Trie Prefix Tree"
+        },
+        "ja": {
+          "title": "Trie（プレフィックス木）の実装"
+        },
+        "hi": {
+          "title": "ट्राई (प्रिफिक्स ट्री) लागू करें"
+        },
+        "es": {
+          "title": "Implementar Trie (árbol de prefijos)"
+        },
+        "zh": {
+          "title": "实现 Trie (前缀树)"
+        },
+        "ko": {
+          "title": "트라이(접두사 트리) 구현"
         }
       },
       "resources": {
@@ -4610,6 +5330,21 @@
       "translations": {
         "en": {
           "title": "Design Add And Search Words Data Structure"
+        },
+        "ja": {
+          "title": "単語の追加と検索データ構造"
+        },
+        "hi": {
+          "title": "शब्द जोड़ने और खोजने की संरचना"
+        },
+        "es": {
+          "title": "Diseño de estructura para agregar y buscar palabras"
+        },
+        "zh": {
+          "title": "添加与搜索单词 - 数据结构设计"
+        },
+        "ko": {
+          "title": "단어 추가 및 검색 자료구조 설계"
         }
       },
       "resources": {
@@ -4669,6 +5404,21 @@
       "translations": {
         "en": {
           "title": "Word Search II"
+        },
+        "ja": {
+          "title": "単語探索 II"
+        },
+        "hi": {
+          "title": "शब्द खोज II"
+        },
+        "es": {
+          "title": "Búsqueda de palabras II"
+        },
+        "zh": {
+          "title": "单词搜索 II"
+        },
+        "ko": {
+          "title": "단어 찾기 II"
         }
       },
       "resources": {
@@ -4725,6 +5475,21 @@
       "translations": {
         "en": {
           "title": "Kth Largest Element In a Stream"
+        },
+        "ja": {
+          "title": "ストリームのK番目に大きい要素"
+        },
+        "hi": {
+          "title": "स्ट्रीम में K-वां सबसे बड़ा तत्व"
+        },
+        "es": {
+          "title": "K-ésimo elemento más grande en un flujo"
+        },
+        "zh": {
+          "title": "数据流中的第 K 大元素"
+        },
+        "ko": {
+          "title": "스트림에서 K번째 큰 요소"
         }
       },
       "resources": {
@@ -4782,6 +5547,21 @@
       "translations": {
         "en": {
           "title": "Last Stone Weight"
+        },
+        "ja": {
+          "title": "最後の石の重さ"
+        },
+        "hi": {
+          "title": "अंतिम पत्थर का भार"
+        },
+        "es": {
+          "title": "Peso de la última piedra"
+        },
+        "zh": {
+          "title": "最后一块石头的重量"
+        },
+        "ko": {
+          "title": "마지막 돌의 무게"
         }
       },
       "resources": {
@@ -4839,6 +5619,21 @@
       "translations": {
         "en": {
           "title": "K Closest Points to Origin"
+        },
+        "ja": {
+          "title": "原点に最も近いK個の点"
+        },
+        "hi": {
+          "title": "मूल बिंदु के सबसे निकट K बिंदु"
+        },
+        "es": {
+          "title": "K puntos más cercanos al origen"
+        },
+        "zh": {
+          "title": "最接近原点的 K 个点"
+        },
+        "ko": {
+          "title": "원점에서 가장 가까운 K개의 점"
         }
       },
       "resources": {
@@ -4894,6 +5689,21 @@
       "translations": {
         "en": {
           "title": "Kth Largest Element In An Array"
+        },
+        "ja": {
+          "title": "配列のK番目に大きい要素"
+        },
+        "hi": {
+          "title": "एरे में K-वां सबसे बड़ा तत्व"
+        },
+        "es": {
+          "title": "K-ésimo elemento más grande en arreglo"
+        },
+        "zh": {
+          "title": "数组中的第 K 个最大元素"
+        },
+        "ko": {
+          "title": "배열에서 K번째 큰 요소"
         }
       },
       "resources": {
@@ -4951,6 +5761,21 @@
       "translations": {
         "en": {
           "title": "Task Scheduler"
+        },
+        "ja": {
+          "title": "タスクスケジューラ"
+        },
+        "hi": {
+          "title": "टास्क शेड्यूलर"
+        },
+        "es": {
+          "title": "Planificador de tareas"
+        },
+        "zh": {
+          "title": "任务调度器"
+        },
+        "ko": {
+          "title": "작업 스케줄러"
         }
       },
       "resources": {
@@ -5006,6 +5831,21 @@
       "translations": {
         "en": {
           "title": "Design Twitter"
+        },
+        "ja": {
+          "title": "Twitterの設計"
+        },
+        "hi": {
+          "title": "ट्विटर डिज़ाइन करें"
+        },
+        "es": {
+          "title": "Diseñar Twitter"
+        },
+        "zh": {
+          "title": "设计推特"
+        },
+        "ko": {
+          "title": "트위터 설계"
         }
       },
       "resources": {
@@ -5060,6 +5900,21 @@
       "translations": {
         "en": {
           "title": "Find Median From Data Stream"
+        },
+        "ja": {
+          "title": "データストリームの中央値"
+        },
+        "hi": {
+          "title": "डेटा स्ट्रीम से माध्यिका खोजें"
+        },
+        "es": {
+          "title": "Mediana de un flujo de datos"
+        },
+        "zh": {
+          "title": "数据流的中位数"
+        },
+        "ko": {
+          "title": "데이터 스트림의 중앙값 찾기"
         }
       },
       "resources": {
@@ -5114,6 +5969,21 @@
       "translations": {
         "en": {
           "title": "Subsets"
+        },
+        "ja": {
+          "title": "部分集合"
+        },
+        "hi": {
+          "title": "उपसमुच्चय"
+        },
+        "es": {
+          "title": "Subconjuntos"
+        },
+        "zh": {
+          "title": "子集"
+        },
+        "ko": {
+          "title": "부분집합"
         }
       },
       "resources": {
@@ -5172,6 +6042,21 @@
       "translations": {
         "en": {
           "title": "Combination Sum"
+        },
+        "ja": {
+          "title": "組み合わせの和"
+        },
+        "hi": {
+          "title": "संयोजन योग"
+        },
+        "es": {
+          "title": "Suma de combinaciones"
+        },
+        "zh": {
+          "title": "组合总和"
+        },
+        "ko": {
+          "title": "조합의 합"
         }
       },
       "resources": {
@@ -5229,6 +6114,21 @@
       "translations": {
         "en": {
           "title": "Permutations"
+        },
+        "ja": {
+          "title": "順列"
+        },
+        "hi": {
+          "title": "क्रमचय"
+        },
+        "es": {
+          "title": "Permutaciones"
+        },
+        "zh": {
+          "title": "全排列"
+        },
+        "ko": {
+          "title": "순열"
         }
       },
       "resources": {
@@ -5286,6 +6186,21 @@
       "translations": {
         "en": {
           "title": "Subsets II"
+        },
+        "ja": {
+          "title": "部分集合 II"
+        },
+        "hi": {
+          "title": "उपसमुच्चय II"
+        },
+        "es": {
+          "title": "Subconjuntos II"
+        },
+        "zh": {
+          "title": "子集 II"
+        },
+        "ko": {
+          "title": "부분집합 II"
         }
       },
       "resources": {
@@ -5343,6 +6258,21 @@
       "translations": {
         "en": {
           "title": "Combination Sum II"
+        },
+        "ja": {
+          "title": "組み合わせの和 II"
+        },
+        "hi": {
+          "title": "संयोजन योग II"
+        },
+        "es": {
+          "title": "Suma de combinaciones II"
+        },
+        "zh": {
+          "title": "组合总和 II"
+        },
+        "ko": {
+          "title": "조합의 합 II"
         }
       },
       "resources": {
@@ -5400,6 +6330,21 @@
       "translations": {
         "en": {
           "title": "Word Search"
+        },
+        "ja": {
+          "title": "単語探索"
+        },
+        "hi": {
+          "title": "शब्द खोज"
+        },
+        "es": {
+          "title": "Búsqueda de palabras"
+        },
+        "zh": {
+          "title": "单词搜索"
+        },
+        "ko": {
+          "title": "단어 찾기"
         }
       },
       "resources": {
@@ -5457,6 +6402,21 @@
       "translations": {
         "en": {
           "title": "Palindrome Partitioning"
+        },
+        "ja": {
+          "title": "回文分割"
+        },
+        "hi": {
+          "title": "पैलिंड्रोम विभाजन"
+        },
+        "es": {
+          "title": "Partición en palíndromos"
+        },
+        "zh": {
+          "title": "分割回文串"
+        },
+        "ko": {
+          "title": "회문 분할"
         }
       },
       "resources": {
@@ -5513,6 +6473,21 @@
       "translations": {
         "en": {
           "title": "Letter Combinations of a Phone Number"
+        },
+        "ja": {
+          "title": "電話番号の文字組み合わせ"
+        },
+        "hi": {
+          "title": "फ़ोन नंबर के अक्षर संयोजन"
+        },
+        "es": {
+          "title": "Combinaciones de letras de un número telefónico"
+        },
+        "zh": {
+          "title": "电话号码的字母组合"
+        },
+        "ko": {
+          "title": "전화번호 문자 조합"
         }
       },
       "resources": {
@@ -5569,6 +6544,21 @@
       "translations": {
         "en": {
           "title": "N Queens"
+        },
+        "ja": {
+          "title": "Nクイーン問題"
+        },
+        "hi": {
+          "title": "N-क्वींस समस्या"
+        },
+        "es": {
+          "title": "N reinas"
+        },
+        "zh": {
+          "title": "N 皇后"
+        },
+        "ko": {
+          "title": "N-퀸"
         }
       },
       "resources": {
@@ -5743,6 +6733,21 @@
       "translations": {
         "en": {
           "title": "Clone Graph"
+        },
+        "ja": {
+          "title": "グラフの複製"
+        },
+        "hi": {
+          "title": "ग्राफ की प्रतिलिपि"
+        },
+        "es": {
+          "title": "Clonar grafo"
+        },
+        "zh": {
+          "title": "克隆图"
+        },
+        "ko": {
+          "title": "그래프 복제"
         }
       },
       "resources": {
@@ -5799,6 +6804,21 @@
       "translations": {
         "en": {
           "title": "Max Area of Island"
+        },
+        "ja": {
+          "title": "島の最大面積"
+        },
+        "hi": {
+          "title": "द्वीप का अधिकतम क्षेत्रफल"
+        },
+        "es": {
+          "title": "Área máxima de isla"
+        },
+        "zh": {
+          "title": "岛屿的最大面积"
+        },
+        "ko": {
+          "title": "섬의 최대 면적"
         }
       },
       "resources": {
@@ -5856,6 +6876,21 @@
       "translations": {
         "en": {
           "title": "Pacific Atlantic Water Flow"
+        },
+        "ja": {
+          "title": "太平洋・大西洋への水流"
+        },
+        "hi": {
+          "title": "प्रशांत अटलांटिक जल प्रवाह"
+        },
+        "es": {
+          "title": "Flujo de agua Pacífico-Atlántico"
+        },
+        "zh": {
+          "title": "太平洋大西洋水流问题"
+        },
+        "ko": {
+          "title": "태평양 대서양 물 흐름"
         }
       },
       "resources": {
@@ -5912,6 +6947,21 @@
       "translations": {
         "en": {
           "title": "Surrounded Regions"
+        },
+        "ja": {
+          "title": "囲まれた領域"
+        },
+        "hi": {
+          "title": "घिरे हुए क्षेत्र"
+        },
+        "es": {
+          "title": "Regiones rodeadas"
+        },
+        "zh": {
+          "title": "被围绕的区域"
+        },
+        "ko": {
+          "title": "둘러싸인 영역"
         }
       },
       "resources": {
@@ -5968,6 +7018,21 @@
       "translations": {
         "en": {
           "title": "Rotting Oranges"
+        },
+        "ja": {
+          "title": "腐るオレンジ"
+        },
+        "hi": {
+          "title": "सड़ते संतरे"
+        },
+        "es": {
+          "title": "Naranjas podridas"
+        },
+        "zh": {
+          "title": "腐烂的橘子"
+        },
+        "ko": {
+          "title": "썩어가는 오렌지"
         }
       },
       "resources": {
@@ -6023,6 +7088,21 @@
       "translations": {
         "en": {
           "title": "Walls And Gates"
+        },
+        "ja": {
+          "title": "壁とゲート"
+        },
+        "hi": {
+          "title": "दीवारें और द्वार"
+        },
+        "es": {
+          "title": "Paredes y puertas"
+        },
+        "zh": {
+          "title": "墙与门"
+        },
+        "ko": {
+          "title": "벽과 문"
         }
       },
       "resources": {
@@ -6076,6 +7156,21 @@
       "translations": {
         "en": {
           "title": "Course Schedule"
+        },
+        "ja": {
+          "title": "コーススケジュール"
+        },
+        "hi": {
+          "title": "कोर्स शेड्यूल"
+        },
+        "es": {
+          "title": "Horario de cursos"
+        },
+        "zh": {
+          "title": "课程表"
+        },
+        "ko": {
+          "title": "수강 신청"
         }
       },
       "resources": {
@@ -6132,6 +7227,21 @@
       "translations": {
         "en": {
           "title": "Course Schedule II"
+        },
+        "ja": {
+          "title": "コーススケジュール II"
+        },
+        "hi": {
+          "title": "कोर्स शेड्यूल II"
+        },
+        "es": {
+          "title": "Horario de cursos II"
+        },
+        "zh": {
+          "title": "课程表 II"
+        },
+        "ko": {
+          "title": "수강 신청 II"
         }
       },
       "resources": {
@@ -6186,6 +7296,21 @@
       "translations": {
         "en": {
           "title": "Redundant Connection"
+        },
+        "ja": {
+          "title": "冗長な接続"
+        },
+        "hi": {
+          "title": "अनावश्यक कनेक्शन"
+        },
+        "es": {
+          "title": "Conexión redundante"
+        },
+        "zh": {
+          "title": "冗余连接"
+        },
+        "ko": {
+          "title": "중복 연결"
         }
       },
       "resources": {
@@ -6243,6 +7368,21 @@
       "translations": {
         "en": {
           "title": "Number of Connected Components In An Undirected Graph"
+        },
+        "ja": {
+          "title": "無向グラフの連結成分数"
+        },
+        "hi": {
+          "title": "अदिश ग्राफ में जुड़े घटकों की संख्या"
+        },
+        "es": {
+          "title": "Número de componentes conexas en grafo no dirigido"
+        },
+        "zh": {
+          "title": "无向图中连通分量的数目"
+        },
+        "ko": {
+          "title": "무방향 그래프의 연결 요소 개수"
         }
       },
       "resources": {
@@ -6297,6 +7437,21 @@
       "translations": {
         "en": {
           "title": "Graph Valid Tree"
+        },
+        "ja": {
+          "title": "有効な木グラフ"
+        },
+        "hi": {
+          "title": "मान्य ट्री ग्राफ"
+        },
+        "es": {
+          "title": "Grafo árbol válido"
+        },
+        "zh": {
+          "title": "以图判树"
+        },
+        "ko": {
+          "title": "유효한 트리 그래프"
         }
       },
       "resources": {
@@ -6350,6 +7505,21 @@
       "translations": {
         "en": {
           "title": "Word Ladder"
+        },
+        "ja": {
+          "title": "ワードラダー"
+        },
+        "hi": {
+          "title": "वर्ड लैडर"
+        },
+        "es": {
+          "title": "Escalera de palabras"
+        },
+        "zh": {
+          "title": "单词接龙"
+        },
+        "ko": {
+          "title": "단어 사다리"
         }
       },
       "resources": {
@@ -6405,6 +7575,21 @@
       "translations": {
         "en": {
           "title": "Reconstruct Itinerary"
+        },
+        "ja": {
+          "title": "旅程の再構築"
+        },
+        "hi": {
+          "title": "यात्रा कार्यक्रम पुनर्निर्माण"
+        },
+        "es": {
+          "title": "Reconstruir itinerario"
+        },
+        "zh": {
+          "title": "重新安排行程"
+        },
+        "ko": {
+          "title": "여행 일정 재구성"
         }
       },
       "resources": {
@@ -6460,6 +7645,21 @@
       "translations": {
         "en": {
           "title": "Min Cost to Connect All Points"
+        },
+        "ja": {
+          "title": "全点を結ぶ最小コスト"
+        },
+        "hi": {
+          "title": "सभी बिंदुओं को जोड़ने की न्यूनतम लागत"
+        },
+        "es": {
+          "title": "Costo mínimo para conectar todos los puntos"
+        },
+        "zh": {
+          "title": "连接所有点的最小费用"
+        },
+        "ko": {
+          "title": "모든 점을 연결하는 최소 비용"
         }
       },
       "resources": {
@@ -6515,6 +7715,21 @@
       "translations": {
         "en": {
           "title": "Network Delay Time"
+        },
+        "ja": {
+          "title": "ネットワーク遅延時間"
+        },
+        "hi": {
+          "title": "नेटवर्क विलंब समय"
+        },
+        "es": {
+          "title": "Tiempo de retardo de red"
+        },
+        "zh": {
+          "title": "网络延迟时间"
+        },
+        "ko": {
+          "title": "네트워크 지연 시간"
         }
       },
       "resources": {
@@ -6569,6 +7784,21 @@
       "translations": {
         "en": {
           "title": "Swim In Rising Water"
+        },
+        "ja": {
+          "title": "水位上昇中の水泳"
+        },
+        "hi": {
+          "title": "बढ़ते पानी में तैरना"
+        },
+        "es": {
+          "title": "Nadar en agua creciente"
+        },
+        "zh": {
+          "title": "水位上升的泳池中游泳"
+        },
+        "ko": {
+          "title": "차오르는 물에서 수영하기"
         }
       },
       "resources": {
@@ -6625,6 +7855,21 @@
       "translations": {
         "en": {
           "title": "Alien Dictionary"
+        },
+        "ja": {
+          "title": "エイリアン辞書"
+        },
+        "hi": {
+          "title": "एलियन शब्दकोश"
+        },
+        "es": {
+          "title": "Diccionario alienígena"
+        },
+        "zh": {
+          "title": "火星词典"
+        },
+        "ko": {
+          "title": "외계어 사전"
         }
       },
       "resources": {
@@ -6676,6 +7921,21 @@
       "translations": {
         "en": {
           "title": "Cheapest Flights Within K Stops"
+        },
+        "ja": {
+          "title": "K回以内の乗り継ぎ最安フライト"
+        },
+        "hi": {
+          "title": "K स्टॉप के भीतर सबसे सस्ती उड़ान"
+        },
+        "es": {
+          "title": "Vuelos más baratos con K escalas"
+        },
+        "zh": {
+          "title": "K 站中转内最便宜的航班"
+        },
+        "ko": {
+          "title": "K번 경유 내 최저가 항공편"
         }
       },
       "resources": {
@@ -6849,6 +8109,21 @@
       "translations": {
         "en": {
           "title": "Min Cost Climbing Stairs"
+        },
+        "ja": {
+          "title": "最小コストで階段を上る"
+        },
+        "hi": {
+          "title": "सीढ़ियाँ चढ़ने की न्यूनतम लागत"
+        },
+        "es": {
+          "title": "Costo mínimo para subir escaleras"
+        },
+        "zh": {
+          "title": "使用最小花费爬楼梯"
+        },
+        "ko": {
+          "title": "최소 비용 계단 오르기"
         }
       },
       "resources": {
@@ -6909,6 +8184,21 @@
       "translations": {
         "en": {
           "title": "House Robber"
+        },
+        "ja": {
+          "title": "家泥棒"
+        },
+        "hi": {
+          "title": "हाउस रॉबर"
+        },
+        "es": {
+          "title": "Ladrón de casas"
+        },
+        "zh": {
+          "title": "打家劫舍"
+        },
+        "ko": {
+          "title": "집 도둑"
         }
       },
       "resources": {
@@ -6968,6 +8258,21 @@
       "translations": {
         "en": {
           "title": "House Robber II"
+        },
+        "ja": {
+          "title": "家泥棒 II"
+        },
+        "hi": {
+          "title": "हाउस रॉबर II"
+        },
+        "es": {
+          "title": "Ladrón de casas II"
+        },
+        "zh": {
+          "title": "打家劫舍 II"
+        },
+        "ko": {
+          "title": "집 도둑 II"
         }
       },
       "resources": {
@@ -7027,6 +8332,21 @@
       "translations": {
         "en": {
           "title": "Longest Palindromic Substring"
+        },
+        "ja": {
+          "title": "最長回文部分文字列"
+        },
+        "hi": {
+          "title": "सबसे लंबी पैलिंड्रोमिक सबस्ट्रिंग"
+        },
+        "es": {
+          "title": "Subcadena palindrómica más larga"
+        },
+        "zh": {
+          "title": "最长回文子串"
+        },
+        "ko": {
+          "title": "가장 긴 회문 부분 문자열"
         }
       },
       "resources": {
@@ -7084,6 +8404,21 @@
       "translations": {
         "en": {
           "title": "Palindromic Substrings"
+        },
+        "ja": {
+          "title": "回文部分文字列の個数"
+        },
+        "hi": {
+          "title": "पैलिंड्रोमिक सबस्ट्रिंग्स"
+        },
+        "es": {
+          "title": "Subcadenas palindrómicas"
+        },
+        "zh": {
+          "title": "回文子串"
+        },
+        "ko": {
+          "title": "회문 부분 문자열"
         }
       },
       "resources": {
@@ -7141,6 +8476,21 @@
       "translations": {
         "en": {
           "title": "Decode Ways"
+        },
+        "ja": {
+          "title": "デコード方法の数"
+        },
+        "hi": {
+          "title": "डिकोड करने के तरीके"
+        },
+        "es": {
+          "title": "Formas de decodificar"
+        },
+        "zh": {
+          "title": "解码方法"
+        },
+        "ko": {
+          "title": "디코딩 방법 수"
         }
       },
       "resources": {
@@ -7199,6 +8549,21 @@
       "translations": {
         "en": {
           "title": "Coin Change"
+        },
+        "ja": {
+          "title": "コイン両替"
+        },
+        "hi": {
+          "title": "सिक्का परिवर्तन"
+        },
+        "es": {
+          "title": "Cambio de monedas"
+        },
+        "zh": {
+          "title": "零钱兑换"
+        },
+        "ko": {
+          "title": "동전 교환"
         }
       },
       "resources": {
@@ -7257,6 +8622,21 @@
       "translations": {
         "en": {
           "title": "Maximum Product Subarray"
+        },
+        "ja": {
+          "title": "最大積部分配列"
+        },
+        "hi": {
+          "title": "अधिकतम गुणनफल सबएरे"
+        },
+        "es": {
+          "title": "Subarreglo de producto máximo"
+        },
+        "zh": {
+          "title": "乘积最大子数组"
+        },
+        "ko": {
+          "title": "최대 곱 부분 배열"
         }
       },
       "resources": {
@@ -7315,6 +8695,21 @@
       "translations": {
         "en": {
           "title": "Word Break"
+        },
+        "ja": {
+          "title": "単語分割"
+        },
+        "hi": {
+          "title": "शब्द विभाजन"
+        },
+        "es": {
+          "title": "División de palabras"
+        },
+        "zh": {
+          "title": "单词拆分"
+        },
+        "ko": {
+          "title": "단어 분할"
         }
       },
       "resources": {
@@ -7370,6 +8765,21 @@
       "translations": {
         "en": {
           "title": "Longest Increasing Subsequence"
+        },
+        "ja": {
+          "title": "最長増加部分列 (LIS)"
+        },
+        "hi": {
+          "title": "सबसे लंबा बढ़ता उप-अनुक्रम"
+        },
+        "es": {
+          "title": "Subsecuencia creciente más larga"
+        },
+        "zh": {
+          "title": "最长递增子序列"
+        },
+        "ko": {
+          "title": "가장 긴 증가 부분 수열"
         }
       },
       "resources": {
@@ -7426,6 +8836,21 @@
       "translations": {
         "en": {
           "title": "Partition Equal Subset Sum"
+        },
+        "ja": {
+          "title": "等和部分集合分割"
+        },
+        "hi": {
+          "title": "समान उपसमुच्चय योग विभाजन"
+        },
+        "es": {
+          "title": "Partición de igual suma"
+        },
+        "zh": {
+          "title": "分割等和子集"
+        },
+        "ko": {
+          "title": "동일 부분집합 합 분할"
         }
       },
       "resources": {
@@ -7481,6 +8906,21 @@
       "translations": {
         "en": {
           "title": "Unique Paths"
+        },
+        "ja": {
+          "title": "ユニークパス"
+        },
+        "hi": {
+          "title": "अद्वितीय पथ"
+        },
+        "es": {
+          "title": "Caminos únicos"
+        },
+        "zh": {
+          "title": "不同路径"
+        },
+        "ko": {
+          "title": "고유 경로"
         }
       },
       "resources": {
@@ -7538,6 +8978,21 @@
       "translations": {
         "en": {
           "title": "Longest Common Subsequence"
+        },
+        "ja": {
+          "title": "最長共通部分列 (LCS)"
+        },
+        "hi": {
+          "title": "सबसे लंबा सामान्य उप-अनुक्रम"
+        },
+        "es": {
+          "title": "Subsecuencia común más larga"
+        },
+        "zh": {
+          "title": "最长公共子序列"
+        },
+        "ko": {
+          "title": "가장 긴 공통 부분 수열"
         }
       },
       "resources": {
@@ -7595,6 +9050,21 @@
       "translations": {
         "en": {
           "title": "Best Time to Buy And Sell Stock With Cooldown"
+        },
+        "ja": {
+          "title": "クールダウン付き株売買の最大利益"
+        },
+        "hi": {
+          "title": "कूलडाउन के साथ स्टॉक खरीद-बिक्री"
+        },
+        "es": {
+          "title": "Compra y venta de acciones con espera"
+        },
+        "zh": {
+          "title": "买卖股票的最佳时机含冷冻期"
+        },
+        "ko": {
+          "title": "쿨다운이 있는 주식 매매"
         }
       },
       "resources": {
@@ -7651,6 +9121,21 @@
       "translations": {
         "en": {
           "title": "Coin Change II"
+        },
+        "ja": {
+          "title": "コイン両替 II"
+        },
+        "hi": {
+          "title": "सिक्का परिवर्तन II"
+        },
+        "es": {
+          "title": "Cambio de monedas II"
+        },
+        "zh": {
+          "title": "零钱兑换 II"
+        },
+        "ko": {
+          "title": "동전 교환 II"
         }
       },
       "resources": {
@@ -7707,6 +9192,21 @@
       "translations": {
         "en": {
           "title": "Target Sum"
+        },
+        "ja": {
+          "title": "ターゲット和"
+        },
+        "hi": {
+          "title": "लक्ष्य योग"
+        },
+        "es": {
+          "title": "Suma objetivo"
+        },
+        "zh": {
+          "title": "目标和"
+        },
+        "ko": {
+          "title": "타겟 넘버"
         }
       },
       "resources": {
@@ -7762,6 +9262,21 @@
       "translations": {
         "en": {
           "title": "Interleaving String"
+        },
+        "ja": {
+          "title": "インターリーブ文字列"
+        },
+        "hi": {
+          "title": "इंटरलीविंग स्ट्रिंग"
+        },
+        "es": {
+          "title": "Cadena intercalada"
+        },
+        "zh": {
+          "title": "交错字符串"
+        },
+        "ko": {
+          "title": "인터리빙 문자열"
         }
       },
       "resources": {
@@ -7818,6 +9333,21 @@
       "translations": {
         "en": {
           "title": "Longest Increasing Path In a Matrix"
+        },
+        "ja": {
+          "title": "行列内の最長増加パス"
+        },
+        "hi": {
+          "title": "मैट्रिक्स में सबसे लंबा बढ़ता पथ"
+        },
+        "es": {
+          "title": "Camino creciente más largo en matriz"
+        },
+        "zh": {
+          "title": "矩阵中的最长递增路径"
+        },
+        "ko": {
+          "title": "행렬에서 가장 긴 증가 경로"
         }
       },
       "resources": {
@@ -7872,6 +9402,21 @@
       "translations": {
         "en": {
           "title": "Distinct Subsequences"
+        },
+        "ja": {
+          "title": "異なる部分列"
+        },
+        "hi": {
+          "title": "विशिष्ट उप-अनुक्रम"
+        },
+        "es": {
+          "title": "Subsecuencias distintas"
+        },
+        "zh": {
+          "title": "不同的子序列"
+        },
+        "ko": {
+          "title": "서로 다른 부분 수열"
         }
       },
       "resources": {
@@ -7926,6 +9471,21 @@
       "translations": {
         "en": {
           "title": "Edit Distance"
+        },
+        "ja": {
+          "title": "編集距離"
+        },
+        "hi": {
+          "title": "संपादन दूरी"
+        },
+        "es": {
+          "title": "Distancia de edición"
+        },
+        "zh": {
+          "title": "编辑距离"
+        },
+        "ko": {
+          "title": "편집 거리"
         }
       },
       "resources": {
@@ -7982,6 +9542,21 @@
       "translations": {
         "en": {
           "title": "Burst Balloons"
+        },
+        "ja": {
+          "title": "風船割り"
+        },
+        "hi": {
+          "title": "गुब्बारे फोड़ना"
+        },
+        "es": {
+          "title": "Reventar globos"
+        },
+        "zh": {
+          "title": "戳气球"
+        },
+        "ko": {
+          "title": "풍선 터뜨리기"
         }
       },
       "resources": {
@@ -8036,6 +9611,21 @@
       "translations": {
         "en": {
           "title": "Regular Expression Matching"
+        },
+        "ja": {
+          "title": "正規表現マッチング"
+        },
+        "hi": {
+          "title": "रेगुलर एक्सप्रेशन मिलान"
+        },
+        "es": {
+          "title": "Coincidencia de expresiones regulares"
+        },
+        "zh": {
+          "title": "正则表达式匹配"
+        },
+        "ko": {
+          "title": "정규 표현식 매칭"
         }
       },
       "resources": {
@@ -8092,6 +9682,21 @@
       "translations": {
         "en": {
           "title": "Maximum Subarray"
+        },
+        "ja": {
+          "title": "最大部分配列和"
+        },
+        "hi": {
+          "title": "अधिकतम सबएरे योग"
+        },
+        "es": {
+          "title": "Subarreglo máximo"
+        },
+        "zh": {
+          "title": "最大子数组和"
+        },
+        "ko": {
+          "title": "최대 부분 배열 합"
         }
       },
       "resources": {
@@ -8150,6 +9755,21 @@
       "translations": {
         "en": {
           "title": "Jump Game"
+        },
+        "ja": {
+          "title": "ジャンプゲーム"
+        },
+        "hi": {
+          "title": "जंप गेम"
+        },
+        "es": {
+          "title": "Juego de saltos"
+        },
+        "zh": {
+          "title": "跳跃游戏"
+        },
+        "ko": {
+          "title": "점프 게임"
         }
       },
       "resources": {
@@ -8206,6 +9826,21 @@
       "translations": {
         "en": {
           "title": "Jump Game II"
+        },
+        "ja": {
+          "title": "ジャンプゲーム II"
+        },
+        "hi": {
+          "title": "जंप गेम II"
+        },
+        "es": {
+          "title": "Juego de saltos II"
+        },
+        "zh": {
+          "title": "跳跃游戏 II"
+        },
+        "ko": {
+          "title": "점프 게임 II"
         }
       },
       "resources": {
@@ -8263,6 +9898,21 @@
       "translations": {
         "en": {
           "title": "Gas Station"
+        },
+        "ja": {
+          "title": "ガソリンスタンド"
+        },
+        "hi": {
+          "title": "गैस स्टेशन"
+        },
+        "es": {
+          "title": "Gasolinera"
+        },
+        "zh": {
+          "title": "加油站"
+        },
+        "ko": {
+          "title": "주유소"
         }
       },
       "resources": {
@@ -8319,6 +9969,21 @@
       "translations": {
         "en": {
           "title": "Hand of Straights"
+        },
+        "ja": {
+          "title": "ストレートの手札"
+        },
+        "hi": {
+          "title": "स्ट्रेट्स का हाथ"
+        },
+        "es": {
+          "title": "Mano de escaleras"
+        },
+        "zh": {
+          "title": "一手顺子"
+        },
+        "ko": {
+          "title": "스트레이트 핸드"
         }
       },
       "resources": {
@@ -8375,6 +10040,21 @@
       "translations": {
         "en": {
           "title": "Merge Triplets to Form Target Triplet"
+        },
+        "ja": {
+          "title": "3つ組のマージで目標値作成"
+        },
+        "hi": {
+          "title": "लक्ष्य त्रिक बनाने के लिए त्रिक विलय"
+        },
+        "es": {
+          "title": "Fusionar tripletas para objetivo"
+        },
+        "zh": {
+          "title": "合并若干三元组以形成目标三元组"
+        },
+        "ko": {
+          "title": "목표 트리플렛 병합"
         }
       },
       "resources": {
@@ -8430,6 +10110,21 @@
       "translations": {
         "en": {
           "title": "Partition Labels"
+        },
+        "ja": {
+          "title": "ラベルの分割"
+        },
+        "hi": {
+          "title": "पार्टीशन लेबल्स"
+        },
+        "es": {
+          "title": "Particionar etiquetas"
+        },
+        "zh": {
+          "title": "划分字母区间"
+        },
+        "ko": {
+          "title": "파티션 레이블"
         }
       },
       "resources": {
@@ -8485,6 +10180,21 @@
       "translations": {
         "en": {
           "title": "Valid Parenthesis String"
+        },
+        "ja": {
+          "title": "有効な括弧文字列"
+        },
+        "hi": {
+          "title": "मान्य कोष्ठक स्ट्रिंग"
+        },
+        "es": {
+          "title": "Cadena de paréntesis válida"
+        },
+        "zh": {
+          "title": "有效的括号字符串"
+        },
+        "ko": {
+          "title": "유효한 괄호 문자열"
         }
       },
       "resources": {
@@ -8542,6 +10252,21 @@
       "translations": {
         "en": {
           "title": "Insert Interval"
+        },
+        "ja": {
+          "title": "区間の挿入"
+        },
+        "hi": {
+          "title": "अंतराल सम्मिलित करें"
+        },
+        "es": {
+          "title": "Insertar intervalo"
+        },
+        "zh": {
+          "title": "插入区间"
+        },
+        "ko": {
+          "title": "구간 삽입"
         }
       },
       "resources": {
@@ -8599,6 +10324,21 @@
       "translations": {
         "en": {
           "title": "Merge Intervals"
+        },
+        "ja": {
+          "title": "区間のマージ"
+        },
+        "hi": {
+          "title": "अंतरालों का विलय"
+        },
+        "es": {
+          "title": "Fusionar intervalos"
+        },
+        "zh": {
+          "title": "合并区间"
+        },
+        "ko": {
+          "title": "구간 병합"
         }
       },
       "resources": {
@@ -8657,6 +10397,21 @@
       "translations": {
         "en": {
           "title": "Non Overlapping Intervals"
+        },
+        "ja": {
+          "title": "重複しない区間"
+        },
+        "hi": {
+          "title": "गैर-अतिव्यापी अंतराल"
+        },
+        "es": {
+          "title": "Intervalos no superpuestos"
+        },
+        "zh": {
+          "title": "无重叠区间"
+        },
+        "ko": {
+          "title": "겹치지 않는 구간"
         }
       },
       "resources": {
@@ -8715,6 +10470,21 @@
       "translations": {
         "en": {
           "title": "Meeting Rooms"
+        },
+        "ja": {
+          "title": "会議室"
+        },
+        "hi": {
+          "title": "मीटिंग रूम"
+        },
+        "es": {
+          "title": "Salas de reuniones"
+        },
+        "zh": {
+          "title": "会议室"
+        },
+        "ko": {
+          "title": "회의실"
         }
       },
       "resources": {
@@ -8769,6 +10539,21 @@
       "translations": {
         "en": {
           "title": "Meeting Rooms II"
+        },
+        "ja": {
+          "title": "会議室 II"
+        },
+        "hi": {
+          "title": "मीटिंग रूम II"
+        },
+        "es": {
+          "title": "Salas de reuniones II"
+        },
+        "zh": {
+          "title": "会议室 II"
+        },
+        "ko": {
+          "title": "회의실 II"
         }
       },
       "resources": {
@@ -8822,6 +10607,21 @@
       "translations": {
         "en": {
           "title": "Minimum Interval to Include Each Query"
+        },
+        "ja": {
+          "title": "各クエリを含む最小区間"
+        },
+        "hi": {
+          "title": "प्रत्येक क्वेरी को शामिल करने वाला न्यूनतम अंतराल"
+        },
+        "es": {
+          "title": "Intervalo mínimo para cada consulta"
+        },
+        "zh": {
+          "title": "包含每个查询的最小区间"
+        },
+        "ko": {
+          "title": "각 쿼리를 포함하는 최소 구간"
         }
       },
       "resources": {
@@ -8875,6 +10675,21 @@
       "translations": {
         "en": {
           "title": "Rotate Image"
+        },
+        "ja": {
+          "title": "画像の回転"
+        },
+        "hi": {
+          "title": "छवि घुमाएं"
+        },
+        "es": {
+          "title": "Rotar imagen"
+        },
+        "zh": {
+          "title": "旋转图像"
+        },
+        "ko": {
+          "title": "이미지 회전"
         }
       },
       "resources": {
@@ -8933,6 +10748,21 @@
       "translations": {
         "en": {
           "title": "Spiral Matrix"
+        },
+        "ja": {
+          "title": "螺旋行列"
+        },
+        "hi": {
+          "title": "सर्पिल मैट्रिक्स"
+        },
+        "es": {
+          "title": "Matriz en espiral"
+        },
+        "zh": {
+          "title": "螺旋矩阵"
+        },
+        "ko": {
+          "title": "나선형 행렬"
         }
       },
       "resources": {
@@ -8990,6 +10820,21 @@
       "translations": {
         "en": {
           "title": "Set Matrix Zeroes"
+        },
+        "ja": {
+          "title": "行列のゼロ設定"
+        },
+        "hi": {
+          "title": "मैट्रिक्स शून्य सेट करें"
+        },
+        "es": {
+          "title": "Poner ceros en matriz"
+        },
+        "zh": {
+          "title": "矩阵置零"
+        },
+        "ko": {
+          "title": "행렬 0으로 설정"
         }
       },
       "resources": {
@@ -9046,6 +10891,21 @@
       "translations": {
         "en": {
           "title": "Happy Number"
+        },
+        "ja": {
+          "title": "ハッピー数"
+        },
+        "hi": {
+          "title": "हैप्पी नंबर"
+        },
+        "es": {
+          "title": "Número feliz"
+        },
+        "zh": {
+          "title": "快乐数"
+        },
+        "ko": {
+          "title": "행복한 수"
         }
       },
       "resources": {
@@ -9103,6 +10963,21 @@
       "translations": {
         "en": {
           "title": "Plus One"
+        },
+        "ja": {
+          "title": "プラス1"
+        },
+        "hi": {
+          "title": "प्लस वन"
+        },
+        "es": {
+          "title": "Más uno"
+        },
+        "zh": {
+          "title": "加一"
+        },
+        "ko": {
+          "title": "플러스 원"
         }
       },
       "resources": {
@@ -9160,6 +11035,21 @@
       "translations": {
         "en": {
           "title": "Pow(x, n)"
+        },
+        "ja": {
+          "title": "累乗 Pow(x, n)"
+        },
+        "hi": {
+          "title": "घात Pow(x, n)"
+        },
+        "es": {
+          "title": "Potencia Pow(x, n)"
+        },
+        "zh": {
+          "title": "快速幂 Pow(x, n)"
+        },
+        "ko": {
+          "title": "거듭제곱 Pow(x, n)"
         }
       },
       "resources": {
@@ -9216,6 +11106,21 @@
       "translations": {
         "en": {
           "title": "Multiply Strings"
+        },
+        "ja": {
+          "title": "文字列の乗算"
+        },
+        "hi": {
+          "title": "स्ट्रिंग्स का गुणन"
+        },
+        "es": {
+          "title": "Multiplicar cadenas"
+        },
+        "zh": {
+          "title": "字符串相乘"
+        },
+        "ko": {
+          "title": "문자열 곱셈"
         }
       },
       "resources": {
@@ -9272,6 +11177,21 @@
       "translations": {
         "en": {
           "title": "Detect Squares"
+        },
+        "ja": {
+          "title": "正方形の検出"
+        },
+        "hi": {
+          "title": "वर्गों का पता लगाएं"
+        },
+        "es": {
+          "title": "Detectar cuadrados"
+        },
+        "zh": {
+          "title": "检测正方形"
+        },
+        "ko": {
+          "title": "정사각형 감지"
         }
       },
       "resources": {
@@ -9326,6 +11246,21 @@
       "translations": {
         "en": {
           "title": "Single Number"
+        },
+        "ja": {
+          "title": "シングルナンバー"
+        },
+        "hi": {
+          "title": "एकल संख्या"
+        },
+        "es": {
+          "title": "Número único"
+        },
+        "zh": {
+          "title": "只出现一次的数字"
+        },
+        "ko": {
+          "title": "싱글 넘버"
         }
       },
       "resources": {
@@ -9385,6 +11320,21 @@
       "translations": {
         "en": {
           "title": "Number of 1 Bits"
+        },
+        "ja": {
+          "title": "1ビットの個数"
+        },
+        "hi": {
+          "title": "1-बिट्स की संख्या"
+        },
+        "es": {
+          "title": "Número de bits 1"
+        },
+        "zh": {
+          "title": "位 1 的个数"
+        },
+        "ko": {
+          "title": "1 비트의 개수"
         }
       },
       "resources": {
@@ -9443,6 +11393,21 @@
       "translations": {
         "en": {
           "title": "Counting Bits"
+        },
+        "ja": {
+          "title": "ビットカウント"
+        },
+        "hi": {
+          "title": "बिट्स की गिनती"
+        },
+        "es": {
+          "title": "Contar bits"
+        },
+        "zh": {
+          "title": "比特位计数"
+        },
+        "ko": {
+          "title": "비트 세기"
         }
       },
       "resources": {
@@ -9501,6 +11466,21 @@
       "translations": {
         "en": {
           "title": "Reverse Bits"
+        },
+        "ja": {
+          "title": "ビット反転"
+        },
+        "hi": {
+          "title": "बिट्स उलटें"
+        },
+        "es": {
+          "title": "Invertir bits"
+        },
+        "zh": {
+          "title": "颠倒二进制位"
+        },
+        "ko": {
+          "title": "비트 뒤집기"
         }
       },
       "resources": {
@@ -9559,6 +11539,21 @@
       "translations": {
         "en": {
           "title": "Missing Number"
+        },
+        "ja": {
+          "title": "欠落している数値"
+        },
+        "hi": {
+          "title": "लुप्त संख्या"
+        },
+        "es": {
+          "title": "Número faltante"
+        },
+        "zh": {
+          "title": "丢失的数字"
+        },
+        "ko": {
+          "title": "빠진 숫자"
         }
       },
       "resources": {
@@ -9617,6 +11612,21 @@
       "translations": {
         "en": {
           "title": "Sum of Two Integers"
+        },
+        "ja": {
+          "title": "2つの整数の和"
+        },
+        "hi": {
+          "title": "दो पूर्णांकों का योग"
+        },
+        "es": {
+          "title": "Suma de dos enteros"
+        },
+        "zh": {
+          "title": "两整数之和"
+        },
+        "ko": {
+          "title": "두 정수의 합"
         }
       },
       "resources": {
@@ -9674,6 +11684,21 @@
       "translations": {
         "en": {
           "title": "Reverse Integer"
+        },
+        "ja": {
+          "title": "整数の反転"
+        },
+        "hi": {
+          "title": "पूर्णांक उलटें"
+        },
+        "es": {
+          "title": "Invertir entero"
+        },
+        "zh": {
+          "title": "整数反转"
+        },
+        "ko": {
+          "title": "정수 뒤집기"
         }
       },
       "resources": {
