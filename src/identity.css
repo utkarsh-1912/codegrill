@@ -8418,7 +8418,6 @@ input[type="search"]::-webkit-search-results-decoration {
   padding: clamp(18px, 2.4vw, 26px) clamp(20px, 2.8vw, 30px);
   margin-bottom: 22px;
   border: 1px solid #4d3222;
-  border-left: 4px solid var(--ember);
   border-radius: 15px;
   background: linear-gradient(135deg, #241913 0%, #311f15 100%);
   color: #fff7ee;
@@ -8485,4 +8484,38 @@ input[type="search"]::-webkit-search-results-decoration {
     padding: 18px 18px;
     border-radius: 13px;
   }
+}
+
+
+/* Notion-style Single Notes Toggle in Active Room */
+.room-pad-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-width: 0;
+}
+
+.room-pad-label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--ink);
+}
+
+.room-pad-hint {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
+
+.room-pad-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.room-pad-preview.is-clickable {
+  cursor: text;
+  min-height: 500px;
+  padding: 20px 24px;
 }

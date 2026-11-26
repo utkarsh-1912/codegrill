@@ -16,6 +16,7 @@ import {
   Minimize2,
   Network,
   Pause,
+  Pencil,
   Play,
   Plus,
   RotateCcw,
@@ -113,10 +114,11 @@ export function StudyRooms({
       ? readRoomState(validActiveRoom, activeMode || 'dsa', { problemSlug: sharedProblem })
       : createDefaultRoomState('dsa')
   ));
-  const [editorTab, setEditorTab] = useState('write');
+  const [editingNotes, setEditingNotes] = useState(false);
   const [conductorTab, setConductorTab] = useState('session'); // 'session' | 'rubric'
   const [padExpanded, setPadExpanded] = useState(false);
   const [swapOpen, setSwapOpen] = useState(false);
+  const padTextareaRef = useRef(null);
   const [swapQuery, setSwapQuery] = useState('');
   const [copiedInvite, setCopiedInvite] = useState(false);
   const [copiedDebrief, setCopiedDebrief] = useState(false);
@@ -381,11 +383,24 @@ export function StudyRooms({
       .slice(0, 12);
   }, [problems, swapQuery, locale, defaultLocale]);
 
-  function insertSnippet(snippet) {
-    updateRoomState((prev) => ({
-      ...prev,
-      notes: `${prev.notes.trimEnd()}\n\n${snippet}\n`,
-    }));
+  function insertSnippet(before, placeholder = '', after = '') {
+    const el = padTextareaRef.current;
+    const text = roomState.notes || '';
+    const start = el ? el.selectionStart : text.length;
+    const end = el ? el.selectionEnd : text.length;
+    const selected = text.slice(start, end) || placeholder;
+    const needsLeadingNewline = start > 0 && text[start - 1] !== '\n';
+    const prefix = needsLeadingNewline ? `\n\n${before}` : before;
+    const nextNotes = `${text.slice(0, start)}${prefix}${selected}${after}${text.slice(end)}`;
+    updateRoomState({ notes: nextNotes });
+
+    const selStart = start + prefix.length;
+    const selEnd = selStart + selected.length;
+    window.setTimeout(() => {
+      if (!padTextareaRef.current) return;
+      padTextareaRef.current.focus();
+      padTextareaRef.current.setSelectionRange(selStart, selEnd);
+    }, 0);
   }
 
   async function handleExportDebrief(downloadFile = false) {
@@ -636,58 +651,91 @@ export function StudyRooms({
           <div className="room-main-pane">
             <Card variant="outlined" className="room-pad-card">
               <div className="room-pad-toolbar">
-                <div className="segmented-tabs" role="group" aria-label="Scratchpad view">
-                  <button type="button" aria-pressed={editorTab === 'write'} onClick={() => setEditorTab('write')}>
-                    Write
-                  </button>
-                  <button type="button" aria-pressed={editorTab === 'preview'} onClick={() => setEditorTab('preview')}>
-                    Preview
-                  </button>
-                  <button type="button" aria-pressed={editorTab === 'split'} onClick={() => setEditorTab('split')}>
-                    Split
-                  </button>
+                <div className="room-pad-heading">
+                  <span className="room-pad-label">Shared Notes</span>
+                  <span className="room-pad-hint">
+                    {editingNotes ? 'Esc or Ctrl+Enter to render' : 'Click note to edit'}
+                  </span>
                 </div>
 
-                <div className="room-snippet-bar">
-                  <button
-                    type="button"
-                    onClick={() => insertSnippet('```python\ndef solution():\n    pass\n```')}
+                <div className="room-pad-actions">
+                  {editingNotes && (
+                    <div className="room-snippet-bar">
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet('```\n', '', '\n```')}
+                      >
+                        + Code
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet('```mermaid\nflowchart LR\n    ', 'A --> B', '\n```')}
+                      >
+                        + Mermaid
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet('$$\n', '', '\n$$')}
+                      >
+                        + Math
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => insertSnippet('| ', 'Col 1', ' | Col 2 |\n| --- | --- |\n|  |  |')}
+                      >
+                        + Table
+                      </button>
+                    </div>
+                  )}
+
+                  <Button
+                    variant={editingNotes ? 'solid' : 'outlined'}
+                    size="sm"
+                    onClick={() => {
+                      setEditingNotes((v) => {
+                        const next = !v;
+                        if (next) {
+                          window.setTimeout(() => padTextareaRef.current?.focus(), 0);
+                        }
+                        return next;
+                      });
+                    }}
                   >
-                    + Code
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => insertSnippet('```mermaid\nflowchart LR\n    Client --> API --> DB[("Database")]\n```')}
-                  >
-                    + Mermaid
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => insertSnippet('$$T(n) = 2T(n/2) + O(n) = O(n \\log n)$$')}
-                  >
-                    + Math
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => insertSnippet('| Component | Trade-off | Choice |\n| --- | --- | --- |\n| Cache | Speed vs Staleness | Redis TTL |')}
-                  >
-                    + Table
-                  </button>
+                    {editingNotes ? (
+                      <><Check size={14} aria-hidden="true" /> Done</>
+                    ) : (
+                      <><Pencil size={14} aria-hidden="true" /> Edit</>
+                    )}
+                  </Button>
                 </div>
               </div>
 
-              <div className={`room-pad-body is-${editorTab}`}>
-                {(editorTab === 'write' || editorTab === 'split') && (
+              <div className={`room-pad-body ${editingNotes ? 'is-editing' : 'is-reading'}`}>
+                {editingNotes ? (
                   <textarea
+                    ref={padTextareaRef}
                     className="room-pad-textarea"
                     value={roomState.notes}
                     onChange={(e) => updateRoomState({ notes: e.target.value })}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Escape' || ((e.metaKey || e.ctrlKey) && e.key === 'Enter')) {
+                        e.preventDefault();
+                        setEditingNotes(false);
+                      }
+                    }}
                     placeholder="Write Markdown, code blocks, $O(n \log n)$ math, or ```mermaid diagrams..."
                     spellCheck={false}
                   />
-                )}
-                {(editorTab === 'preview' || editorTab === 'split') && (
-                  <div className="room-pad-preview">
+                ) : (
+                  <div
+                    className="room-pad-preview is-clickable"
+                    onClick={(e) => {
+                      if (e.target.closest('a, button, summary, details, pre')) return;
+                      setEditingNotes(true);
+                      window.setTimeout(() => padTextareaRef.current?.focus(), 0);
+                    }}
+                    title="Click to edit notes"
+                  >
                     <RichTextInterpreter content={roomState.notes} format="markdown" />
                   </div>
                 )}
