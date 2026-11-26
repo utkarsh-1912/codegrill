@@ -11,6 +11,7 @@ import {
   sanitizeHandle,
 } from '../src/profiles.mjs';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from '../src/sheets.mjs';
+import { ROADMAP_DOMAINS, buildDomainRoadmap } from '../src/domainRoadmaps.mjs';
 import { getMessages } from '../src/i18n.mjs';
 import { createStore } from '../server/store.mjs';
 import { createPluginRegistry } from '../server/plugins/registry.mjs';
@@ -79,5 +80,13 @@ const dailyA = pickDailyProblem(
   new Date('2026-01-01T00:00:00Z'),
 );
 assert.equal(dailyA.slug, 'two-sum');
+
+// 7. Multi-domain roadmap DAG integrity (System Design, LLD, SQL, Concurrency, AI/Behavioral)
+assert.equal(ROADMAP_DOMAINS.length, 6);
+for (const dom of ROADMAP_DOMAINS.filter((d) => d.id !== 'dsa')) {
+  const topics = buildDomainRoadmap(dom.id, {});
+  assert.ok(topics.length >= 4, `Expected >= 4 topics in domain ${dom.id}`);
+  assert.ok(topics.some((t) => t.ready), `Expected at least one ready foundation topic in ${dom.id}`);
+}
 
 console.log('All unit and integration tests passed.');

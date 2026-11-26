@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ExternalLink, Play } 
 import { fetchPluginContent } from './api.mjs';
 import { resourcesFor } from './catalog.mjs';
 import { getMessages } from './i18n.mjs';
-import { ContentViewerBody, buildViewerPath, formatPluginBadge } from './ContentViewer.jsx';
+import { ContentViewerBody, buildViewerPath, formatPluginBadge, formatViewerTitle } from './ContentViewer.jsx';
 
 export function ViewerPage({
   url,
@@ -78,60 +78,95 @@ export function ViewerPage({
     ? (problem.translations[locale]?.title || problem.translations[defaultLocale].title)
     : '';
 
-  // Connected Prev / Next for Learning Modules
+  // Flattened immediate Prev / Next playlist across Learning Module resources (then adjacent modules)
   const modIndex = moduleId ? allModules.findIndex((m) => m.id === moduleId) : -1;
-  const prevModule = modIndex > 0 ? allModules[modIndex - 1] : null;
-  const nextModule = modIndex >= 0 && modIndex < allModules.length - 1 ? allModules[modIndex + 1] : null;
+  const modulePlaylist = [];
+  if (moduleId && allModules.length > 0) {
+    allModules.forEach((mod, mIdx) => {
+      const modTitle = mod.titles[locale] ?? mod.titles[defaultLocale];
+      const links = resourcesFor(mod.resources, locale, defaultLocale);
+      links.forEach((link, rIdx) => {
+        modulePlaylist.push({
+          url: link.url,
+          title: formatViewerTitle(modTitle, link.title),
+          shortLabel: link.title || modTitle,
+          kind: link.kind === 'video' ? 'video' : 'article',
+          moduleId: mod.id,
+          modIndex: mIdx,
+          resIndex: rIdx,
+          resTotal: links.length,
+        });
+      });
+    });
+  }
+  const currentModulePlayIdx = moduleId
+    ? (() => {
+        const exact = modulePlaylist.findIndex((item) => item.moduleId === moduleId && item.url === url);
+        if (exact >= 0) return exact;
+        return modulePlaylist.findIndex((item) => item.moduleId === moduleId);
+      })()
+    : -1;
+  const currentModuleItem = currentModulePlayIdx >= 0 ? modulePlaylist[currentModulePlayIdx] : null;
+  const prevModuleItem = currentModulePlayIdx > 0 ? modulePlaylist[currentModulePlayIdx - 1] : null;
+  const nextModuleItem = currentModulePlayIdx >= 0 && currentModulePlayIdx < modulePlaylist.length - 1
+    ? modulePlaylist[currentModulePlayIdx + 1]
+    : null;
 
-  function openModuleInViewer(mod) {
-    if (!mod) return;
-    const links = resourcesFor(mod.resources, locale, defaultLocale);
-    const primary = links[0];
-    if (!primary) {
-      onNavigate('/tracks');
-      return;
-    }
-    const modTitle = mod.titles[locale] ?? mod.titles[defaultLocale];
+  function openPlaylistItem(item) {
+    if (!item) return;
     onNavigate(buildViewerPath({
-      url: primary.url,
-      title: modTitle,
-      kind: primary.kind === 'video' ? 'video' : 'article',
-      moduleId: mod.id,
+      url: item.url,
+      title: item.title,
+      kind: item.kind,
+      moduleId: item.moduleId,
+      problemSlug: item.problemSlug,
+      solutionLang: item.solutionLang,
     }));
   }
 
-  // Connected Prev / Next for Problems in same topic
+  // Flattened immediate Prev / Next playlist across Problem resources (then sibling problems in topic)
   const topicSiblings = problem ? allProblems.filter((p) => p.category_id === problem.category_id) : [];
-  const probIndex = problem ? topicSiblings.findIndex((p) => p.slug === problem.slug) : -1;
-  const prevProblem = probIndex > 0 ? topicSiblings[probIndex - 1] : null;
-  const nextProblem = probIndex >= 0 && probIndex < topicSiblings.length - 1 ? topicSiblings[probIndex + 1] : null;
-
-  function openProblemInViewer(p) {
-    if (!p) return;
-    const pTitle = p.translations[locale]?.title || p.translations[defaultLocale].title;
-    if (kind === 'code' && selectedLang && p.solutions?.[selectedLang]) {
-      onNavigate(buildViewerPath({
-        url: p.solutions[selectedLang],
-        title: `${pTitle} — ${languages[selectedLang] || selectedLang}`,
-        kind: 'code',
-        problemSlug: p.slug,
-        solutionLang: selectedLang,
-      }));
-      return;
-    }
-    const links = resourcesFor(p.resources, locale, defaultLocale);
-    const primary = links.find((l) => l.kind === 'video') || links[0];
-    if (primary) {
-      onNavigate(buildViewerPath({
-        url: primary.url,
-        title: pTitle,
-        kind: primary.kind === 'video' ? 'video' : 'article',
-        problemSlug: p.slug,
-      }));
-    } else {
-      onNavigate(`/problems?${new URLSearchParams({ problem: p.slug })}`);
-    }
+  const problemPlaylist = [];
+  if (problem && kind !== 'code') {
+    topicSiblings.forEach((p) => {
+      const pTitle = p.translations[locale]?.title || p.translations[defaultLocale].title;
+      const links = resourcesFor(p.resources, locale, defaultLocale);
+      links.forEach((link) => {
+        problemPlaylist.push({
+          url: link.url,
+          title: formatViewerTitle(pTitle, link.title),
+          shortLabel: p.slug === problem.slug ? (link.title || pTitle) : `#${p.leetcode_id} ${pTitle}`,
+          kind: link.kind === 'video' ? 'video' : 'article',
+          problemSlug: p.slug,
+        });
+      });
+    });
+  } else if (problem && kind === 'code') {
+    topicSiblings.forEach((p) => {
+      if (selectedLang && p.solutions?.[selectedLang]) {
+        const pTitle = p.translations[locale]?.title || p.translations[defaultLocale].title;
+        problemPlaylist.push({
+          url: p.solutions[selectedLang],
+          title: `${pTitle} — ${languages[selectedLang] || selectedLang}`,
+          shortLabel: `#${p.leetcode_id} ${pTitle}`,
+          kind: 'code',
+          problemSlug: p.slug,
+          solutionLang: selectedLang,
+        });
+      }
+    });
   }
+  const currentProbPlayIdx = problem
+    ? (() => {
+        const exact = problemPlaylist.findIndex((item) => item.problemSlug === problem.slug && item.url === url);
+        if (exact >= 0) return exact;
+        return problemPlaylist.findIndex((item) => item.problemSlug === problem.slug);
+      })()
+    : -1;
+  const prevProblemItem = currentProbPlayIdx > 0 ? problemPlaylist[currentProbPlayIdx - 1] : null;
+  const nextProblemItem = currentProbPlayIdx >= 0 && currentProbPlayIdx < problemPlaylist.length - 1
+    ? problemPlaylist[currentProbPlayIdx + 1]
+    : null;
 
   async function copyCode() {
     if (!data?.content) return;
@@ -151,9 +186,10 @@ export function ViewerPage({
     <div className="viewer-title-section">
       <div className="viewer-title-row">
         <Badge variant="outlined">{badgeLabel}</Badge>
-        {modIndex >= 0 && (
+        {currentModuleItem && (
           <span className="viewer-seq-badge">
-            {String(modIndex + 1).padStart(2, '0')} / {String(allModules.length).padStart(2, '0')}
+            {String(currentModuleItem.resIndex + 1).padStart(2, '0')} / {String(currentModuleItem.resTotal).padStart(2, '0')}
+            {' · '}M{String(currentModuleItem.modIndex + 1).padStart(2, '0')}
           </span>
         )}
       </div>
@@ -168,25 +204,20 @@ export function ViewerPage({
     </div>
   );
 
-  const stepNavigation = (prevModule || nextModule || prevProblem || nextProblem) && (
-    <nav className="viewer-step-nav" aria-label="Module sequence navigation">
-      {prevModule ? (
-        <Button variant="outlined" size="sm" onClick={() => openModuleInViewer(prevModule)}>
-          <ChevronLeft size={15} aria-hidden="true" /> {prevModule.titles[locale] ?? prevModule.titles[defaultLocale]}
-        </Button>
-      ) : prevProblem ? (
-        <Button variant="outlined" size="sm" onClick={() => openProblemInViewer(prevProblem)}>
-          <ChevronLeft size={15} aria-hidden="true" /> #{prevProblem.leetcode_id} {prevProblem.translations[locale]?.title || prevProblem.translations[defaultLocale].title}
+  const prevStep = prevModuleItem || prevProblemItem;
+  const nextStep = nextModuleItem || nextProblemItem;
+
+  const stepNavigation = (prevStep || nextStep) && (
+    <nav className="viewer-step-nav" aria-label="Sequence navigation">
+      {prevStep ? (
+        <Button variant="outlined" size="sm" onClick={() => openPlaylistItem(prevStep)}>
+          <ChevronLeft size={15} aria-hidden="true" /> {prevStep.shortLabel}
         </Button>
       ) : <span />}
 
-      {nextModule ? (
-        <Button variant="solid" size="sm" onClick={() => openModuleInViewer(nextModule)}>
-          {nextModule.titles[locale] ?? nextModule.titles[defaultLocale]} <ChevronRight size={15} aria-hidden="true" />
-        </Button>
-      ) : nextProblem ? (
-        <Button variant="solid" size="sm" onClick={() => openProblemInViewer(nextProblem)}>
-          #{nextProblem.leetcode_id} {nextProblem.translations[locale]?.title || nextProblem.translations[defaultLocale].title} <ChevronRight size={15} aria-hidden="true" />
+      {nextStep ? (
+        <Button variant="solid" size="sm" onClick={() => openPlaylistItem(nextStep)}>
+          {nextStep.shortLabel} <ChevronRight size={15} aria-hidden="true" />
         </Button>
       ) : <span />}
     </nav>

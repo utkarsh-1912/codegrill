@@ -26,6 +26,7 @@ import { ForgeAtlas } from './ForgeAtlas.jsx';
 import { ErrorBoundary, ErrorPage, NotFoundPage } from './StatusPages.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from './sheets.mjs';
+import { ROADMAP_DOMAINS, buildDomainRoadmap } from './domainRoadmaps.mjs';
 import { DEFAULT_APP_CONFIG } from './config.mjs';
 import { getMessages } from './i18n.mjs';
 import {
@@ -470,7 +471,15 @@ function App() {
             locale={locale}
             onSaveProfiles={handleSaveProfiles}
           />
-          <Roadmap roadmap={roadmap} next={next} locale={locale} title={t.nav.roadmap} onOpen={openProblems} />
+          <Roadmap
+            roadmap={roadmap}
+            next={next}
+            locale={locale}
+            title={t.nav.roadmap}
+            onOpen={openProblems}
+            onOpenViewer={setViewerItem}
+            onNavigate={navigate}
+          />
           {!zenMode && (
             <section className="marketing-section">
               <h2>{t.roadmap.howToUse}</h2>
@@ -587,22 +596,62 @@ function App() {
   );
 }
 
-function Roadmap({ roadmap, next, locale, title, onOpen }) {
+const DOMAIN_CHECKS_KEY = 'codegrill:domain-roadmap:v1';
+
+function Roadmap({ roadmap, next, locale, title, onOpen, onOpenViewer, onNavigate }) {
   const t = getMessages(locale);
+  const [domain, setDomain] = useState('dsa');
   const [stage, setStage] = useState('all');
   const [selectedId, setSelectedId] = useState(next?.id ?? roadmap[0].id);
-  const stages = [...new Set(roadmap.map(({ depth }) => depth))].sort((a, b) => a - b);
-  const selected = roadmap.find(({ id }) => id === selectedId);
-  const visible = stage === 'all' ? stages : [stage];
+  const [domainChecks, setDomainChecks] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(DOMAIN_CHECKS_KEY) || '{}') || {};
+    } catch {
+      return {};
+    }
+  });
+
+  function toggleDomainCheck(topicId, idx) {
+    setDomainChecks((prev) => {
+      const key = `${topicId}:${idx}`;
+      const nextChecks = { ...prev, [key]: !prev[key] };
+      if (!nextChecks[key]) delete nextChecks[key];
+      try {
+        localStorage.setItem(DOMAIN_CHECKS_KEY, JSON.stringify(nextChecks));
+      } catch {
+        // Ignore storage errors
+      }
+      return nextChecks;
+    });
+  }
+
+  const isDsa = domain === 'dsa';
+  const activeTopics = isDsa ? roadmap : buildDomainRoadmap(domain, domainChecks);
+  const stages = [...new Set(activeTopics.map(({ depth }) => depth))].sort((a, b) => a - b);
+  const selected = activeTopics.find(({ id }) => id === selectedId) || activeTopics[0];
+  const visible = stage === 'all' ? stages : stages.filter((d) => d === stage);
   const status = (topic) => (
     topic.complete ? t.roadmap.statusComplete : topic.ready ? t.roadmap.statusReady : t.roadmap.statusPrerequisites
   );
 
+  function changeDomain(nextDomain) {
+    setDomain(nextDomain);
+    setStage('all');
+    if (nextDomain === 'dsa') {
+      setSelectedId(next?.id ?? roadmap[0].id);
+    } else {
+      const nextList = buildDomainRoadmap(nextDomain, domainChecks);
+      const firstReady = nextList.find((item) => item.ready && !item.complete) || nextList[0];
+      if (firstReady) setSelectedId(firstReady.id);
+    }
+  }
+
   function changeStage(depth) {
     setStage(depth);
-    if (depth !== 'all' && selected.depth !== depth) {
-      setSelectedId((roadmap.find((topic) => topic.depth === depth && topic.ready && !topic.complete) ??
-        roadmap.find((topic) => topic.depth === depth)).id);
+    if (depth !== 'all' && selected && selected.depth !== depth) {
+      const target = activeTopics.find((topic) => topic.depth === depth && topic.ready && !topic.complete)
+        ?? activeTopics.find((topic) => topic.depth === depth);
+      if (target) setSelectedId(target.id);
     }
   }
 
@@ -613,14 +662,30 @@ function Roadmap({ roadmap, next, locale, title, onOpen }) {
           <h2 id="roadmap-title" lang={locale}>{title}</h2>
           <p>{t.roadmap.subtitle}</p>
         </div>
-        <Badge variant="outlined">{roadmap.length} {t.roadmap.topicsUnit}</Badge>
+        <Badge variant="outlined">{activeTopics.length} {t.roadmap.topicsUnit}</Badge>
       </div>
+
+      <div className="roadmap-domain-tabs" role="tablist" aria-label="Roadmap domains">
+        {ROADMAP_DOMAINS.map((d) => (
+          <button
+            key={d.id}
+            type="button"
+            role="tab"
+            aria-selected={domain === d.id}
+            className={`roadmap-domain-tab ${domain === d.id ? 'is-active' : ''}`}
+            onClick={() => changeDomain(d.id)}
+          >
+            {d.labels[locale] || d.labels.en}
+          </button>
+        ))}
+      </div>
+
       <div className="stage-selector" role="group" aria-label={t.roadmap.allStages}>
         <button type="button" aria-pressed={stage === 'all'} onClick={() => changeStage('all')}>
           {t.roadmap.allStages}
         </button>
         {stages.map((depth) => {
-          const topics = roadmap.filter((topic) => topic.depth === depth);
+          const topics = activeTopics.filter((topic) => topic.depth === depth);
           return (
             <button type="button" key={depth} aria-pressed={stage === depth} onClick={() => changeStage(depth)}>
               {t.roadmap.stages[depth] ?? `Stage ${depth + 1}`} <span>{topics.filter((topic) => topic.complete).length}/{topics.length}</span>
@@ -628,18 +693,19 @@ function Roadmap({ roadmap, next, locale, title, onOpen }) {
           );
         })}
       </div>
+
       <div className="roadmap-layout">
         <div className="map-stages">
           {visible.map((depth) => (
             <section key={depth} className="map-stage">
               <h3>{t.roadmap.stages[depth] ?? `Stage ${depth + 1}`}</h3>
               <div className="map-topic-grid">
-                {roadmap.filter((topic) => topic.depth === depth).map((topic) => (
+                {activeTopics.filter((topic) => topic.depth === depth).map((topic) => (
                   <button
                     key={topic.id}
                     type="button"
                     className="map-topic map-topic-text-only"
-                    aria-pressed={selectedId === topic.id}
+                    aria-pressed={selected?.id === topic.id}
                     onClick={() => {
                       setSelectedId(topic.id);
                       if (window.matchMedia('(max-width: 740px)').matches) {
@@ -648,7 +714,9 @@ function Roadmap({ roadmap, next, locale, title, onOpen }) {
                     }}
                   >
                     <span>
-                      <strong lang={locale}>{pickLabel(topic.labels, locale)}</strong>
+                      <strong lang={isDsa ? locale : 'en'}>
+                        {isDsa ? pickLabel(topic.labels, locale) : topic.title}
+                      </strong>
                       <small>{topic.done}/{topic.total} {t.progress.solvedOf} · {status(topic)}</small>
                     </span>
                     <ChevronRight size={16} aria-hidden="true" />
@@ -658,33 +726,106 @@ function Roadmap({ roadmap, next, locale, title, onOpen }) {
             </section>
           ))}
         </div>
-        <Card variant="outlined" className="topic-inspector" id="topic-details" tabIndex={-1}>
-          <div aria-live="polite">
-            <p className="inspector-label">{status(selected)}</p>
-            <h3 lang={locale}>{pickLabel(selected.labels, locale)}</h3>
-            <p>{selected.done} / {selected.total} {t.progress.solvedOf}</p>
-            <progress value={selected.done} max={selected.total} aria-label={t.progress.title} />
-            {!!selected.prerequisites.length && (
-              <div className="topic-related">
-                <h4>{t.roadmap.prerequisites}</h4>
-                {selected.prerequisites.map((id) => {
-                  const prerequisite = roadmap.find((topic) => topic.id === id);
-                  return (
-                    <button key={id} type="button" onClick={() => {
-                      if (stage !== 'all') setStage(prerequisite.depth);
-                      setSelectedId(id);
-                    }}>
-                      {prerequisite.complete ? <Check size={15} aria-hidden="true" /> : <Circle size={15} aria-hidden="true" />}
-                      <span lang={locale}>{pickLabel(prerequisite.labels, locale)}</span>
-                      <small>{prerequisite.done}/{prerequisite.total}</small>
+
+        {selected && (
+          <Card variant="outlined" className="topic-inspector" id="topic-details" tabIndex={-1}>
+            <div aria-live="polite">
+              <p className="inspector-label">{status(selected)}</p>
+              <h3 lang={isDsa ? locale : 'en'}>
+                {isDsa ? pickLabel(selected.labels, locale) : selected.title}
+              </h3>
+              {!isDsa && selected.summary && (
+                <p className="domain-inspector-summary">{selected.summary}</p>
+              )}
+              <p>{selected.done} / {selected.total} {t.progress.solvedOf}</p>
+              <progress value={selected.done} max={Math.max(1, selected.total)} aria-label={t.progress.title} />
+
+              {!isDsa && selected.checklist?.length > 0 && (
+                <div className="domain-checklist">
+                  {selected.checklist.map((itemText, idx) => {
+                    const checked = Boolean(domainChecks[`${selected.id}:${idx}`]);
+                    return (
+                      <label key={idx} className={`domain-check-row ${checked ? 'is-checked' : ''}`}>
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleDomainCheck(selected.id, idx)}
+                        />
+                        <span>{itemText}</span>
+                      </label>
+                    );
+                  })}
+                </div>
+              )}
+
+              {!isDsa && selected.interviewPrompts?.length > 0 && (
+                <div className="domain-prompts">
+                  <h4>Interview prompts</h4>
+                  <ul>
+                    {selected.interviewPrompts.map((promptText, idx) => (
+                      <li key={idx}>{promptText}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {!!selected.prerequisites?.length && (
+                <div className="topic-related">
+                  <h4>{t.roadmap.prerequisites}</h4>
+                  {selected.prerequisites.map((id) => {
+                    const prerequisite = activeTopics.find((topic) => topic.id === id);
+                    if (!prerequisite) return null;
+                    return (
+                      <button key={id} type="button" onClick={() => {
+                        if (stage !== 'all') setStage(prerequisite.depth);
+                        setSelectedId(id);
+                      }}>
+                        {prerequisite.complete ? <Check size={15} aria-hidden="true" /> : <Circle size={15} aria-hidden="true" />}
+                        <span lang={isDsa ? locale : 'en'}>
+                          {isDsa ? pickLabel(prerequisite.labels, locale) : prerequisite.title}
+                        </span>
+                        <small>{prerequisite.done}/{prerequisite.total}</small>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+
+              {!isDsa && selected.resources?.length > 0 && (
+                <div className="domain-resources">
+                  <h4>Study guides</h4>
+                  {selected.resources.map((res) => (
+                    <button
+                      key={res.url}
+                      type="button"
+                      className="resource-open-btn"
+                      onClick={() => onOpenViewer({
+                        url: res.url,
+                        title: res.title,
+                        kind: 'article',
+                      })}
+                    >
+                      <BookOpen size={15} aria-hidden="true" />
+                      <span>
+                        <strong>{res.title}</strong>
+                        <small>{res.platform}</small>
+                      </span>
+                      <ChevronRight size={14} aria-hidden="true" />
                     </button>
-                  );
-                })}
-              </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {isDsa ? (
+              <Button variant="solid" onClick={() => onOpen(selected.id)}>{t.roadmap.openTopic}</Button>
+            ) : (
+              <Button variant="outlined" onClick={() => onNavigate('/tracks')}>
+                {t.nav.tracks} <ChevronRight size={15} aria-hidden="true" />
+              </Button>
             )}
-          </div>
-          <Button variant="solid" onClick={() => onOpen(selected.id)}>{t.roadmap.openTopic}</Button>
-        </Card>
+          </Card>
+        )}
       </div>
     </section>
   );
