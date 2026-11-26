@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Button, Card } from '@utkristi/ui';
-import { ArrowLeft, ChevronLeft, ChevronRight, ExternalLink, Play } from 'lucide-react';
+import { ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, ExternalLink, Play } from 'lucide-react';
 import { fetchPluginContent } from './api.mjs';
 import { resourcesFor } from './catalog.mjs';
 import { getMessages } from './i18n.mjs';
@@ -23,18 +23,38 @@ export function ViewerPage({
   onNavigate,
 }) {
   const t = getMessages(locale);
-  const [activeUrl, setActiveUrl] = useState(url || '');
-  const [activeTitle, setActiveTitle] = useState(title || '');
+  const [history, setHistory] = useState([{ url: url || '', title: title || '' }]);
+  const [historyIndex, setHistoryIndex] = useState(0);
   const [selectedLang, setSelectedLang] = useState(initialLang || '');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setActiveUrl(url || '');
-    setActiveTitle(title || '');
+    setHistory([{ url: url || '', title: title || '' }]);
+    setHistoryIndex(0);
     setSelectedLang(initialLang || '');
   }, [url, title, initialLang]);
+
+  const currentEntry = history[historyIndex] || { url: url || '', title: title || '' };
+  const activeUrl = currentEntry.url;
+  const activeTitle = currentEntry.title;
+  const canGoBack = historyIndex > 0;
+  const canGoForward = historyIndex < history.length - 1;
+
+  function navigateNested(nextUrl, nextTitle) {
+    if (!nextUrl || nextUrl === activeUrl) return;
+    setHistory((prev) => [...prev.slice(0, historyIndex + 1), { url: nextUrl, title: nextTitle || '' }]);
+    setHistoryIndex((idx) => idx + 1);
+  }
+
+  function goBackNested() {
+    if (canGoBack) setHistoryIndex((idx) => idx - 1);
+  }
+
+  function goForwardNested() {
+    if (canGoForward) setHistoryIndex((idx) => idx + 1);
+  }
 
   useEffect(() => {
     if (!activeUrl) return undefined;
@@ -175,16 +195,43 @@ export function ViewerPage({
   return (
     <section className="page-section viewer-page">
       <div className="viewer-page-bar">
-        <Button
-          variant="quiet"
-          size="sm"
-          onClick={() => {
-            if (window.history.length > 1) window.history.back();
-            else onNavigate(moduleId ? '/tracks' : '/resources');
-          }}
-        >
-          <ArrowLeft size={16} aria-hidden="true" /> {t.status.goHome}
-        </Button>
+        <div className="viewer-page-bar-left">
+          <Button
+            variant="quiet"
+            size="sm"
+            onClick={() => {
+              if (window.history.length > 1) window.history.back();
+              else onNavigate(moduleId ? '/tracks' : '/resources');
+            }}
+          >
+            <ArrowLeft size={16} aria-hidden="true" /> {t.status.goHome}
+          </Button>
+          {history.length > 1 && (
+            <div className="viewer-history-nav" role="group" aria-label="Nested plugin history">
+              <button
+                type="button"
+                className="icon-btn"
+                disabled={!canGoBack}
+                onClick={goBackNested}
+                aria-label="Back"
+                title="Back"
+              >
+                <ArrowLeft size={16} aria-hidden="true" />
+              </button>
+              <span className="viewer-history-count">{historyIndex + 1}/{history.length}</span>
+              <button
+                type="button"
+                className="icon-btn"
+                disabled={!canGoForward}
+                onClick={goForwardNested}
+                aria-label="Forward"
+                title="Forward"
+              >
+                <ArrowRight size={16} aria-hidden="true" />
+              </button>
+            </div>
+          )}
+        </div>
         {activeUrl && (
           <Button variant="outlined" size="sm" href={activeUrl} target="_blank" rel="noopener noreferrer">
             {t.viewer.openOriginal} <ExternalLink size={14} aria-hidden="true" />
@@ -207,8 +254,7 @@ export function ViewerPage({
               customPlayerTemplate={customPlayerTemplate}
               onCopyCode={copyCode}
               onSelectSubUrl={(nextUrl, nextTitle) => {
-                setActiveUrl(nextUrl);
-                setActiveTitle(nextTitle);
+                navigateNested(nextUrl, nextTitle);
               }}
             />
           </div>
@@ -229,8 +275,7 @@ export function ViewerPage({
                     aria-selected={selectedLang === langId}
                     onClick={() => {
                       setSelectedLang(langId);
-                      setActiveUrl(problem.solutions[langId]);
-                      setActiveTitle(`${problemTitle} — ${langName}`);
+                      navigateNested(problem.solutions[langId], `${problemTitle} — ${langName}`);
                     }}
                   >
                     {langName}
@@ -251,8 +296,7 @@ export function ViewerPage({
                 customPlayerTemplate={customPlayerTemplate}
                 onCopyCode={copyCode}
                 onSelectSubUrl={(nextUrl, nextTitle) => {
-                  setActiveUrl(nextUrl);
-                  setActiveTitle(nextTitle);
+                  navigateNested(nextUrl, nextTitle);
                 }}
               />
             </div>

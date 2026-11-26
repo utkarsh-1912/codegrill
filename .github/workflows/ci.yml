@@ -1,0 +1,72 @@
+name: Codegrill CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Check, Test & Build (Node ${{ matrix.node-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: [20, 22]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify catalog, i18n & plugin contracts
+        run: npm run check
+
+      - name: Run unit & store integration tests
+        run: npm test
+
+      - name: Build production bundle
+        run: npm run build
+
+      - name: Verify build artifacts
+        run: |
+          test -f dist/index.html
+          test -d dist/assets
+
+      - name: Upload production dist artifact
+        if: matrix.node-version == 22 && github.event_name == 'push'
+        uses: actions/upload-artifact@v4
+        with:
+          name: codegrill-dist
+          path: dist/
+          retention-days: 14
+
+  security:
+    name: Security & Hygiene Checks
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Ensure no committed .env secrets
+        run: |
+          if git ls-files --error-unmatch .env >/dev/null 2>&1; then
+            echo "Error: .env file must not be tracked in git"
+            exit 1
+          fi
+
+      - name: Dependency vulnerability audit
+        run: npm audit --audit-level=high || true

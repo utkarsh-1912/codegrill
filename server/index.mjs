@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createPluginRegistry } from './plugins/registry.mjs';
 import { fetchYouTubeTranscript } from './plugins/transcript.mjs';
+import { fetchPlatformProfile } from './plugins/profiles.mjs';
 import { buildAnalytics, createStore } from './store.mjs';
 import { getPublicConfig, loadServerConfig } from './config.mjs';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from '../src/sheets.mjs';
@@ -145,6 +146,27 @@ export function createServer(configOverrides = {}) {
         const profile = url.searchParams.get('profile') || config.defaultProfile;
         const fresh = await store.resetProgress(profile);
         return sendJson(res, 200, fresh);
+      }
+
+      if (req.method === 'GET' && pathname === '/api/profiles') {
+        const profile = url.searchParams.get('profile') || config.defaultProfile;
+        const profiles = await store.getLinkedProfiles(profile);
+        return sendJson(res, 200, { profiles });
+      }
+
+      if (req.method === 'PUT' && pathname === '/api/profiles') {
+        const profile = url.searchParams.get('profile') || config.defaultProfile;
+        const body = await readJsonBody(req);
+        const saved = await store.saveLinkedProfiles(profile, body?.profiles || body);
+        return sendJson(res, 200, { profiles: saved });
+      }
+
+      if (req.method === 'GET' && pathname === '/api/profiles/sync') {
+        const platform = url.searchParams.get('platform') || '';
+        const handle = url.searchParams.get('handle') || '';
+        if (!platform || !handle) return sendJson(res, 400, { error: 'Missing platform or handle parameter' });
+        const result = await fetchPlatformProfile(platform, handle, config.pluginFetchTimeoutMs);
+        return sendJson(res, 200, result);
       }
 
       if (req.method === 'GET' && pathname === '/api/sheets') {

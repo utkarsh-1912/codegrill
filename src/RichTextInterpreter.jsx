@@ -57,25 +57,116 @@ function isInAppLink(url) {
   }
 }
 
+const HTML_ENTITIES = {
+  quot: '"',
+  apos: "'",
+  lt: '<',
+  gt: '>',
+  amp: '&',
+  nbsp: ' ',
+  ensp: ' ',
+  emsp: ' ',
+  thinsp: ' ',
+  ndash: '–',
+  mdash: '—',
+  hellip: '…',
+  lsquo: '‘',
+  rsquo: '’',
+  ldquo: '“',
+  rdquo: '”',
+  laquo: '«',
+  raquo: '»',
+  bull: '•',
+  middot: '·',
+  rarr: '→',
+  larr: '←',
+  uarr: '↑',
+  darr: '↓',
+  harr: '↔',
+  times: '×',
+  divide: '÷',
+  plusmn: '±',
+  le: '≤',
+  ge: '≥',
+  ne: '≠',
+  approx: '≈',
+  infin: '∞',
+  deg: '°',
+  copy: '©',
+  reg: '®',
+  trade: '™',
+  sect: '§',
+};
+
+export function decodeHtmlEntities(text) {
+  if (!text || !String(text).includes('&')) return text;
+  return String(text).replace(/&(#x[0-9a-fA-F]+|#\d+|[a-zA-Z][a-zA-Z0-9]+);/g, (full, entity) => {
+    if (entity[0] === '#') {
+      const code = entity[1] === 'x' || entity[1] === 'X'
+        ? parseInt(entity.slice(2), 16)
+        : parseInt(entity.slice(1), 10);
+      if (Number.isFinite(code) && code >= 0 && code <= 0x10ffff) {
+        try {
+          return String.fromCodePoint(code);
+        } catch {
+          return full;
+        }
+      }
+      return full;
+    }
+    const named = HTML_ENTITIES[entity] ?? HTML_ENTITIES[entity.toLowerCase()];
+    return named !== undefined ? named : full;
+  });
+}
+
+function preprocessHtmlToMarkdown(text) {
+  if (!text || !text.includes('<')) return text;
+  let out = String(text);
+  // Convert <img ... src="..." ... /> (any attribute order) into Markdown ![alt](src)
+  out = out.replace(/<img\b([^>]*?)\/?>/gi, (_, attrs) => {
+    const srcMatch = /\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)'|([^\s"'>]+))/i.exec(attrs);
+    const src = decodeHtmlEntities(srcMatch ? (srcMatch[1] || srcMatch[2] || srcMatch[3] || '').trim() : '');
+    if (!src) return '';
+    const altMatch = /\balt\s*=\s*(?:"([^"]*)"|'([^']*)')/i.exec(attrs);
+    const alt = decodeHtmlEntities(altMatch ? (altMatch[1] || altMatch[2] || '').trim() : '');
+    return `![${alt}](${src})`;
+  });
+  // Convert <a ... href="...">inner</a> into Markdown [inner](href)
+  out = out.replace(/<a\b[^>]*\bhref\s*=\s*(?:"([^"]+)"|'([^']+)')[^>]*>([\s\S]*?)<\/a>/gi, (_, h1, h2, inner) => {
+    const href = decodeHtmlEntities((h1 || h2 || '').trim());
+    const label = decodeHtmlEntities(inner.replace(/<[^>]+>/g, '').trim()) || href;
+    return `[${label}](${href})`;
+  });
+  // Convert simple inline formatting HTML tags
+  out = out
+    .replace(/<(?:strong|b)\b[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, '**$1**')
+    .replace(/<(?:em|i)\b[^>]*>([\s\S]*?)<\/(?:em|i)>/gi, '*$1*')
+    .replace(/<code\b[^>]*>([\s\S]*?)<\/code>/gi, '`$1`')
+    .replace(/<br\s*\/?>/gi, ' ')
+    .replace(/<\/?(?:p|div|span|center|details|summary|sup|sub|small|font|picture|source)\b[^>]*>/gi, '');
+  return out;
+}
+
 // Parse inline markdown: ![alt](img), `code`, **bold**, *italic*, ~~strike~~, [label](url)
 function renderInline(text, { sourceUrl, onOpenLink, keyPrefix = 'in' } = {}) {
-  if (!text) return null;
+  const prepared = preprocessHtmlToMarkdown(text);
+  if (!prepared) return null;
   const tokens = [];
   const pattern = /(!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)|`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|~~[^~]+~~|\*[^*\n]+\*|_[^_\n]+_|\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\))/g;
   let lastIndex = 0;
   let match;
   let idx = 0;
 
-  while ((match = pattern.exec(text)) !== null) {
+  while ((match = pattern.exec(prepared)) !== null) {
     if (match.index > lastIndex) {
-      tokens.push(text.slice(lastIndex, match.index));
+      tokens.push(decodeHtmlEntities(prepared.slice(lastIndex, match.index)));
     }
     const token = match[0];
     const key = `${keyPrefix}-${idx++}`;
 
     if (token.startsWith('![')) {
-      const alt = match[2] || '';
-      const src = resolveResourceUrl(match[3], sourceUrl, true);
+      const alt = decodeHtmlEntities(match[2] || '');
+      const src = resolveResourceUrl(decodeHtmlEntities(match[3]), sourceUrl, true);
       if (src) {
         tokens.push(
           <img
@@ -88,7 +179,7 @@ function renderInline(text, { sourceUrl, onOpenLink, keyPrefix = 'in' } = {}) {
         );
       }
     } else if (token.startsWith('`')) {
-      tokens.push(<code key={key} className="rt-inline-code">{token.slice(1, -1)}</code>);
+      tokens.push(<code key={key} className="rt-inline-code">{decodeHtmlEntities(token.slice(1, -1))}</code>);
     } else if (token.startsWith('**') || token.startsWith('__')) {
       tokens.push(<strong key={key}>{renderInline(token.slice(2, -2), { sourceUrl, onOpenLink, keyPrefix: key })}</strong>);
     } else if (token.startsWith('~~')) {
@@ -96,8 +187,8 @@ function renderInline(text, { sourceUrl, onOpenLink, keyPrefix = 'in' } = {}) {
     } else if (token.startsWith('*') || token.startsWith('_')) {
       tokens.push(<em key={key}>{renderInline(token.slice(1, -1), { sourceUrl, onOpenLink, keyPrefix: key })}</em>);
     } else if (token.startsWith('[')) {
-      const label = match[4];
-      const resolved = resolveResourceUrl(match[5], sourceUrl, false);
+      const label = decodeHtmlEntities(match[4]);
+      const resolved = resolveResourceUrl(decodeHtmlEntities(match[5]), sourceUrl, false);
       if (resolved && onOpenLink && isInAppLink(resolved)) {
         tokens.push(
           <a
@@ -127,8 +218,8 @@ function renderInline(text, { sourceUrl, onOpenLink, keyPrefix = 'in' } = {}) {
     lastIndex = pattern.lastIndex;
   }
 
-  if (lastIndex < text.length) {
-    tokens.push(text.slice(lastIndex));
+  if (lastIndex < prepared.length) {
+    tokens.push(decodeHtmlEntities(prepared.slice(lastIndex)));
   }
   return tokens;
 }
@@ -272,15 +363,14 @@ function parseRichBlocks(rawText, isPlainText = false) {
       continue;
     }
 
-    // Paragraph (convert simple <a href="...">text</a> to markdown links before stripping other HTML)
+    // Paragraph (preserve HTML <img> and <a> via preprocessHtmlToMarkdown)
     const paraLines = [];
     while (
       i < lines.length &&
       lines[i].trim() !== '' &&
-      !/^(#{1,6}\s|```|>|[-*+]\s|\d+\.\s|---|\*\*\*|___|<img\b)/i.test(lines[i].trim())
+      !/^(#{1,6}\s|```|>|[-*+]\s|\d+\.\s|---|\*\*\*|___)/i.test(lines[i].trim())
     ) {
-      const withLinks = lines[i].replace(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)');
-      const cleaned = withLinks.replace(/<[^>]+>/g, '').trim();
+      const cleaned = preprocessHtmlToMarkdown(lines[i]).trim();
       if (cleaned) paraLines.push(cleaned);
       i += 1;
     }
@@ -296,10 +386,13 @@ function parseRichBlocks(rawText, isPlainText = false) {
 
 function CodeBlock({ language, content }) {
   const [copied, setCopied] = useState(false);
+  const displayContent = /^(html|xml|svg)$/i.test(language || '')
+    ? content
+    : decodeHtmlEntities(content);
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(content);
+      await navigator.clipboard.writeText(displayContent);
       setCopied(true);
       setTimeout(() => setCopied(false), 1600);
     } catch {
@@ -315,7 +408,7 @@ function CodeBlock({ language, content }) {
           {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
         </button>
       </div>
-      <pre><code>{content}</code></pre>
+      <pre><code>{displayContent}</code></pre>
     </div>
   );
 }
@@ -351,8 +444,8 @@ export function RichTextInterpreter({ content, format = 'markdown', sourceUrl, o
               return <Tag key={key} className={`rt-h rt-h${block.level}`}>{renderInline(block.text, { ...inlineOpts, keyPrefix: key })}</Tag>;
             }
             if (block.type === 'image') {
-              const resolved = resolveResourceUrl(block.src, sourceUrl, true);
-              return resolved ? <img key={key} src={resolved} alt={block.alt} className="rt-image" loading="lazy" /> : null;
+              const resolved = resolveResourceUrl(decodeHtmlEntities(block.src), sourceUrl, true);
+              return resolved ? <img key={key} src={resolved} alt={decodeHtmlEntities(block.alt)} className="rt-image" loading="lazy" /> : null;
             }
             if (block.type === 'code') {
               return <CodeBlock key={key} language={block.language} content={block.content} />;

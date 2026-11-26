@@ -1,5 +1,6 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname } from 'node:path';
+import { normalizeLinkedProfiles } from '../src/profiles.mjs';
 
 const DEFAULT_PROFILE = {
   locale: 'en',
@@ -8,6 +9,7 @@ const DEFAULT_PROFILE = {
   notes: {},
   solvedAt: {},
   activity: {},
+  linkedProfiles: {},
   updatedAt: null,
 };
 
@@ -181,6 +183,7 @@ export function createStore(filePath, defaultProfileId = 'default') {
         notes,
         solvedAt,
         activity,
+        linkedProfiles: current.linkedProfiles || {},
         updatedAt: nowIso,
       };
       data.profiles[id] = next;
@@ -188,11 +191,36 @@ export function createStore(filePath, defaultProfileId = 'default') {
       const streaks = computeStreaks(activity);
       return { ...next, streak: streaks.current, longestStreak: streaks.longest };
     },
+    async getLinkedProfiles(profileId = defaultProfileId) {
+      const data = await load();
+      const id = safeProfileId(profileId);
+      const current = data.profiles[id] || DEFAULT_PROFILE;
+      return normalizeLinkedProfiles(current.linkedProfiles || {});
+    },
+    async saveLinkedProfiles(profileId = defaultProfileId, rawProfiles = {}) {
+      const data = await load();
+      const id = safeProfileId(profileId);
+      const current = { ...DEFAULT_PROFILE, ...(data.profiles[id] || {}) };
+      const linkedProfiles = normalizeLinkedProfiles(rawProfiles);
+      data.profiles[id] = {
+        ...current,
+        linkedProfiles,
+        updatedAt: new Date().toISOString(),
+      };
+      await persist();
+      return linkedProfiles;
+    },
     async resetProgress(profileId = defaultProfileId) {
       const data = await load();
       const id = safeProfileId(profileId);
       const currentLocale = data.profiles[id]?.locale || DEFAULT_PROFILE.locale;
-      const fresh = { ...DEFAULT_PROFILE, locale: currentLocale, updatedAt: new Date().toISOString() };
+      const currentLinked = data.profiles[id]?.linkedProfiles || {};
+      const fresh = {
+        ...DEFAULT_PROFILE,
+        locale: currentLocale,
+        linkedProfiles: currentLinked,
+        updatedAt: new Date().toISOString(),
+      };
       data.profiles[id] = fresh;
       await persist();
       return { ...fresh, streak: 0, longestStreak: 0 };

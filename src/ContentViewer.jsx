@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Button } from '@utkristi/ui';
-import { Check, Copy, ExternalLink, FileCode2, Folder, Maximize2, Play, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Copy, ExternalLink, FileCode2, Folder, Maximize2, Play, X } from 'lucide-react';
 import { fetchPluginContent } from './api.mjs';
 import { getMessages } from './i18n.mjs';
 import { LoadingState } from './LoadingState.jsx';
 import { RichTextInterpreter } from './RichTextInterpreter.jsx';
 import { CustomVideoPlayer } from './CustomVideoPlayer.jsx';
+import { Pagination } from './Pagination.jsx';
 
 export function formatViewerTitle(problemTitle, resourceTitle) {
   const cleanProb = String(problemTitle || '').trim();
@@ -20,6 +21,9 @@ export function formatPluginBadge(data, fallback) {
   if (!data?.plugin) return fallback;
   if (data.plugin.startsWith('youtube')) return 'YouTube';
   if (data.plugin.startsWith('github')) return 'GitHub';
+  if (data.plugin.startsWith('medium')) return 'Medium';
+  if (data.plugin.startsWith('qiita')) return 'Qiita';
+  if (data.plugin.startsWith('devto')) return 'DEV Community';
   if (data.plugin === 'web-article') return data.siteName || 'Article';
   return fallback;
 }
@@ -50,9 +54,13 @@ export function ContentViewerBody({
 }) {
   const t = getMessages(locale);
   const [selectedVideoId, setSelectedVideoId] = useState('');
+  const [dirPage, setDirPage] = useState(1);
+  const [channelPage, setChannelPage] = useState(1);
 
   useEffect(() => {
     setSelectedVideoId('');
+    setDirPage(1);
+    setChannelPage(1);
   }, [activeUrl]);
 
   const activeChannelEmbed = selectedVideoId
@@ -78,6 +86,12 @@ export function ContentViewerBody({
   }
 
   if (data?.kind === 'channel') {
+    const channelPageSize = 8;
+    const allVideos = data.videos || [];
+    const totalChannelPages = Math.max(1, Math.ceil(allVideos.length / channelPageSize));
+    const safeChannelPage = Math.min(channelPage, totalChannelPages);
+    const visibleVideos = allVideos.slice((safeChannelPage - 1) * channelPageSize, safeChannelPage * channelPageSize);
+
     return (
       <div className="channel-viewer">
         <CustomVideoPlayer
@@ -89,45 +103,69 @@ export function ContentViewerBody({
           defaultShowScript={defaultShowScript}
           customPlayerTemplate={customPlayerTemplate}
         />
-        {data.videos?.length > 0 && (
-          <div className="channel-video-grid">
-            {data.videos.map((vid) => (
-              <button
-                key={vid.videoId}
-                type="button"
-                className={`channel-video-card ${selectedVideoId === vid.videoId ? 'is-selected' : ''}`}
-                onClick={() => setSelectedVideoId(vid.videoId)}
-              >
-                <div className="channel-thumb-wrap">
-                  <img src={vid.thumbnailUrl} alt="" loading="lazy" />
-                  <span className="channel-play-pill"><Play size={13} aria-hidden="true" /></span>
-                </div>
-                <div className="channel-video-info">
-                  <strong>{vid.title}</strong>
-                  {vid.published && <small>{vid.published}</small>}
-                </div>
-              </button>
-            ))}
-          </div>
+        {allVideos.length > 0 && (
+          <>
+            <div className="channel-video-grid">
+              {visibleVideos.map((vid) => (
+                <button
+                  key={vid.videoId}
+                  type="button"
+                  className={`channel-video-card ${selectedVideoId === vid.videoId ? 'is-selected' : ''}`}
+                  onClick={() => setSelectedVideoId(vid.videoId)}
+                >
+                  <div className="channel-thumb-wrap">
+                    <img src={vid.thumbnailUrl} alt="" loading="lazy" />
+                    <span className="channel-play-pill"><Play size={13} aria-hidden="true" /></span>
+                  </div>
+                  <div className="channel-video-info">
+                    <strong>{vid.title}</strong>
+                    {vid.published && <small>{vid.published}</small>}
+                  </div>
+                </button>
+              ))}
+            </div>
+            <Pagination
+              page={safeChannelPage}
+              pageSize={channelPageSize}
+              totalItems={allVideos.length}
+              onPageChange={setChannelPage}
+              locale={locale}
+            />
+          </>
         )}
       </div>
     );
   }
 
   if (data?.kind === 'directory') {
+    const dirPageSize = 14;
+    const allEntries = data.entries || [];
+    const totalDirPages = Math.max(1, Math.ceil(allEntries.length / dirPageSize));
+    const safeDirPage = Math.min(dirPage, totalDirPages);
+    const visibleEntries = allEntries.slice((safeDirPage - 1) * dirPageSize, safeDirPage * dirPageSize);
+
     return (
-      <div className="github-dir-list">
-        {data.entries?.map((entry) => (
-          <button
-            key={entry.path}
-            type="button"
-            className="github-dir-item"
-            onClick={() => onSelectSubUrl?.(entry.url, `${data.repo} — ${entry.name}`)}
-          >
-            {entry.type === 'dir' ? <Folder size={16} aria-hidden="true" /> : <FileCode2 size={16} aria-hidden="true" />}
-            <span>{entry.name}</span>
-          </button>
-        ))}
+      <div className="github-dir-shell">
+        <div className="github-dir-list">
+          {visibleEntries.map((entry) => (
+            <button
+              key={entry.path}
+              type="button"
+              className="github-dir-item"
+              onClick={() => onSelectSubUrl?.(entry.url, `${data.repo} — ${entry.name}`)}
+            >
+              {entry.type === 'dir' ? <Folder size={16} aria-hidden="true" /> : <FileCode2 size={16} aria-hidden="true" />}
+              <span>{entry.name}</span>
+            </button>
+          ))}
+        </div>
+        <Pagination
+          page={safeDirPage}
+          pageSize={dirPageSize}
+          totalItems={allEntries.length}
+          onPageChange={setDirPage}
+          locale={locale}
+        />
       </div>
     );
   }
@@ -171,17 +209,40 @@ export function ContentViewerBody({
     );
   }
 
+  const targetHref = data?.sourceUrl || activeUrl;
+  let targetHost = '';
+  try {
+    targetHost = targetHref ? new URL(targetHref).hostname.replace(/^www\./, '') : '';
+  } catch {
+    targetHost = '';
+  }
+
   return (
     <div className="viewer-error">
       <p>{t.viewer.errorNote}</p>
+      {targetHref && (
+        <div className="viewer-error-actions">
+          <Button
+            as="a"
+            href={targetHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="solid"
+            size="sm"
+          >
+            {t.viewer.openSource}{targetHost ? ` (${targetHost})` : ''}
+            <ExternalLink size={14} aria-hidden="true" />
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
 
 export function ContentViewer({ item, locale, languages, customPlayerTemplate, onClose, onExpand }) {
   const t = getMessages(locale);
-  const [activeUrl, setActiveUrl] = useState(item?.url || '');
-  const [activeTitle, setActiveTitle] = useState(item?.title || '');
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(0);
   const [selectedLang, setSelectedLang] = useState(item?.solutionLang || '');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -189,10 +250,30 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
 
   useEffect(() => {
     if (!item) return;
-    setActiveUrl(item.url);
-    setActiveTitle(item.title || '');
+    setHistory([{ url: item.url, title: item.title || '' }]);
+    setHistoryIndex(0);
     setSelectedLang(item.solutionLang || '');
   }, [item]);
+
+  const currentEntry = history[historyIndex] || { url: item?.url || '', title: item?.title || '' };
+  const activeUrl = currentEntry.url;
+  const activeTitle = currentEntry.title;
+  const canGoBack = historyIndex > 0;
+  const canGoForward = historyIndex < history.length - 1;
+
+  function navigateNested(nextUrl, nextTitle) {
+    if (!nextUrl || nextUrl === activeUrl) return;
+    setHistory((prev) => [...prev.slice(0, historyIndex + 1), { url: nextUrl, title: nextTitle || '' }]);
+    setHistoryIndex((idx) => idx + 1);
+  }
+
+  function goBack() {
+    if (canGoBack) setHistoryIndex((idx) => idx - 1);
+  }
+
+  function goForward() {
+    if (canGoForward) setHistoryIndex((idx) => idx + 1);
+  }
 
   useEffect(() => {
     if (!activeUrl) return undefined;
@@ -251,6 +332,31 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
             )}
           </div>
           <div className="viewer-header-actions">
+            {history.length > 1 && (
+              <div className="viewer-history-nav" role="group" aria-label="Nested plugin history">
+                <button
+                  type="button"
+                  className="icon-btn"
+                  disabled={!canGoBack}
+                  onClick={goBack}
+                  aria-label="Back"
+                  title="Back"
+                >
+                  <ArrowLeft size={16} aria-hidden="true" />
+                </button>
+                <span className="viewer-history-count">{historyIndex + 1}/{history.length}</span>
+                <button
+                  type="button"
+                  className="icon-btn"
+                  disabled={!canGoForward}
+                  onClick={goForward}
+                  aria-label="Forward"
+                  title="Forward"
+                >
+                  <ArrowRight size={16} aria-hidden="true" />
+                </button>
+              </div>
+            )}
             {onExpand && (
               <button
                 type="button"
@@ -283,8 +389,7 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
                 aria-selected={selectedLang === langId}
                 onClick={() => {
                   setSelectedLang(langId);
-                  setActiveUrl(item.solutions[langId]);
-                  setActiveTitle(`${item.problemTitle || ''} — ${langName}`);
+                  navigateNested(item.solutions[langId], `${item.problemTitle || ''} — ${langName}`);
                 }}
               >
                 {langName}
@@ -304,8 +409,7 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
             customPlayerTemplate={customPlayerTemplate}
             onCopyCode={copyCode}
             onSelectSubUrl={(nextUrl, nextTitle) => {
-              setActiveUrl(nextUrl);
-              setActiveTitle(nextTitle);
+              navigateNested(nextUrl, nextTitle);
             }}
           />
         </div>

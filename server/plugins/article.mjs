@@ -1,11 +1,142 @@
 function decodeEntities(text) {
-  return text
-    .replace(/&amp;/g, '&')
-    .replace(/&lt;/g, '<')
-    .replace(/&gt;/g, '>')
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'")
-    .replace(/&nbsp;/g, ' ');
+  if (!text) return '';
+  return String(text)
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+    .replace(/&(#x[0-9a-fA-F]+|#\d+|amp|lt|gt|quot|apos|nbsp|mdash|ndash|hellip|lsquo|rsquo|ldquo|rdquo);/gi, (full, ent) => {
+      if (ent[0] === '#') {
+        const code = ent[1] === 'x' || ent[1] === 'X' ? parseInt(ent.slice(2), 16) : parseInt(ent.slice(1), 10);
+        if (Number.isFinite(code) && code >= 0 && code <= 0x10ffff) {
+          try { return String.fromCodePoint(code); } catch { return full; }
+        }
+        return full;
+      }
+      const map = {
+        amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+        mdash: '—', ndash: '–', hellip: '…', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”',
+      };
+      return map[ent.toLowerCase()] ?? full;
+    });
+}
+
+function htmlFragmentToMarkdown(html) {
+  if (!html) return '';
+  let out = String(html)
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<figure[^>]*>([\s\S]*?)<\/figure>/gi, '\n$1\n')
+    .replace(/<figcaption[^>]*>([\s\S]*?)<\/figcaption>/gi, '\n*$1*\n')
+    .replace(/<pre[^>]*>\s*<code[^>]*>([\s\S]*?)<\/code>\s*<\/pre>/gi, (_, code) => `\n\`\`\`\n${decodeEntities(code.replace(/<[^>]+>/g, ''))}\n\`\`\`\n`)
+    .replace(/<pre[^>]*>([\s\S]*?)<\/pre>/gi, (_, code) => `\n\`\`\`\n${decodeEntities(code.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, ''))}\n\`\`\`\n`)
+    .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, t) => `\n# ${t.replace(/<[^>]+>/g, '').trim()}\n`)
+    .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, t) => `\n## ${t.replace(/<[^>]+>/g, '').trim()}\n`)
+    .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, t) => `\n### ${t.replace(/<[^>]+>/g, '').trim()}\n`)
+    .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, (_, t) => `\n#### ${t.replace(/<[^>]+>/g, '').trim()}\n`)
+    .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, t) => `\n> ${t.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}\n`)
+    .replace(/<img\b([^>]*?)\/?>/gi, (_, attrs) => {
+      const srcM = /\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)')/i.exec(attrs);
+      const src = srcM ? (srcM[1] || srcM[2] || '').trim() : '';
+      if (!src || /\/_\/stat\?event=post\.clientViewed/i.test(src)) return '';
+      const altM = /\balt\s*=\s*(?:"([^"]*)"|'([^']*)')/i.exec(attrs);
+      const alt = altM ? (altM[1] || altM[2] || '').trim() : '';
+      return `\n![${alt}](${src})\n`;
+    })
+    .replace(/<a\b[^>]*\bhref\s*=\s*(?:"([^"]+)"|'([^']+)')[^>]*>([\s\S]*?)<\/a>/gi, (_, h1, h2, inner) => {
+      const href = (h1 || h2 || '').trim();
+      const label = inner.replace(/<[^>]+>/g, '').trim() || href;
+      return `[${label}](${href})`;
+    })
+    .replace(/<(?:strong|b)\b[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, '**$1**')
+    .replace(/<(?:em|i)\b[^>]*>([\s\S]*?)<\/(?:em|i)>/gi, '*$1*')
+    .replace(/<code\b[^>]*>([\s\S]*?)<\/code>/gi, (_, c) => `\`${decodeEntities(c.replace(/<[^>]+>/g, ''))}\``)
+    .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, t) => `\n- ${t.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}`)
+    .replace(/<hr\s*\/?>/gi, '\n---\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '');
+
+  out = decodeEntities(out).replace(/\n{3,}/g, '\n\n').trim();
+  return out;
+}
+
+function parseMediumUrl(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    const host = url.hostname.toLowerCase();
+    const parts = url.pathname.split('/').filter(Boolean);
+    if (host === 'medium.com' || host === 'www.medium.com') {
+      if (parts.length >= 2) {
+        const scope = parts[0]; // @author or publication
+        const slug = parts[parts.length - 1];
+        const idMatch = /([a-f0-9]{8,16})$/i.exec(slug);
+        return {
+          feedUrl: `https://medium.com/feed/${encodeURIComponent(scope)}`,
+          postId: idMatch ? idMatch[1].toLowerCase() : '',
+          slug: slug.toLowerCase(),
+        };
+      }
+    } else if (host.endsWith('.medium.com') && parts.length >= 1) {
+      const slug = parts[parts.length - 1];
+      const idMatch = /([a-f0-9]{8,16})$/i.exec(slug);
+      return {
+        feedUrl: `https://${host}/feed`,
+        postId: idMatch ? idMatch[1].toLowerCase() : '',
+        slug: slug.toLowerCase(),
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function fetchMediumViaRss(rawUrl, signal) {
+  const parsed = parseMediumUrl(rawUrl);
+  if (!parsed) return null;
+
+  const res = await fetch(parsed.feedUrl, {
+    signal,
+    redirect: 'follow',
+    headers: {
+      'User-Agent': 'Mozilla/5.0 (compatible; CodegrillReader/1.0)',
+      Accept: 'application/rss+xml, application/xml, text/xml;q=0.9',
+    },
+  });
+  if (!res.ok) return null;
+  const xml = await res.text();
+  const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
+  let match;
+  let best = null;
+
+  while ((match = itemRegex.exec(xml)) !== null) {
+    const itemXml = match[1];
+    const linkMatch = /<link>([\s\S]*?)<\/link>/i.exec(itemXml) || /<guid[^>]*>([\s\S]*?)<\/guid>/i.exec(itemXml);
+    const itemLink = decodeEntities(linkMatch?.[1] || '').toLowerCase();
+    const idHit = parsed.postId && itemLink.includes(parsed.postId);
+    const slugHit = parsed.slug && itemLink.includes(parsed.slug);
+    if (idHit || slugHit) {
+      best = itemXml;
+      break;
+    }
+  }
+  if (!best) return null;
+
+  const titleMatch = /<title>([\s\S]*?)<\/title>/i.exec(best);
+  const authorMatch = /<dc:creator>([\s\S]*?)<\/dc:creator>/i.exec(best);
+  const contentMatch = /<content:encoded>([\s\S]*?)<\/content:encoded>/i.exec(best)
+    || /<description>([\s\S]*?)<\/description>/i.exec(best);
+  const rawHtml = decodeEntities(contentMatch?.[1] || '');
+  const markdown = htmlFragmentToMarkdown(rawHtml);
+  if (!markdown || markdown.length < 40) return null;
+
+  return {
+    plugin: 'web-article',
+    kind: 'markdown',
+    title: decodeEntities(titleMatch?.[1] || '').trim() || 'Medium Article',
+    author: decodeEntities(authorMatch?.[1] || '').trim(),
+    siteName: 'Medium',
+    content: markdown.slice(0, 80000),
+    sourceUrl: rawUrl,
+  };
 }
 
 function extractMeta(html, attr, key) {
@@ -16,6 +147,25 @@ function extractMeta(html, attr, key) {
   );
   const match = pattern.exec(html);
   return match ? decodeEntities((match[1] || match[2] || '').trim()) : '';
+}
+
+function extractJsonLdBody(html) {
+  const scriptRegex = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  let match;
+  while ((match = scriptRegex.exec(html)) !== null) {
+    try {
+      const parsed = JSON.parse(match[1].trim());
+      const items = Array.isArray(parsed) ? parsed : [parsed];
+      for (const item of items) {
+        if (typeof item?.articleBody === 'string' && item.articleBody.trim().length > 80) {
+          return item.articleBody.trim();
+        }
+      }
+    } catch {
+      // Ignore malformed JSON-LD
+    }
+  }
+  return '';
 }
 
 function extractReadableBlocks(html) {
@@ -72,6 +222,10 @@ export const articlePlugin = {
   async fetch(rawUrl, { signal } = {}) {
     if (!isSafePublicUrl(rawUrl)) throw new Error('Blocked or invalid article URL');
 
+    // Official Medium RSS feed extraction first for medium.com URLs
+    const mediumRss = await fetchMediumViaRss(rawUrl, signal).catch(() => null);
+    if (mediumRss) return mediumRss;
+
     const response = await fetch(rawUrl, {
       signal,
       redirect: 'follow',
@@ -107,7 +261,19 @@ export const articlePlugin = {
       || extractMeta(body, 'name', 'description');
     const siteName = extractMeta(body, 'property', 'og:site_name')
       || new URL(rawUrl).hostname.replace(/^www\./, '');
-    const blocks = extractReadableBlocks(body);
+    let blocks = extractReadableBlocks(body);
+
+    if (!blocks.length) {
+      const ldBody = extractJsonLdBody(body);
+      if (ldBody) {
+        blocks = ldBody
+          .split(/\n{2,}/)
+          .map((p) => p.trim())
+          .filter(Boolean)
+          .slice(0, 60)
+          .map((text) => ({ tag: 'p', text }));
+      }
+    }
 
     return {
       plugin: 'web-article',

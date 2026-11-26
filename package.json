@@ -9,6 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "node scripts/check-catalog.mjs",
+    "test": "node scripts/test-all.mjs",
     "import:roadmap": "node scripts/import-roadmap.mjs",
     "verify:directories": "node scripts/verify-directories.mjs"
   },

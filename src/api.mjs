@@ -1,7 +1,9 @@
 import { BUILTIN_SHEETS } from './sheets.mjs';
 import { DEFAULT_APP_CONFIG, mergeAppConfig } from './config.mjs';
+import { buildProfileUrl, normalizeLinkedProfiles, sanitizeHandle } from './profiles.mjs';
 
 const CUSTOM_SHEETS_KEY = 'codegrill:custom-sheets:v1';
+const LINKED_PROFILES_KEY = 'codegrill:linked-profiles:v1';
 
 function apiUrl(path, baseUrl = DEFAULT_APP_CONFIG.apiBaseUrl) {
   return `${String(baseUrl || '').replace(/\/+$/, '')}${path}`;
@@ -327,6 +329,74 @@ export async function fetchPluginContent(url, locale = 'en', baseUrl) {
     }
   }
 
+function htmlFragmentToMarkdownClient(html) {
+  if (!html) return '';
+  return String(html)
+    .replace(/<script[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[\s\S]*?<\/style>/gi, '')
+    .replace(/<figure[^>]*>([\s\S]*?)<\/figure>/gi, '\n$1\n')
+    .replace(/<figcaption[^>]*>([\s\S]*?)<\/figcaption>/gi, '\n*$1*\n')
+    .replace(/<pre[^>]*>\s*<code[^>]*>([\s\S]*?)<\/code>\s*<\/pre>/gi, (_, code) => `\n\`\`\`\n${code.replace(/<[^>]+>/g, '')}\n\`\`\`\n`)
+    .replace(/<pre[^>]*>([\s\S]*?)<\/pre>/gi, (_, code) => `\n\`\`\`\n${code.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')}\n\`\`\`\n`)
+    .replace(/<h1[^>]*>([\s\S]*?)<\/h1>/gi, (_, t) => `\n# ${t.replace(/<[^>]+>/g, '').trim()}\n`)
+    .replace(/<h2[^>]*>([\s\S]*?)<\/h2>/gi, (_, t) => `\n## ${t.replace(/<[^>]+>/g, '').trim()}\n`)
+    .replace(/<h3[^>]*>([\s\S]*?)<\/h3>/gi, (_, t) => `\n### ${t.replace(/<[^>]+>/g, '').trim()}\n`)
+    .replace(/<h4[^>]*>([\s\S]*?)<\/h4>/gi, (_, t) => `\n#### ${t.replace(/<[^>]+>/g, '').trim()}\n`)
+    .replace(/<blockquote[^>]*>([\s\S]*?)<\/blockquote>/gi, (_, t) => `\n> ${t.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}\n`)
+    .replace(/<img\b([^>]*?)\/?>/gi, (_, attrs) => {
+      const srcM = /\bsrc\s*=\s*(?:"([^"]+)"|'([^']+)')/i.exec(attrs);
+      const src = srcM ? (srcM[1] || srcM[2] || '').trim() : '';
+      if (!src || /\/_\/stat\?event=post\.clientViewed/i.test(src)) return '';
+      const altM = /\balt\s*=\s*(?:"([^"]*)"|'([^']*)')/i.exec(attrs);
+      const alt = altM ? (altM[1] || altM[2] || '').trim() : '';
+      return `\n![${alt}](${src})\n`;
+    })
+    .replace(/<a\b[^>]*\bhref\s*=\s*(?:"([^"]+)"|'([^']+)')[^>]*>([\s\S]*?)<\/a>/gi, (_, h1, h2, inner) => {
+      const href = (h1 || h2 || '').trim();
+      const label = inner.replace(/<[^>]+>/g, '').trim() || href;
+      return `[${label}](${href})`;
+    })
+    .replace(/<(?:strong|b)\b[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, '**$1**')
+    .replace(/<(?:em|i)\b[^>]*>([\s\S]*?)<\/(?:em|i)>/gi, '*$1*')
+    .replace(/<code\b[^>]*>([\s\S]*?)<\/code>/gi, (_, c) => `\`${c.replace(/<[^>]+>/g, '')}\``)
+    .replace(/<li[^>]*>([\s\S]*?)<\/li>/gi, (_, t) => `\n- ${t.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()}`)
+    .replace(/<hr\s*\/?>/gi, '\n---\n')
+    .replace(/<br\s*\/?>/gi, '\n')
+    .replace(/<\/p>/gi, '\n\n')
+    .replace(/<[^>]+>/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
+function parseMediumUrlClient(rawUrl) {
+  try {
+    const u = new URL(rawUrl);
+    const host = u.hostname.toLowerCase();
+    const parts = u.pathname.split('/').filter(Boolean);
+    if ((host === 'medium.com' || host === 'www.medium.com') && parts.length >= 2) {
+      const slug = parts[parts.length - 1];
+      const idMatch = /([a-f0-9]{8,16})$/i.exec(slug);
+      return {
+        feedUrl: `https://medium.com/feed/${encodeURIComponent(parts[0])}`,
+        postId: idMatch ? idMatch[1].toLowerCase() : '',
+        slug: slug.toLowerCase(),
+      };
+    }
+    if (host.endsWith('.medium.com') && parts.length >= 1) {
+      const slug = parts[parts.length - 1];
+      const idMatch = /([a-f0-9]{8,16})$/i.exec(slug);
+      return {
+        feedUrl: `https://${host}/feed`,
+        postId: idMatch ? idMatch[1].toLowerCase() : '',
+        slug: slug.toLowerCase(),
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
   const gh = toGitHubRawClient(url);
   if (gh) {
     try {
@@ -354,10 +424,289 @@ export async function fetchPluginContent(url, locale = 'en', baseUrl) {
     }
   }
 
+  // Medium public RSS fallback (works on static deployments without backend)
+  const medium = parseMediumUrlClient(url);
+  if (medium) {
+    try {
+      const rssRes = await fetch(
+        `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(medium.feedUrl)}`,
+        { signal: AbortSignal.timeout(8000) },
+      );
+      if (rssRes.ok) {
+        const rssData = await rssRes.json();
+        const items = Array.isArray(rssData?.items) ? rssData.items : [];
+        const matched = items.find((item) => {
+          const link = String(item?.link || item?.guid || '').toLowerCase();
+          return (medium.postId && link.includes(medium.postId)) || (medium.slug && link.includes(medium.slug));
+        });
+        if (matched) {
+          const md = htmlFragmentToMarkdownClient(matched.content || matched.description || '');
+          if (md.length >= 40) {
+            return {
+              plugin: 'medium-rss-client',
+              kind: 'markdown',
+              title: matched.title || 'Medium Article',
+              author: matched.author || '',
+              siteName: 'Medium',
+              content: md,
+              sourceUrl: url,
+            };
+          }
+        }
+      }
+    } catch {
+      // Ignore fallback error
+    }
+  }
+
+  // Qiita official public API v2 fallback
+  try {
+    const u = new URL(url);
+    if (u.hostname === 'qiita.com' || u.hostname === 'www.qiita.com') {
+      const m = /^\/[^/]+\/items\/([a-zA-Z0-9]+)/.exec(u.pathname);
+      if (m?.[1]) {
+        const qRes = await fetch(`https://qiita.com/api/v2/items/${encodeURIComponent(m[1])}`, {
+          signal: AbortSignal.timeout(7000),
+        });
+        if (qRes.ok) {
+          const item = await qRes.json();
+          if (item?.body) {
+            return {
+              plugin: 'qiita-api-client',
+              kind: 'markdown',
+              title: item.title || 'Qiita Article',
+              author: item.user?.name || item.user?.id || '',
+              siteName: 'Qiita',
+              content: item.body,
+              sourceUrl: url,
+            };
+          }
+        }
+      }
+    }
+    // DEV.to official public API fallback
+    if (u.hostname === 'dev.to' || u.hostname === 'www.dev.to') {
+      const parts = u.pathname.split('/').filter(Boolean);
+      if (parts.length >= 2) {
+        const dRes = await fetch(
+          `https://dev.to/api/articles/${encodeURIComponent(parts[0])}/${encodeURIComponent(parts[1])}`,
+          { signal: AbortSignal.timeout(7000) },
+        );
+        if (dRes.ok) {
+          const item = await dRes.json();
+          if (item?.body_markdown) {
+            return {
+              plugin: 'devto-api-client',
+              kind: 'markdown',
+              title: item.title || 'DEV Article',
+              author: item.user?.name || '',
+              siteName: 'DEV Community',
+              content: item.body_markdown,
+              sourceUrl: url,
+            };
+          }
+        }
+      }
+    }
+  } catch {
+    // Ignore fallback error
+  }
+
   return {
     plugin: 'fallback',
     kind: 'error',
     title: url,
     sourceUrl: url,
   };
+}
+
+export function readLocalProfiles() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(LINKED_PROFILES_KEY) || '{}');
+    return normalizeLinkedProfiles(raw);
+  } catch {
+    return {};
+  }
+}
+
+export function writeLocalProfiles(profiles) {
+  const clean = normalizeLinkedProfiles(profiles);
+  try {
+    localStorage.setItem(LINKED_PROFILES_KEY, JSON.stringify(clean));
+  } catch {
+    // Ignore storage quota errors
+  }
+  return clean;
+}
+
+export async function fetchRemoteProfiles(profile = DEFAULT_APP_CONFIG.defaultProfile, baseUrl) {
+  try {
+    const res = await fetch(apiUrl(`/api/profiles?profile=${encodeURIComponent(profile)}`, baseUrl), {
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return normalizeLinkedProfiles(data?.profiles || {});
+  } catch {
+    return null;
+  }
+}
+
+export async function saveRemoteProfiles(profiles, profile = DEFAULT_APP_CONFIG.defaultProfile, baseUrl) {
+  const clean = writeLocalProfiles(profiles);
+  try {
+    const res = await fetch(apiUrl(`/api/profiles?profile=${encodeURIComponent(profile)}`, baseUrl), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ profiles: clean }),
+      signal: AbortSignal.timeout(3000),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return normalizeLinkedProfiles(data?.profiles || clean);
+    }
+  } catch {
+    // Offline fallback already saved locally
+  }
+  return clean;
+}
+
+async function syncPlatformProfileBrowser(platformId, handle) {
+  const profileUrl = buildProfileUrl(platformId, handle);
+  if (platformId === 'codeforces') {
+    const res = await fetch(`https://codeforces.com/api/user.info?handles=${encodeURIComponent(handle)}`, {
+      signal: AbortSignal.timeout(7000),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const info = await res.json();
+    if (info?.status !== 'OK' || !info.result?.[0]) throw new Error('User not found');
+    const user = info.result[0];
+    let solved = null;
+    try {
+      const stRes = await fetch(
+        `https://codeforces.com/api/user.status?handle=${encodeURIComponent(handle)}&from=1&count=2000`,
+        { signal: AbortSignal.timeout(7000) },
+      );
+      if (stRes.ok) {
+        const st = await stRes.json();
+        if (st?.status === 'OK' && Array.isArray(st.result)) {
+          const unique = new Set();
+          for (const sub of st.result) {
+            if (sub?.verdict === 'OK' && sub.problem) {
+              unique.add(`${sub.problem.contestId || 'gym'}:${sub.problem.index || sub.problem.name}`);
+            }
+          }
+          solved = unique.size;
+        }
+      }
+    } catch {
+      // Keep rating/rank if status is rate-limited
+    }
+    return {
+      ok: true,
+      platform: platformId,
+      handle,
+      profileUrl,
+      syncedAt: new Date().toISOString(),
+      stats: {
+        platform: platformId,
+        handle,
+        profileUrl,
+        solved,
+        rating: Number.isFinite(user.rating) ? Math.round(user.rating) : null,
+        maxRating: Number.isFinite(user.maxRating) ? Math.round(user.maxRating) : null,
+        rank: user.rank || user.maxRank || '',
+        source: 'live',
+      },
+    };
+  }
+
+  if (platformId === 'atcoder') {
+    const res = await fetch(
+      `https://kenkoooo.com/atcoder/atcoder-api/v3/user/ac_rank?user=${encodeURIComponent(handle)}`,
+      { signal: AbortSignal.timeout(7000) },
+    );
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const ac = await res.json();
+    return {
+      ok: true,
+      platform: platformId,
+      handle,
+      profileUrl,
+      syncedAt: new Date().toISOString(),
+      stats: {
+        platform: platformId,
+        handle,
+        profileUrl,
+        solved: Number.isFinite(ac?.count) ? ac.count : null,
+        rank: Number.isFinite(ac?.rank) ? `AC #${ac.rank + 1}` : '',
+        globalRank: Number.isFinite(ac?.rank) ? ac.rank + 1 : null,
+        source: 'live',
+      },
+    };
+  }
+
+  if (platformId === 'github') {
+    const res = await fetch(`https://api.github.com/users/${encodeURIComponent(handle)}`, {
+      signal: AbortSignal.timeout(7000),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const user = await res.json();
+    return {
+      ok: true,
+      platform: platformId,
+      handle,
+      profileUrl,
+      syncedAt: new Date().toISOString(),
+      stats: {
+        platform: platformId,
+        handle,
+        profileUrl,
+        rank: user.followers ? `${user.followers} followers` : '',
+        extraCount: Number.isFinite(user.public_repos) ? user.public_repos : null,
+        extraLabel: 'repos',
+        source: 'live',
+      },
+    };
+  }
+
+  return {
+    ok: false,
+    platform: platformId,
+    handle,
+    profileUrl,
+    syncedAt: null,
+    stats: null,
+    note: 'Live browser sync is restricted by this platform; enter solved count or rating manually.',
+  };
+}
+
+export async function syncPlatformProfile(platformId, rawHandle, baseUrl) {
+  const handle = sanitizeHandle(platformId, rawHandle);
+  const profileUrl = buildProfileUrl(platformId, handle);
+  if (!handle) return { ok: false, platform: platformId, handle: '', profileUrl: '', note: 'Invalid handle' };
+
+  try {
+    const res = await fetch(
+      apiUrl(`/api/profiles/sync?platform=${encodeURIComponent(platformId)}&handle=${encodeURIComponent(handle)}`, baseUrl),
+      { signal: AbortSignal.timeout(9000) },
+    );
+    if (res.ok) return await res.json();
+  } catch {
+    // Fall through to browser-side CORS-friendly sync
+  }
+
+  try {
+    return await syncPlatformProfileBrowser(platformId, handle);
+  } catch (error) {
+    return {
+      ok: false,
+      platform: platformId,
+      handle,
+      profileUrl,
+      syncedAt: null,
+      stats: null,
+      note: error?.message || 'Could not sync live stats; profile link saved.',
+    };
+  }
 }

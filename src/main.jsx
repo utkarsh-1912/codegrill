@@ -18,13 +18,13 @@ import { SheetsPage } from './SheetsPage.jsx';
 import { ContentViewer, buildViewerPath, formatViewerTitle } from './ContentViewer.jsx';
 import { ViewerPage } from './ViewerPage.jsx';
 import { LedgerDashboard } from './LedgerDashboard.jsx';
+import { PlatformProfiles } from './PlatformProfiles.jsx';
 import { CommandPalette } from './CommandPalette.jsx';
 import { ProblemPracticeBar } from './ProblemPracticeBar.jsx';
 import { AppHeader } from './AppHeader.jsx';
 import { ForgeAtlas } from './ForgeAtlas.jsx';
 import { ErrorBoundary, ErrorPage, NotFoundPage } from './StatusPages.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
-import { Pagination } from './Pagination.jsx';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from './sheets.mjs';
 import { DEFAULT_APP_CONFIG } from './config.mjs';
 import { getMessages } from './i18n.mjs';
@@ -35,9 +35,12 @@ import {
   fetchAllSheets,
   fetchAppConfig,
   fetchDailyChallenge,
+  fetchRemoteProfiles,
   fetchRemoteProgress,
   readLocalCustomSheets,
+  readLocalProfiles,
   resetRemoteProgress,
+  saveRemoteProfiles,
   saveRemoteProgress,
   writeLocalCustomSheets,
 } from './api.mjs';
@@ -135,6 +138,7 @@ function App() {
   const [dailyChallenge, setDailyChallenge] = useState(null);
   const [backendOnline, setBackendOnline] = useState(false);
   const [customSheets, setCustomSheets] = useState(readLocalCustomSheets);
+  const [linkedProfiles, setLinkedProfiles] = useState(readLocalProfiles);
   const [viewerItem, setViewerItem] = useState(null);
   const hydratedRef = useRef(false);
 
@@ -175,7 +179,10 @@ function App() {
       setDailyChallenge(daily);
       if (sheetData.custom) setCustomSheets(sheetData.custom);
       if (health.online) {
-        const remote = await fetchRemoteProgress(remoteConfig.defaultProfile);
+        const [remote, remoteProfiles] = await Promise.all([
+          fetchRemoteProgress(remoteConfig.defaultProfile),
+          fetchRemoteProfiles(remoteConfig.defaultProfile),
+        ]);
         if (active && remote) {
           setPreferences((prev) => ({
             locale: locales.some(({ code }) => code === remote.locale) ? remote.locale : prev.locale,
@@ -186,6 +193,9 @@ function App() {
             streak: Number(remote.streak || prev.streak || 0),
             longestStreak: Number(remote.longestStreak || prev.longestStreak || 0),
           }));
+        }
+        if (active && remoteProfiles && Object.keys(remoteProfiles).length > 0) {
+          setLinkedProfiles((prev) => ({ ...remoteProfiles, ...prev }));
         }
       }
       hydratedRef.current = true;
@@ -302,6 +312,12 @@ function App() {
       else delete nextNotes[slug];
       return { ...current, notes: nextNotes };
     });
+  }
+
+  async function handleSaveProfiles(nextProfiles) {
+    setLinkedProfiles(nextProfiles);
+    const saved = await saveRemoteProfiles(nextProfiles, appConfig.defaultProfile, appConfig.apiBaseUrl);
+    if (saved) setLinkedProfiles(saved);
   }
 
   async function resetProgress() {
@@ -447,6 +463,13 @@ function App() {
             defaultLocale={defaultLocale}
             onOpenProblem={openProblemBySlug}
           />
+          <PlatformProfiles
+            linkedProfiles={linkedProfiles}
+            codegrillSolved={completed.size}
+            apiBaseUrl={appConfig.apiBaseUrl}
+            locale={locale}
+            onSaveProfiles={handleSaveProfiles}
+          />
           <Roadmap roadmap={roadmap} next={next} locale={locale} title={t.nav.roadmap} onOpen={openProblems} />
           {!zenMode && (
             <section className="marketing-section">
@@ -498,7 +521,7 @@ function App() {
           />
         )}
 
-        {page === 'tracks' && <InterviewTracks locale={locale} title={t.nav.tracks} onOpenViewer={setViewerItem} />}
+        {page === 'tracks' && <InterviewTracks locale={locale} title={t.nav.tracks} onOpenViewer={setViewerItem} onNavigate={navigate} />}
         {page === 'resources' && (
           <ResourceDirectory
             locale={locale}
@@ -706,9 +729,7 @@ function ProblemLibrary({
     ? [matches[sharedIndex], ...matches.slice(0, sharedIndex), ...matches.slice(sharedIndex + 1)]
     : matches;
 
-  const totalPages = Math.max(1, Math.ceil(ordered.length / pageSize));
-  const currentPageNum = Math.min(pageNum, totalPages);
-  const visible = ordered.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
+  const visible = ordered;
 
   return (
     <section className="library page-section">
@@ -897,17 +918,6 @@ function ProblemLibrary({
           );
         })}
       </div>
-
-      <Pagination
-        page={currentPageNum}
-        totalItems={ordered.length}
-        pageSize={pageSize}
-        locale={locale}
-        onPageChange={(nextPage) => {
-          setPageNum(nextPage);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
     </section>
   );
 }
@@ -1002,15 +1012,11 @@ function ProblemLink({ slug, locale = 'en' }) {
   );
 }
 
-function ResourceDirectory({ locale, title, pageSize = 12, onOpenViewer }) {
+function ResourceDirectory({ locale, title, onOpenViewer }) {
   const t = getMessages(locale);
   const [language, setLanguage] = useState(locale);
-  const [pageNum, setPageNum] = useState(1);
-  useEffect(() => { setLanguage(locale); setPageNum(1); }, [locale]);
-  const allVisible = directories.filter((entry) => !language || entry.locale === language);
-  const totalPages = Math.max(1, Math.ceil(allVisible.length / pageSize));
-  const currentPageNum = Math.min(pageNum, totalPages);
-  const visible = allVisible.slice((currentPageNum - 1) * pageSize, currentPageNum * pageSize);
+  useEffect(() => { setLanguage(locale); }, [locale]);
+  const visible = directories.filter((entry) => !language || entry.locale === language);
 
   return (
     <section className="page-section">
@@ -1024,7 +1030,7 @@ function ResourceDirectory({ locale, title, pageSize = 12, onOpenViewer }) {
         <SelectDropdown
           ariaLabel={t.resources.allLanguages}
           value={language}
-          onChange={(val) => { setLanguage(val); setPageNum(1); }}
+          onChange={setLanguage}
           prefix={language || undefined}
           options={[
             { value: '', label: t.resources.allLanguages },
@@ -1032,7 +1038,7 @@ function ResourceDirectory({ locale, title, pageSize = 12, onOpenViewer }) {
           ]}
         />
       </div>
-      <p className="result-count" role="status">{allVisible.length} {t.resources.directoriesUnit}</p>
+      <p className="result-count" role="status">{visible.length} {t.resources.directoriesUnit}</p>
       <ul className="directory-list">
         {visible.map((entry) => {
           const platform = sourcePlatform(entry.url);
@@ -1061,16 +1067,6 @@ function ResourceDirectory({ locale, title, pageSize = 12, onOpenViewer }) {
           );
         })}
       </ul>
-      <Pagination
-        page={currentPageNum}
-        totalItems={allVisible.length}
-        pageSize={pageSize}
-        locale={locale}
-        onPageChange={(nextPage) => {
-          setPageNum(nextPage);
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }}
-      />
     </section>
   );
 }
@@ -1131,17 +1127,46 @@ function ResourceLinks({ links, problemTitle, moduleId, onOpenViewer }) {
 
 const ALLOCATION_COLORS = ['#ff693d', '#f59e0b', '#ea580c', '#fb923c', '#d97706', '#c2410c'];
 
-function InterviewTracks({ locale, title, onOpenViewer }) {
+function InterviewTracks({ locale, title, onOpenViewer, onNavigate }) {
   const t = getMessages(locale);
   const [roleId, setRoleId] = useState(roles[0]?.id || '');
   const [levelId, setLevelId] = useState(levels[1]?.id || levels[0]?.id || '');
   const [activeModuleIndex, setActiveModuleIndex] = useState(0);
+  const [doneModules, setDoneModules] = useState(() => {
+    try {
+      return new Set(JSON.parse(localStorage.getItem('codegrill:modules:v1') || '[]'));
+    } catch {
+      return new Set();
+    }
+  });
   const role = roles.find(({ id }) => id === roleId);
   const visible = modules.filter((item) => item.roles.includes(roleId) && item.levels.includes(levelId));
   useEffect(() => { setActiveModuleIndex(0); }, [roleId, levelId]);
+
+  function toggleModuleDone(id) {
+    setDoneModules((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      try {
+        localStorage.setItem('codegrill:modules:v1', JSON.stringify([...next]));
+      } catch {
+        // Ignore storage errors
+      }
+      return next;
+    });
+  }
+
   const trackLabel = (id) => t.tracks.labels[id] ?? id.replaceAll('_', ' ');
   const weightEntries = Object.entries(role.module_weights_by_level[levelId] || {})
     .sort((a, b) => b[1] - a[1]);
+
+  const safeIndex = Math.min(activeModuleIndex, Math.max(0, visible.length - 1));
+  const activeMod = visible[safeIndex] || null;
+  const activeLinks = activeMod ? resourcesFor(activeMod.resources, locale, defaultLocale) : [];
+  const prevMod = safeIndex > 0 ? visible[safeIndex - 1] : null;
+  const nextMod = safeIndex < visible.length - 1 ? visible[safeIndex + 1] : null;
+  const completedInTrack = visible.filter((m) => doneModules.has(m.id)).length;
 
   return (
     <section className="page-section">
@@ -1218,59 +1243,117 @@ function InterviewTracks({ locale, title, onOpenViewer }) {
           })}
         </div>
       </Card>
-      <h2 className="module-title">{t.tracks.learningModules}</h2>
-      <p className="result-count" role="status">{visible.length}</p>
-      {!visible.length && <p className="library-empty">{t.tracks.empty}</p>}
-      <div className="connected-module-list">
-        {visible.map((item, idx) => {
-          const isOpen = idx === activeModuleIndex;
-          const prevMod = idx > 0 ? visible[idx - 1] : null;
-          const nextMod = idx < visible.length - 1 ? visible[idx + 1] : null;
-          return (
-            <div key={item.id} className={`connected-module-step ${isOpen ? 'is-active' : ''}`}>
-              <div className="module-rail-node" aria-hidden="true">
-                <span>{String(idx + 1).padStart(2, '0')}</span>
-              </div>
-              <Card variant="outlined" className="connected-module-card">
-                <button
-                  type="button"
-                  className="connected-module-trigger"
-                  aria-expanded={isOpen}
-                  onClick={() => setActiveModuleIndex(isOpen ? -1 : idx)}
-                >
-                  <span lang={item.titles[locale] ? locale : defaultLocale}>{pickLabel(item.titles, locale)}</span>
-                  <ChevronRight size={17} aria-hidden="true" />
-                </button>
-                {isOpen && (
-                  <div className="connected-module-body">
-                    <Resources
-                      resources={item.resources}
-                      locale={locale}
-                      problemTitle={pickLabel(item.titles, locale)}
-                      moduleId={item.id}
-                      onOpenViewer={onOpenViewer}
-                    />
-                    {(prevMod || nextMod) && (
-                      <div className="module-step-nav">
-                        {prevMod ? (
-                          <Button variant="outlined" size="sm" onClick={() => setActiveModuleIndex(idx - 1)}>
-                            <ChevronLeft size={15} aria-hidden="true" /> {pickLabel(prevMod.titles, locale)}
-                          </Button>
-                        ) : <span />}
-                        {nextMod ? (
-                          <Button variant="solid" size="sm" onClick={() => setActiveModuleIndex(idx + 1)}>
-                            {pickLabel(nextMod.titles, locale)} <ChevronRight size={15} aria-hidden="true" />
-                          </Button>
-                        ) : <span />}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </Card>
-            </div>
-          );
-        })}
+      <div className="module-studio-header">
+        <div>
+          <h2 className="module-title">{t.tracks.learningModules}</h2>
+          <p className="result-count" role="status">
+            {completedInTrack}/{visible.length} {t.progress.solvedOf}
+          </p>
+        </div>
+        {visible.length > 0 && (
+          <div className="module-studio-progress">
+            <progress value={completedInTrack} max={Math.max(1, visible.length)} aria-label={t.tracks.learningModules} />
+          </div>
+        )}
       </div>
+
+      {!visible.length && <p className="library-empty">{t.tracks.empty}</p>}
+
+      {activeMod && (
+        <div className="module-studio">
+          <aside className="module-syllabus" aria-label={t.tracks.learningModules}>
+            {visible.map((item, idx) => {
+              const isSelected = idx === safeIndex;
+              const isDone = doneModules.has(item.id);
+              const itemLinks = resourcesFor(item.resources, locale, defaultLocale);
+              return (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`syllabus-item ${isSelected ? 'is-selected' : ''} ${isDone ? 'is-done' : ''}`}
+                  aria-current={isSelected ? 'step' : undefined}
+                  onClick={() => setActiveModuleIndex(idx)}
+                >
+                  <span className="syllabus-num">
+                    {isDone ? <Check size={14} aria-hidden="true" /> : String(idx + 1).padStart(2, '0')}
+                  </span>
+                  <span className="syllabus-copy">
+                    <strong lang={item.titles[locale] ? locale : defaultLocale}>
+                      {pickLabel(item.titles, locale)}
+                    </strong>
+                    <small>{itemLinks.length} {t.problems.resourcesTitle.toLowerCase()}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </aside>
+
+          <Card variant="outlined" className="module-stage">
+            <div className="module-stage-top">
+              <div className="module-stage-meta">
+                <span className="viewer-seq-badge">
+                  {String(safeIndex + 1).padStart(2, '0')} / {String(visible.length).padStart(2, '0')}
+                </span>
+                <label className="module-done-toggle">
+                  <input
+                    type="checkbox"
+                    checked={doneModules.has(activeMod.id)}
+                    onChange={() => toggleModuleDone(activeMod.id)}
+                  />
+                  <span>{doneModules.has(activeMod.id) ? t.roadmap.statusComplete : t.problems.markSolved}</span>
+                </label>
+              </div>
+              <h3 lang={activeMod.titles[locale] ? locale : defaultLocale}>
+                {pickLabel(activeMod.titles, locale)}
+              </h3>
+              {activeLinks[0] && (
+                <div className="module-stage-cta">
+                  <Button
+                    variant="solid"
+                    size="sm"
+                    onClick={() => {
+                      const primary = activeLinks.find((l) => l.kind === 'video') || activeLinks[0];
+                      onNavigate(buildViewerPath({
+                        url: primary.url,
+                        title: formatViewerTitle(pickLabel(activeMod.titles, locale), primary.title),
+                        kind: primary.kind === 'video' ? 'video' : 'article',
+                        moduleId: activeMod.id,
+                      }));
+                    }}
+                  >
+                    <Play size={14} aria-hidden="true" /> {activeLinks.some((l) => l.kind === 'video') ? t.problems.watchVideo : t.problems.readArticle}
+                  </Button>
+                </div>
+              )}
+            </div>
+
+            <div className="module-stage-resources">
+              <Resources
+                resources={activeMod.resources}
+                locale={locale}
+                problemTitle={pickLabel(activeMod.titles, locale)}
+                moduleId={activeMod.id}
+                onOpenViewer={onOpenViewer}
+              />
+            </div>
+
+            {(prevMod || nextMod) && (
+              <div className="module-stage-footer">
+                {prevMod ? (
+                  <Button variant="outlined" size="sm" onClick={() => setActiveModuleIndex(safeIndex - 1)}>
+                    <ChevronLeft size={15} aria-hidden="true" /> {pickLabel(prevMod.titles, locale)}
+                  </Button>
+                ) : <span />}
+                {nextMod ? (
+                  <Button variant="solid" size="sm" onClick={() => setActiveModuleIndex(safeIndex + 1)}>
+                    {pickLabel(nextMod.titles, locale)} <ChevronRight size={15} aria-hidden="true" />
+                  </Button>
+                ) : <span />}
+              </div>
+            )}
+          </Card>
+        </div>
+      )}
     </section>
   );
 }
