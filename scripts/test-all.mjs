@@ -13,6 +13,14 @@ import {
 import { BUILTIN_SHEETS, normalizeCustomSheet } from '../src/sheets.mjs';
 import { ROADMAP_DOMAINS, buildDomainRoadmap } from '../src/domainRoadmaps.mjs';
 import { CODEFORCES_PROBLEMS, HACKERRANK_PROBLEMS, mergeCatalogProblems } from '../src/externalProblems.mjs';
+import {
+  ROOM_FORMATS,
+  buildRoomDebriefMarkdown,
+  buildRoomShareUrl,
+  createDefaultRoomState,
+  parseRoomInput,
+  roomsDirectory,
+} from '../src/rooms.mjs';
 import { getMessages } from '../src/i18n.mjs';
 import { createStore } from '../server/store.mjs';
 import { createPluginRegistry } from '../server/plugins/registry.mjs';
@@ -97,5 +105,37 @@ const merged = mergeCatalogProblems([{ slug: 'two-sum', leetcode_id: 1, leetcode
 assert.equal(merged.length, 1 + CODEFORCES_PROBLEMS.length + HACKERRANK_PROBLEMS.length);
 assert.ok(BUILTIN_SHEETS.some((s) => s.id === 'codeforces-core'), 'Missing codeforces-core sheet');
 assert.ok(BUILTIN_SHEETS.some((s) => s.id === 'hackerrank-kit'), 'Missing hackerrank-kit sheet');
+
+// 9. Study Rooms & Mock Interview Studio helpers
+assert.equal(ROOM_FORMATS.length, 4);
+const dir = roomsDirectory();
+const parsedId = parseRoomInput('abc12345', dir);
+assert.equal(parsedId?.roomId, 'abc12345');
+const parsedShare = parseRoomInput('https://codegrill.app/rooms?room=xyz98765&mode=hld&problem=two-sum', dir);
+assert.equal(parsedShare?.roomId, 'xyz98765');
+assert.equal(parsedShare?.mode, 'hld');
+assert.equal(parsedShare?.problem, 'two-sum');
+const parsedColabs = parseRoomInput('https://utkristi-colabs.vercel.app/editor/room99', dir);
+assert.equal(parsedColabs?.roomId, 'room99');
+assert.equal(
+  buildRoomShareUrl('https://codegrill.app', { roomId: 'room99', mode: 'lld', problem: 'two-sum' }),
+  'https://codegrill.app/rooms?room=room99&mode=lld&problem=two-sum',
+);
+const defState = createDefaultRoomState('hld');
+assert.equal(defState.mode, 'hld');
+assert.ok(defState.checklist.length >= 4);
+const debrief = buildRoomDebriefMarkdown({
+  roomId: 'room99',
+  mode: 'hld',
+  exerciseTitle: 'Design a URL Shortener',
+  role: 'interviewer',
+  participants: ['Alex (interviewer)'],
+  elapsedMin: 40,
+  checklist: defState.checklist.map((_, i) => i < 3),
+  scores: { approach: 4, communication: 4, execution: 3, tradeoffs: 4 },
+  notes: '## Architecture',
+});
+assert.ok(debrief.includes('Strong Hire'));
+assert.ok(debrief.includes('Design a URL Shortener'));
 
 console.log('All unit and integration tests passed.');

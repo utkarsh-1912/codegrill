@@ -157,6 +157,8 @@ function currentPage() {
     topic: page === 'problems' && !problemParam && categories.some(({ id }) => id === topicParam) ? topicParam : '',
     roadmapDomain: page === 'roadmap' ? validDomain : '',
     roadmapTopic: page === 'roadmap' ? topicParam : '',
+    roomId: page === 'rooms' ? (params.get('room') || '') : '',
+    roomMode: page === 'rooms' ? (params.get('mode') || '') : '',
     viewerUrl: page === 'viewer' ? (params.get('url') || '') : '',
     viewerTitle: page === 'viewer' ? (params.get('title') || '') : '',
     viewerKind: page === 'viewer' ? (params.get('kind') || '') : '',
@@ -169,7 +171,7 @@ function App() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [preferences, setPreferences] = useState(readPreferences);
   const { locale, completed, bookmarked, notes, activity, streak, longestStreak } = preferences;
-  const [{ page, pathname, problem: sharedProblem, topic, roadmapDomain, roadmapTopic, viewerUrl, viewerTitle, viewerKind, viewerLang, viewerModuleId }, setLocation] = useState(currentPage);
+  const [{ page, pathname, problem: sharedProblem, topic, roadmapDomain, roadmapTopic, roomId, roomMode, viewerUrl, viewerTitle, viewerKind, viewerLang, viewerModuleId }, setLocation] = useState(currentPage);
   const [zenMode, setZenMode] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [appConfig, setAppConfig] = useState(DEFAULT_APP_CONFIG);
@@ -606,7 +608,17 @@ function App() {
           />
         )}
         {page === 'rooms' && (
-          <StudyRooms locale={locale} title={t.nav.rooms}>
+          <StudyRooms
+            locale={locale}
+            defaultLocale={defaultLocale}
+            title={t.nav.rooms}
+            problems={problems}
+            activeRoomId={roomId}
+            activeMode={roomMode}
+            sharedProblem={sharedProblem}
+            onNavigate={navigate}
+            onOpenProblem={openProblemBySlug}
+          >
             {sharedProblem && <ProblemLink slug={sharedProblem} locale={locale} />}
           </StudyRooms>
         )}
