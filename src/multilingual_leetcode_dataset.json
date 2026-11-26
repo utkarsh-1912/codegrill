@@ -1,0 +1,2434 @@
+{
+  "schema_version": "2.0.0",
+  "generated_at": "2026-11-26",
+  "platform_metadata": {
+    "name": "Multilingual Multi-Role Interview Prep Platform Seed Dataset (DSA + System Design + AI Engineer + FDE)",
+    "default_locale": "en",
+    "fallback_strategy": "requested_locale -> en (with YouTube cc_lang_pref=<locale>&cc_load_policy=1)",
+    "supported_locales": [
+      {
+        "code": "en",
+        "bcp47": "en-US",
+        "native_name": "English",
+        "font_stack": "Inter, system-ui, sans-serif",
+        "primary_blog_platforms": [
+          "medium",
+          "devto"
+        ]
+      },
+      {
+        "code": "ja",
+        "bcp47": "ja-JP",
+        "native_name": "日本語",
+        "font_stack": "'Noto Sans JP', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', sans-serif",
+        "primary_blog_platforms": [
+          "zenn",
+          "qiita",
+          "hatena",
+          "medium"
+        ],
+        "ecosystem_note": "Japanese DSA authors publish primarily on Zenn and Qiita; Medium Japanese DSA coverage is sparse."
+      },
+      {
+        "code": "hi",
+        "bcp47": "hi-IN",
+        "native_name": "हिन्दी",
+        "font_stack": "'Noto Sans Devanagari', Inter, sans-serif",
+        "primary_blog_platforms": [
+          "medium",
+          "hashnode"
+        ]
+      },
+      {
+        "code": "es",
+        "bcp47": "es-ES",
+        "native_name": "Español",
+        "font_stack": "Inter, system-ui, sans-serif",
+        "primary_blog_platforms": [
+          "medium",
+          "devto"
+        ]
+      },
+      {
+        "code": "zh",
+        "bcp47": "zh-Hant",
+        "native_name": "中文",
+        "font_stack": "'Noto Sans TC', 'Noto Sans SC', sans-serif",
+        "primary_blog_platforms": [
+          "medium",
+          "juejin",
+          "csdn"
+        ]
+      },
+      {
+        "code": "ko",
+        "bcp47": "ko-KR",
+        "native_name": "한국어",
+        "font_stack": "'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif",
+        "primary_blog_platforms": [
+          "velog",
+          "tistory",
+          "medium"
+        ]
+      }
+    ],
+    "official_references": {
+      "neetcode_home": "https://neetcode.io/",
+      "neetcode_roadmap": "https://neetcode.io/roadmap",
+      "neetcode_github_solutions": "https://github.com/neetcode-gh/leetcode",
+      "neetcode_judge0_helper": "https://github.com/neetcode-gh/judge0-custom-helper"
+    },
+    "recommended_backend_stack": {
+      "authentication": {
+        "provider": "Firebase Authentication",
+        "server_verification_docs": "https://firebase.google.com/docs/auth/admin/verify-id-tokens",
+        "session_cookies_docs": "https://firebase.google.com/docs/auth/admin/manage-cookies",
+        "custom_claims_docs": "https://firebase.google.com/docs/auth/admin/custom-claims",
+        "identity_key": "firebase_uid"
+      },
+      "database": {
+        "provider": "Neon Serverless PostgreSQL",
+        "connection_pooling_docs": "https://neon.com/docs/connect/connection-pooling",
+        "serverless_driver_docs": "https://neon.com/docs/serverless/serverless-driver",
+        "prisma_guide": "https://neon.com/docs/guides/prisma",
+        "drizzle_guide": "https://neon.com/docs/guides/drizzle",
+        "env_vars": [
+          "DATABASE_URL (pooled)",
+          "DATABASE_URL_UNPOOLED (direct migrations)"
+        ]
+      },
+      "code_execution": {
+        "provider": "Judge0",
+        "docs": "https://ce.judge0.com/",
+        "custom_helper_repo": "https://github.com/neetcode-gh/judge0-custom-helper"
+      },
+      "spaced_repetition": {
+        "library": "ts-fsrs",
+        "repo": "https://github.com/open-spaced-repetition/ts-fsrs"
+      }
+    }
+  },
+  "roadmap_categories": [
+    {
+      "id": "arrays-hashing",
+      "order": 1,
+      "prerequisites": [],
+      "labels": {
+        "en": "Arrays & Hashing",
+        "ja": "配列・ハッシュマップ",
+        "hi": "ऐरे और हैशिंग",
+        "es": "Arreglos y Hashing",
+        "zh": "陣列與雜湊表",
+        "ko": "배열과 해싱"
+      }
+    },
+    {
+      "id": "two-pointers",
+      "order": 2,
+      "prerequisites": [
+        "arrays-hashing"
+      ],
+      "labels": {
+        "en": "Two Pointers",
+        "ja": "ツーポインタ",
+        "hi": "टू पॉइंटर्स",
+        "es": "Dos Punteros",
+        "zh": "雙指針",
+        "ko": "투 포인터"
+      }
+    },
+    {
+      "id": "sliding-window",
+      "order": 3,
+      "prerequisites": [
+        "two-pointers"
+      ],
+      "labels": {
+        "en": "Sliding Window",
+        "ja": "スライディングウィンドウ",
+        "hi": "स्लाइडिंग विंडो",
+        "es": "Ventana Deslizante",
+        "zh": "滑動視窗",
+        "ko": "슬라이딩 윈도우"
+      }
+    },
+    {
+      "id": "stack",
+      "order": 4,
+      "prerequisites": [
+        "arrays-hashing"
+      ],
+      "labels": {
+        "en": "Stack",
+        "ja": "スタック",
+        "hi": "स्टैक",
+        "es": "Pila",
+        "zh": "堆疊",
+        "ko": "스택"
+      }
+    },
+    {
+      "id": "binary-search",
+      "order": 5,
+      "prerequisites": [
+        "two-pointers"
+      ],
+      "labels": {
+        "en": "Binary Search",
+        "ja": "二分探索",
+        "hi": "बाइनरी सर्च",
+        "es": "Búsqueda Binaria",
+        "zh": "二分搜尋",
+        "ko": "이진 탐색"
+      }
+    },
+    {
+      "id": "linked-list",
+      "order": 6,
+      "prerequisites": [
+        "two-pointers"
+      ],
+      "labels": {
+        "en": "Linked List",
+        "ja": "連結リスト",
+        "hi": "लिंक्ड लिस्ट",
+        "es": "Lista Enlazada",
+        "zh": "鏈結串列",
+        "ko": "연결 리스트"
+      }
+    },
+    {
+      "id": "trees",
+      "order": 7,
+      "prerequisites": [
+        "linked-list",
+        "binary-search"
+      ],
+      "labels": {
+        "en": "Trees",
+        "ja": "二分木・木構造",
+        "hi": "ट्रीज़",
+        "es": "Árboles",
+        "zh": "樹狀結構",
+        "ko": "트리"
+      }
+    },
+    {
+      "id": "graphs",
+      "order": 8,
+      "prerequisites": [
+        "trees"
+      ],
+      "labels": {
+        "en": "Graphs",
+        "ja": "グラフ",
+        "hi": "ग्राफ्स",
+        "es": "Grafos",
+        "zh": "圖論",
+        "ko": "그래프"
+      }
+    },
+    {
+      "id": "1d-dp",
+      "order": 9,
+      "prerequisites": [
+        "trees"
+      ],
+      "labels": {
+        "en": "1-D Dynamic Programming",
+        "ja": "1次元動的計画法 (DP)",
+        "hi": "1-D डायनामिक प्रोग्रामिंग",
+        "es": "Programación Dinámica 1-D",
+        "zh": "一維動態規劃",
+        "ko": "1차원 동적 계획법"
+      }
+    }
+  ],
+  "curated_channels_and_hubs": {
+    "en": [
+      {
+        "name": "NeetCode",
+        "sample_url": "https://www.youtube.com/watch?v=KLlXCFG5TnA",
+        "focus": "Blind 75 & NeetCode 150 Python/visual walkthroughs"
+      },
+      {
+        "name": "freeCodeCamp.org (NeetCode 150 Full Course)",
+        "sample_url": "https://www.youtube.com/watch?v=T0u5nwSA0w0",
+        "focus": "Complete NeetCode 150 video course with chapter timestamps"
+      }
+    ],
+    "ja": [
+      {
+        "name": "電算機学習チャンネル",
+        "channel_id": "UCzsFjATh3acpWEJQUuSnHVw",
+        "sample_url": "https://www.youtube.com/watch?v=hdw_rmmA4fg",
+        "focus": "Structured Japanese LeetCode C++ walkthroughs across core patterns"
+      },
+      {
+        "name": "BeEngineer JP",
+        "channel_id": "UCU0ams_8SA6rtoYvI2yi5Ig",
+        "sample_url": "https://www.youtube.com/watch?v=LO7CSuCuHsM",
+        "focus": "Visual Japanese NeetCode 150 / 250 TypeScript diagrams"
+      },
+      {
+        "name": "CodingNinjaJP",
+        "channel_id": "UChOcZcNSt7S8yolGA3uhOiA",
+        "sample_url": "https://www.youtube.com/watch?v=gu2acTzHZq0",
+        "focus": "Beginner-friendly Japanese whiteboard + Python explanations"
+      },
+      {
+        "name": "Peter刷Leetcode",
+        "channel_id": "UCXvVl7xrEOdzZSE-mHr12Fg",
+        "sample_url": "https://www.youtube.com/watch?v=H6Z0CbBjdCE",
+        "focus": "Japanese-narrated Python/Java solutions paired with Qiita articles"
+      },
+      {
+        "name": "Taijin の Silicon Valley 大学",
+        "channel_id": "UCHmUP5nNksLNCSgag1aVl7A",
+        "sample_url": "https://www.youtube.com/watch?v=RFiNN6-qdS0",
+        "focus": "Japanese FAANG coding interview prep"
+      }
+    ],
+    "hi": [
+      {
+        "name": "Shradha Khapra (Apna College DSA Series)",
+        "channel_id": "UC1XBh-m27kkgwLAwu_SRJBg",
+        "sample_url": "https://www.youtube.com/watch?v=f8RPIb-0DDE",
+        "focus": "Hindi/Hinglish DSA placement series covering LeetCode problems"
+      },
+      {
+        "name": "Striver (take U forward)",
+        "channel_id": "UCvEKHATlVq84hm1jduTYm8g",
+        "sample_url": "https://www.youtube.com/watch?v=awddneKbFIk",
+        "focus": "A2Z DSA roadmap & LeetCode strategy"
+      },
+      {
+        "name": "codestorywithMIK",
+        "channel_id": "UCaw58edcO3ZqMw76Bvs0kGQ",
+        "sample_url": "https://www.youtube.com/watch?v=81h8O-0U5oo",
+        "focus": "In-depth Hindi/Hinglish LeetCode live coding walkthroughs"
+      }
+    ],
+    "es": [
+      {
+        "name": "Air Devs",
+        "channel_id": "UCCBK_0TRYqm2iKMY1-8Pkbw",
+        "sample_url": "https://www.youtube.com/watch?v=OzMXyDUi1io",
+        "focus": "Spanish LeetCode Python walkthroughs"
+      },
+      {
+        "name": "Leetcode en español",
+        "channel_id": "UCHBpmXls2ofe0eMVtCjdlrA",
+        "sample_url": "https://www.youtube.com/watch?v=tdo3t6Qkn8U",
+        "focus": "Dedicated Spanish LeetCode interview explanations"
+      }
+    ],
+    "zh": [
+      {
+        "name": "Nollie Chen",
+        "channel_id": "UCBxcBn2oQXzZyJYL2Aw-vFA",
+        "sample_url": "https://www.youtube.com/watch?v=e5PfKgmPk6o",
+        "focus": "Chinese LeetCode & NeetCode 150 roadmap guide"
+      },
+      {
+        "name": "Sean Chou (Medium — Recording everything)",
+        "sample_url": "https://medium.com/%E6%8A%80%E8%A1%93%E7%AD%86%E8%A8%98/leetcode-%E8%A7%A3%E9%A1%8C%E7%B4%80%E9%8C%84-200-number-of-islands-639908d1049e",
+        "focus": "Traditional Chinese Medium LeetCode walkthrough series"
+      }
+    ],
+    "ko": [
+      {
+        "name": "승지니어 Sengineer",
+        "channel_id": "UCW4ixpFivk6eJl8b5bFOLkg",
+        "sample_url": "https://www.youtube.com/watch?v=KLX44z_NnYc",
+        "focus": "Korean technical interview live coding on LeetCode"
+      },
+      {
+        "name": "Velog LeetCode Series (dadumvu)",
+        "sample_url": "https://velog.io/@dadumvu/series/%EC%95%8C%EA%B3%A0%EB%A6%AC%EC%A6%98-%EB%AC%B8%EC%A0%9C%ED%92%80%EC%9D%B4Leetcode",
+        "focus": "Korean algorithm & LeetCode blog series on Velog"
+      }
+    ]
+  },
+  "problems": [
+    {
+      "leetcode_id": 1,
+      "slug": "two-sum",
+      "difficulty": "Easy",
+      "category_id": "arrays-hashing",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/two-sum/",
+      "optimal_approach": "One-Pass Hash Map",
+      "time_complexity": "O(n)",
+      "space_complexity": "O(n)",
+      "translations": {
+        "en": {
+          "title": "Two Sum"
+        },
+        "ja": {
+          "title": "2数の和 (Two Sum)"
+        },
+        "hi": {
+          "title": "दो संख्याओं का योग (Two Sum)"
+        },
+        "es": {
+          "title": "Suma de Dos Números (Two Sum)"
+        },
+        "zh": {
+          "title": "兩數之和 (Two Sum)"
+        },
+        "ko": {
+          "title": "두 수의 합 (Two Sum)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Two Sum - Leetcode 1 - HashMap - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=KLlXCFG5TnA"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "medium",
+              "title": "LeetCode 1 - Two Sum (NeetCode 150)",
+              "url": "https://abubinfahd.medium.com/leetcode-1-two-sum-neetcode-150-fbdcd2ef37e6"
+            },
+            {
+              "platform": "medium",
+              "title": "Arrays and Hashing: Two Sum — Python Programming Solution",
+              "url": "https://nikitaashah.medium.com/arrays-and-hashing-two-sum-python-programming-solution-1af9f3aa82dc"
+            }
+          ]
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "Two Sum leetcode 1 -【超簡単】Two Sum問題を徹底解説！",
+              "channel": "CodingNinjaJP",
+              "url": "https://www.youtube.com/watch?v=gu2acTzHZq0"
+            },
+            {
+              "title": "[Leetcode] 1. Two Sum (日本語で解説) - Python",
+              "channel": "Peter刷Leetcode",
+              "url": "https://www.youtube.com/watch?v=IHTtwey2Yug"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "zenn",
+              "title": "LeetCode解説（Q1: Two Sum）",
+              "url": "https://zenn.dev/bizibl_fumi/articles/8e5876252a5444"
+            },
+            {
+              "platform": "qiita",
+              "title": "LeetCodeのTwo Sum問題の解法説明",
+              "url": "https://qiita.com/peterchen/items/bc1d0d738678f7a9c286"
+            }
+          ]
+        },
+        "es": {
+          "youtube": [
+            {
+              "title": "Leetcode - TwoSum ESPAÑOL",
+              "channel": "Air Devs",
+              "url": "https://www.youtube.com/watch?v=OzMXyDUi1io"
+            }
+          ],
+          "articles": []
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [
+            {
+              "platform": "medium",
+              "title": "LeetCode 消化道∥ Two Sum 解題筆記 (C++)",
+              "url": "https://medium.com/@chingyu.tung/leetcode-%E6%B6%88%E5%8C%96%E9%81%93-two-sum-%E8%A7%A3%E9%A1%8C%E7%AD%86%E8%A8%98-28f07b6dbf2"
+            },
+            {
+              "platform": "medium",
+              "title": "【 LeetCode 】1. Two Sum",
+              "url": "https://medium.com/@jamielolo/leetcode-1-two-sum-120291e3df06"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 217,
+      "slug": "contains-duplicate",
+      "difficulty": "Easy",
+      "category_id": "arrays-hashing",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/contains-duplicate/",
+      "optimal_approach": "Hash Set",
+      "time_complexity": "O(n)",
+      "space_complexity": "O(n)",
+      "translations": {
+        "en": {
+          "title": "Contains Duplicate"
+        },
+        "ja": {
+          "title": "重複要素の判定 (Contains Duplicate)"
+        },
+        "hi": {
+          "title": "डुप्लिकेट की जाँच (Contains Duplicate)"
+        },
+        "es": {
+          "title": "Contiene Duplicados (Contains Duplicate)"
+        },
+        "zh": {
+          "title": "存在重複元素 (Contains Duplicate)"
+        },
+        "ko": {
+          "title": "중복 요소 포함 여부 (Contains Duplicate)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Contains Duplicate - Leetcode 217 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=3OamzN90kPg"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "medium",
+              "title": "NeetCode 75: Arrays and Hashing (Contains Duplicate, Valid Anagram, Two Sum)",
+              "url": "https://medium.com/@beccajonas3/neetcode-75-arrays-and-hashing-c215f1f750a5"
+            }
+          ]
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "[Leetcode] 217. Contains Duplicate (日本語で解説) - Python & Java",
+              "channel": "Peter刷Leetcode",
+              "url": "https://www.youtube.com/watch?v=xooUVg4114s"
+            },
+            {
+              "title": "LeetCode 217. Contains Duplicate を図解（Easy・TypeScript）",
+              "channel": "BeEngineer JP",
+              "url": "https://www.youtube.com/watch?v=fc3jTTeERYs"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "qiita",
+              "title": "LeetCodeのContains Duplicate問題の解法説明",
+              "url": "https://qiita.com/peterchen/items/f1050505775e373109f7"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 242,
+      "slug": "valid-anagram",
+      "difficulty": "Easy",
+      "category_id": "arrays-hashing",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/valid-anagram/",
+      "optimal_approach": "Character Frequency Count (Array / Hash Map)",
+      "time_complexity": "O(n)",
+      "space_complexity": "O(1) ASCII / O(k) Unicode",
+      "translations": {
+        "en": {
+          "title": "Valid Anagram"
+        },
+        "ja": {
+          "title": "有効なアナグラム (Valid Anagram)"
+        },
+        "hi": {
+          "title": "वैध एनाग्राम (Valid Anagram)"
+        },
+        "es": {
+          "title": "Anagrama Válido (Valid Anagram)"
+        },
+        "zh": {
+          "title": "有效的字母異位詞 (Valid Anagram)"
+        },
+        "ko": {
+          "title": "유효한 애너그램 (Valid Anagram)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Valid Anagram - Leetcode 242 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=9UtInBqnCgA"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "medium",
+              "title": "NeetCode 75: Arrays and Hashing (Contains Duplicate, Valid Anagram, Two Sum)",
+              "url": "https://medium.com/@beccajonas3/neetcode-75-arrays-and-hashing-c215f1f750a5"
+            }
+          ]
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "LeetCode 242. Valid Anagram を図解（Easy・TypeScript）",
+              "channel": "BeEngineer JP",
+              "url": "https://www.youtube.com/watch?v=LO7CSuCuHsM"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "qiita",
+              "title": "【アルゴリズム】ordってなんだ？：Unicodeを活用して (LeetCode 242 Valid Anagram)",
+              "url": "https://qiita.com/qiita_mita/items/3bcac482e98f4bcae142"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 49,
+      "slug": "group-anagrams",
+      "difficulty": "Medium",
+      "category_id": "arrays-hashing",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/group-anagrams/",
+      "optimal_approach": "Hash Map with 26-Char Count Key",
+      "time_complexity": "O(m * n)",
+      "space_complexity": "O(m * n)",
+      "translations": {
+        "en": {
+          "title": "Group Anagrams"
+        },
+        "ja": {
+          "title": "アナグラムのグループ化 (Group Anagrams)"
+        },
+        "hi": {
+          "title": "एनाग्राम समूहन (Group Anagrams)"
+        },
+        "es": {
+          "title": "Agrupar Anagramas (Group Anagrams)"
+        },
+        "zh": {
+          "title": "字母異位詞分組 (Group Anagrams)"
+        },
+        "ko": {
+          "title": "애너그램 그룹화 (Group Anagrams)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Group Anagrams - Categorize Strings by Count - Leetcode 49",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=vzdNOK2oB2E"
+            }
+          ],
+          "articles": []
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "[Leetcode] 49. Group Anagrams (日本語で解説) - Python",
+              "channel": "Peter刷Leetcode",
+              "url": "https://www.youtube.com/watch?v=xCDWlhnQoBE"
+            },
+            {
+              "title": "LeetCode 49. Group Anagrams を図解（Medium・TypeScript）",
+              "channel": "BeEngineer JP",
+              "url": "https://www.youtube.com/watch?v=hiRjii7o1H4"
+            },
+            {
+              "title": "【LeetCode 日本語解説】49. Group Anagrams",
+              "channel": "電算機学習チャンネル",
+              "url": "https://www.youtube.com/watch?v=HgSsJ8W6If0"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "hatena",
+              "title": "49. Group Anagramsを解いた",
+              "url": "https://p0ny.hatenablog.com/entry/2020/03/15/213608"
+            },
+            {
+              "platform": "zenn",
+              "title": "【Python3】コーディングテスト用チートシート（練習問題付き）",
+              "url": "https://zenn.dev/yutohub/articles/1dea6baae5a2d4"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 125,
+      "slug": "valid-palindrome",
+      "difficulty": "Easy",
+      "category_id": "two-pointers",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/valid-palindrome/",
+      "optimal_approach": "In-Place Two Pointers",
+      "time_complexity": "O(n)",
+      "space_complexity": "O(1)",
+      "translations": {
+        "en": {
+          "title": "Valid Palindrome"
+        },
+        "ja": {
+          "title": "有効な回文 (Valid Palindrome)"
+        },
+        "hi": {
+          "title": "वैध पैलिंड्रोम (Valid Palindrome)"
+        },
+        "es": {
+          "title": "Palíndromo Válido (Valid Palindrome)"
+        },
+        "zh": {
+          "title": "驗證回文串 (Valid Palindrome)"
+        },
+        "ko": {
+          "title": "유효한 팰린드롬 (Valid Palindrome)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Valid Palindrome - Leetcode 125 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=jJXJ16kPFWg"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "medium",
+              "title": "NeetCode/LeetCode: Python Solutions of Two Pointers Problems",
+              "url": "https://medium.com/@humzanaveed/neetcode-leetcode-python-solutions-of-two-pointers-problems-e762ce5528f0"
+            }
+          ]
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "【LeetCode 日本語解説】125. Valid Palindrome",
+              "channel": "電算機学習チャンネル",
+              "url": "https://www.youtube.com/watch?v=qXZyjySkKx0"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "qiita",
+              "title": "【LeetCode】125. Valid Palindrome 解いてみた【Easy】",
+              "url": "https://qiita.com/haseryo0403/items/27e94e336e2b9effce33"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 15,
+      "slug": "3sum",
+      "difficulty": "Medium",
+      "category_id": "two-pointers",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/3sum/",
+      "optimal_approach": "Sort + Two Pointers",
+      "time_complexity": "O(n^2)",
+      "space_complexity": "O(1) to O(n)",
+      "translations": {
+        "en": {
+          "title": "3Sum"
+        },
+        "ja": {
+          "title": "3数の和 (3Sum)"
+        },
+        "hi": {
+          "title": "तीन संख्याओं का योग (3Sum)"
+        },
+        "es": {
+          "title": "Suma de Tres Números (3Sum)"
+        },
+        "zh": {
+          "title": "三數之和 (3Sum)"
+        },
+        "ko": {
+          "title": "세 수의 합 (3Sum)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "3Sum - Leetcode 15 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=jzZsG8n2R9A"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "medium",
+              "title": "NeetCode/LeetCode: Python Solutions of Two Pointers Problems",
+              "url": "https://medium.com/@humzanaveed/neetcode-leetcode-python-solutions-of-two-pointers-problems-e762ce5528f0"
+            }
+          ]
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "【Leetcode 日本語解説】15. 3Sum",
+              "channel": "電算機学習チャンネル",
+              "url": "https://www.youtube.com/watch?v=WXg6hBpFYEw"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "qiita",
+              "title": "ゼロから始めるLeetCode Day75 「15. 3Sum」",
+              "url": "https://qiita.com/KueharX/items/0eb53bc1a9a17005abb2"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 121,
+      "slug": "best-time-to-buy-and-sell-stock",
+      "difficulty": "Easy",
+      "category_id": "sliding-window",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/",
+      "optimal_approach": "Sliding Window / Running Minimum",
+      "time_complexity": "O(n)",
+      "space_complexity": "O(1)",
+      "translations": {
+        "en": {
+          "title": "Best Time to Buy and Sell Stock"
+        },
+        "ja": {
+          "title": "株を売買する最適なタイミング (Best Time to Buy and Sell Stock)"
+        },
+        "hi": {
+          "title": "स्टॉक खरीदने और बेचने का सर्वोत्तम समय"
+        },
+        "es": {
+          "title": "Mejor Momento para Comprar y Vender Acciones"
+        },
+        "zh": {
+          "title": "買賣股票的最佳時機"
+        },
+        "ko": {
+          "title": "주식을 사고팔기 가장 좋은 시점"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Sliding Window: Best Time to Buy and Sell Stock - Leetcode 121 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=1pkOgXD63yU"
+            }
+          ],
+          "articles": []
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "Leetcode 121 株を売買する最適タイミング | 二つのポインタ",
+              "channel": "Taijin の Silicon Valley 大学",
+              "url": "https://www.youtube.com/watch?v=RFiNN6-qdS0"
+            },
+            {
+              "title": "【解説】LeetCode #121 Best Time to Buy and Sell Stock【Python】",
+              "channel": "KentyTech",
+              "url": "https://www.youtube.com/watch?v=rPjVGMWvdY4"
+            },
+            {
+              "title": "【LeetCode 日本語解説】121. Best Time to Buy and Sell Stock",
+              "channel": "電算機学習チャンネル",
+              "url": "https://www.youtube.com/watch?v=_aySGHaTQaM"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "zenn",
+              "title": "LeetCode 121. Best Time to Buy and Sell Stock",
+              "url": "https://zenn.dev/shimpo/articles/leet-code-121-20250316"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 3,
+      "slug": "longest-substring-without-repeating-characters",
+      "difficulty": "Medium",
+      "category_id": "sliding-window",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/longest-substring-without-repeating-characters/",
+      "optimal_approach": "Sliding Window + Hash Set/Map",
+      "time_complexity": "O(n)",
+      "space_complexity": "O(min(n, m))",
+      "translations": {
+        "en": {
+          "title": "Longest Substring Without Repeating Characters"
+        },
+        "ja": {
+          "title": "重複文字のない最長部分文字列"
+        },
+        "hi": {
+          "title": "बिना दोहराए गए अक्षरों के सबसे लंबा सबस्ट्रिंग"
+        },
+        "es": {
+          "title": "Subcadena Más Larga sin Caracteres Repetidos"
+        },
+        "zh": {
+          "title": "無重複字元的最長子字串"
+        },
+        "ko": {
+          "title": "중복 문자 없는 가장 긴 부분 문자열"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Longest Substring Without Repeating Characters - Leetcode 3 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=wiGpQwVHdE0"
+            }
+          ],
+          "articles": []
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "[Leetcode] 3. Longest Substring Without Repeating Characters (日本語で解説) - Python",
+              "channel": "Peter刷Leetcode",
+              "url": "https://www.youtube.com/watch?v=H6Z0CbBjdCE"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "qiita",
+              "title": "ゼロから始めるLeetCode Day76「3. Longest Substring Without Repeating Characters」",
+              "url": "https://qiita.com/KueharX/items/a54c6d9dd30bb63f631b"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 20,
+      "slug": "valid-parentheses",
+      "difficulty": "Easy",
+      "category_id": "stack",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/valid-parentheses/",
+      "optimal_approach": "Stack + Bracket Map",
+      "time_complexity": "O(n)",
+      "space_complexity": "O(n)",
+      "translations": {
+        "en": {
+          "title": "Valid Parentheses"
+        },
+        "ja": {
+          "title": "有効な括弧 (Valid Parentheses)"
+        },
+        "hi": {
+          "title": "वैध कोष्ठक (Valid Parentheses)"
+        },
+        "es": {
+          "title": "Paréntesis Válidos (Valid Parentheses)"
+        },
+        "zh": {
+          "title": "有效的括號 (Valid Parentheses)"
+        },
+        "ko": {
+          "title": "유효한 괄호 (Valid Parentheses)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Valid Parentheses - Stack - Leetcode 20 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=WTzjTskDFMg"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "medium",
+              "title": "NeetCode 150 / Easy: Valid Parentheses — Stack Pattern Explained",
+              "url": "https://medium.com/@saipranavmoluguri2001/neetcode-150-easy-valid-parentheses-stack-pattern-explained-leetcode-20-c1bc99aff25a"
+            },
+            {
+              "platform": "medium",
+              "title": "Solving Neetcode 150 problems: Valid Parentheses",
+              "url": "https://medium.com/@tejaskhartude/solving-neetcode-150-problems-todays-problem-valid-parentheses-2db438387f8c"
+            }
+          ]
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "[LeetCode 解説] Valid parenthesis",
+              "channel": "シリコンバレーエンジニアの日常",
+              "url": "https://www.youtube.com/watch?v=-5MoizGAkVY"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "zenn",
+              "title": "【LeetCode】20. Valid Parenthesesを解く",
+              "url": "https://zenn.dev/ike_pon/articles/1be9041001f00168c99d"
+            },
+            {
+              "platform": "qiita",
+              "title": "LeetCode / Valid Parentheses",
+              "url": "https://qiita.com/mhiro216/items/0e668490a9ef89a5c7fe"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 704,
+      "slug": "binary-search",
+      "difficulty": "Easy",
+      "category_id": "binary-search",
+      "neetcode_lists": [
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/binary-search/",
+      "optimal_approach": "Iterative Binary Search",
+      "time_complexity": "O(log n)",
+      "space_complexity": "O(1)",
+      "translations": {
+        "en": {
+          "title": "Binary Search"
+        },
+        "ja": {
+          "title": "二分探索 (Binary Search)"
+        },
+        "hi": {
+          "title": "बाइनरी सर्च (Binary Search)"
+        },
+        "es": {
+          "title": "Búsqueda Binaria (Binary Search)"
+        },
+        "zh": {
+          "title": "二分搜尋 (Binary Search)"
+        },
+        "ko": {
+          "title": "이진 탐색 (Binary Search)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Binary Search - Leetcode 704 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=s4DPM8ct1pI"
+            }
+          ],
+          "articles": []
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "Binary Search leetcode 704 - アルゴリズムを最短でマスター！",
+              "channel": "CodingNinjaJP",
+              "url": "https://www.youtube.com/watch?v=NHzHSTmajs8"
+            },
+            {
+              "title": "初心者向け: LeetCode 704 Binary SearchをJavaで解説",
+              "channel": "じゅんてっく",
+              "url": "https://www.youtube.com/watch?v=UMlPFRIfDzo"
+            },
+            {
+              "title": "Leetcode 704 二分探索法 | Binary Search | 初心者向け",
+              "channel": "Taijin の Silicon Valley 大学",
+              "url": "https://www.youtube.com/watch?v=8RlhYfduEfk"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "qiita",
+              "title": "Leetcode 704. Binary Search #Python",
+              "url": "https://qiita.com/takechanman1228/items/306d460840545e36de76"
+            }
+          ]
+        },
+        "es": {
+          "youtube": [
+            {
+              "title": "704 - Binary Search - Leetcode en español",
+              "channel": "Leetcode en español",
+              "url": "https://www.youtube.com/watch?v=tdo3t6Qkn8U"
+            }
+          ],
+          "articles": []
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 206,
+      "slug": "reverse-linked-list",
+      "difficulty": "Easy",
+      "category_id": "linked-list",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/reverse-linked-list/",
+      "optimal_approach": "Iterative Three-Pointer Reversal",
+      "time_complexity": "O(n)",
+      "space_complexity": "O(1)",
+      "translations": {
+        "en": {
+          "title": "Reverse Linked List"
+        },
+        "ja": {
+          "title": "連結リストの反転 (Reverse Linked List)"
+        },
+        "hi": {
+          "title": "लिंक्ड लिस्ट को उलटना (Reverse Linked List)"
+        },
+        "es": {
+          "title": "Invertir Lista Enlazada (Reverse Linked List)"
+        },
+        "zh": {
+          "title": "反轉鏈結串列 (Reverse Linked List)"
+        },
+        "ko": {
+          "title": "연결 리스트 뒤집기 (Reverse Linked List)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Reverse Linked List - Iterative AND Recursive - Leetcode 206 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=G0_I-ZF0S38"
+            }
+          ],
+          "articles": []
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "【Leetcode 日本語解説】206. Reverse Linked List",
+              "channel": "電算機学習チャンネル",
+              "url": "https://www.youtube.com/watch?v=kv8xNDITNP4"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "zenn",
+              "title": "LeetCode 206. Reverse Linked List (Python3)",
+              "url": "https://zenn.dev/shimpo/articles/leet-code-206-20250905"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 21,
+      "slug": "merge-two-sorted-lists",
+      "difficulty": "Easy",
+      "category_id": "linked-list",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/merge-two-sorted-lists/",
+      "optimal_approach": "Iterative Dummy-Node Two-Pointer Merge",
+      "time_complexity": "O(n + m)",
+      "space_complexity": "O(1)",
+      "translations": {
+        "en": {
+          "title": "Merge Two Sorted Lists"
+        },
+        "ja": {
+          "title": "2つのソート済み連結リストのマージ"
+        },
+        "hi": {
+          "title": "दो क्रमबद्ध सूचियों का विलय (Merge Two Sorted Lists)"
+        },
+        "es": {
+          "title": "Combinar Dos Listas Ordenadas"
+        },
+        "zh": {
+          "title": "合併兩個有序串列"
+        },
+        "ko": {
+          "title": "두 정렬 리스트 병합"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Merge Two Sorted Lists - Leetcode 21 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=XIdigk956u0"
+            }
+          ],
+          "articles": []
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "【Leetcode 日本語解説】21. Merge Two Sorted Lists",
+              "channel": "電算機学習チャンネル",
+              "url": "https://www.youtube.com/watch?v=4YZjC0ngQ5k"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "zenn",
+              "title": "ゼロから始めるLeetCode Day13「21. Merge Two Sorted Lists」",
+              "url": "https://zenn.dev/emp_tech_blog/articles/0fd32db17990ce"
+            },
+            {
+              "platform": "qiita",
+              "title": "Leetcode #21. Merge Two Sorted Lists #Python",
+              "url": "https://qiita.com/takechanman1228/items/8523e526fe2f451046ca"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [
+            {
+              "title": "Merge Two Sorted Lists | DSA Series by @shradhaKD",
+              "channel": "Shradha Khapra",
+              "url": "https://www.youtube.com/watch?v=f8RPIb-0DDE"
+            }
+          ],
+          "articles": []
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 226,
+      "slug": "invert-binary-tree",
+      "difficulty": "Easy",
+      "category_id": "trees",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/invert-binary-tree/",
+      "optimal_approach": "Recursive DFS (or Iterative BFS)",
+      "time_complexity": "O(n)",
+      "space_complexity": "O(h)",
+      "translations": {
+        "en": {
+          "title": "Invert Binary Tree"
+        },
+        "ja": {
+          "title": "二分木の反転 (Invert Binary Tree)"
+        },
+        "hi": {
+          "title": "बाइनरी ट्री को उलटना (Invert Binary Tree)"
+        },
+        "es": {
+          "title": "Invertir Árbol Binario (Invert Binary Tree)"
+        },
+        "zh": {
+          "title": "翻轉二元樹 (Invert Binary Tree)"
+        },
+        "ko": {
+          "title": "이진 트리 반전 (Invert Binary Tree)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Invert Binary Tree - Depth First Search - Leetcode 226",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=OnSn2XEQ4MY"
+            }
+          ],
+          "articles": []
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "Invert Binary Tree - LeetCode #226 Pythonで解説",
+              "channel": "CodingNinjaJP",
+              "url": "https://www.youtube.com/watch?v=Xmx6EupViBI"
+            },
+            {
+              "title": "【LeetCode 日本語解説】226. Invert Binary Tree",
+              "channel": "電算機学習チャンネル",
+              "url": "https://www.youtube.com/watch?v=7sl83BleV4g"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "zenn",
+              "title": "LeetCode 226 「Invert Binary Tree」の 解説",
+              "url": "https://zenn.dev/y045/articles/09e06ef427f1b0"
+            },
+            {
+              "platform": "qiita",
+              "title": "ゼロから始めるLeetCode Day23「226. Invert Binary Tree」",
+              "url": "https://qiita.com/KueharX/items/0f5b1387bae86bbe85c6"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 200,
+      "slug": "number-of-islands",
+      "difficulty": "Medium",
+      "category_id": "graphs",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/number-of-islands/",
+      "optimal_approach": "Grid DFS / BFS Traversal",
+      "time_complexity": "O(m * n)",
+      "space_complexity": "O(m * n)",
+      "translations": {
+        "en": {
+          "title": "Number of Islands"
+        },
+        "ja": {
+          "title": "島の数 (Number of Islands)"
+        },
+        "hi": {
+          "title": "द्वीपों की संख्या (Number of Islands)"
+        },
+        "es": {
+          "title": "Número de Islas (Number of Islands)"
+        },
+        "zh": {
+          "title": "島嶼數量 (Number of Islands)"
+        },
+        "ko": {
+          "title": "섬의 개수 (Number of Islands)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "NUMBER OF ISLANDS - Leetcode 200 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=pV2kpPD66nE"
+            }
+          ],
+          "articles": []
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "【LeetCode 日本語解説】200. Number of Islands",
+              "channel": "電算機学習チャンネル",
+              "url": "https://www.youtube.com/watch?v=hdw_rmmA4fg"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "qiita",
+              "title": "LeetCode「200. Number of Islands」解説 #Python",
+              "url": "https://qiita.com/wadayamada/items/c0ac42d1c323a975941d"
+            }
+          ]
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [
+            {
+              "platform": "medium",
+              "title": "[LeetCode 解題紀錄] 200. Number of Islands",
+              "url": "https://medium.com/%E6%8A%80%E8%A1%93%E7%AD%86%E8%A8%98/leetcode-%E8%A7%A3%E9%A1%8C%E7%B4%80%E9%8C%84-200-number-of-islands-639908d1049e"
+            }
+          ]
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [
+            {
+              "platform": "velog",
+              "title": "[1스4코2파] # 223 LeetCode 200. Number of Islands",
+              "url": "https://velog.io/@heyggun/1%EC%8A%A44%EC%BD%942%ED%8C%8C-223-LeetCode-200.-Number-of-Islands"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    },
+    {
+      "leetcode_id": 70,
+      "slug": "climbing-stairs",
+      "difficulty": "Easy",
+      "category_id": "1d-dp",
+      "neetcode_lists": [
+        "Blind 75",
+        "NeetCode 150"
+      ],
+      "leetcode_url": "https://leetcode.com/problems/climbing-stairs/",
+      "optimal_approach": "Bottom-Up Space-Optimized DP (Two Variables)",
+      "time_complexity": "O(n)",
+      "space_complexity": "O(1)",
+      "translations": {
+        "en": {
+          "title": "Climbing Stairs"
+        },
+        "ja": {
+          "title": "階段の登り方 (Climbing Stairs)"
+        },
+        "hi": {
+          "title": "सीढ़ियाँ चढ़ना (Climbing Stairs)"
+        },
+        "es": {
+          "title": "Subiendo Escaleras (Climbing Stairs)"
+        },
+        "zh": {
+          "title": "爬樓梯 (Climbing Stairs)"
+        },
+        "ko": {
+          "title": "계단 오르기 (Climbing Stairs)"
+        }
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Climbing Stairs - Dynamic Programming - Leetcode 70 - Python",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=Y0lT9Fck7qI"
+            }
+          ],
+          "articles": []
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "【LeetCode 日本語解説】70. Climbing Stairs",
+              "channel": "電算機学習チャンネル",
+              "url": "https://www.youtube.com/watch?v=YrSFnceux54"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "zenn",
+              "title": "ゼロから始めるLeetCode Day18「70. Climbing Stairs」",
+              "url": "https://zenn.dev/emp_tech_blog/articles/550b4202a92da5"
+            },
+            {
+              "platform": "qiita",
+              "title": "LeetCode: 70. Climbing Stairsについて自分なりにまとめ",
+              "url": "https://qiita.com/latttchc/items/5f7d63950e9937a8b942"
+            }
+          ]
+        },
+        "zh": {
+          "youtube": [],
+          "articles": [
+            {
+              "platform": "medium",
+              "title": "[LeetCode 解題紀錄] 70. Climbing Stairs",
+              "url": "https://medium.com/%E6%8A%80%E8%A1%93%E7%AD%86%E8%A8%98/leetcode-%E8%A7%A3%E9%A1%8C%E7%B4%80%E9%8C%84-70-climbing-stairs-aea1f920f7ef"
+            }
+          ]
+        },
+        "hi": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "es": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        },
+        "ko": {
+          "youtube": [],
+          "articles": [],
+          "fallback_locale": "en"
+        }
+      }
+    }
+  ],
+  "roles_and_experience_matrix": {
+    "experience_levels": [
+      {
+        "id": "junior",
+        "years": "0-2",
+        "labels": {
+          "en": "Junior / New Grad (L3 / SDE-1)",
+          "ja": "ジュニア・新卒 (L3 / SDE-1)",
+          "hi": "जूनियर / न्यू ग्रैड (L3 / SDE-1)",
+          "es": "Junior / Recién Graduado (L3)",
+          "zh": "初級工程師 / 應屆生 (L3)",
+          "ko": "주니어 / 신입 (L3 / SDE-1)"
+        },
+        "focus": "Core DSA patterns, clean modular code, SQL/API basics, fundamentals"
+      },
+      {
+        "id": "mid",
+        "years": "2-5",
+        "labels": {
+          "en": "Mid-Level (L4 / SDE-2)",
+          "ja": "ミドルレベル (L4 / SDE-2)",
+          "hi": "मिड-लेवल (L4 / SDE-2)",
+          "es": "Nivel Intermedio (L4 / SDE-2)",
+          "zh": "中級工程師 (L4 / SDE-2)",
+          "ko": "미들레벨 (L4 / SDE-2)"
+        },
+        "focus": "Medium/Hard DSA, LLD/OOD patterns, core HLD building blocks, independent delivery"
+      },
+      {
+        "id": "senior",
+        "years": "5-8",
+        "labels": {
+          "en": "Senior (L5 / SDE-3)",
+          "ja": "シニア (L5 / SDE-3)",
+          "hi": "सीनियर (L5 / SDE-3)",
+          "es": "Senior (L5 / SDE-3)",
+          "zh": "資深工程師 (L5 / SDE-3)",
+          "ko": "시니어 (L5 / SDE-3)"
+        },
+        "focus": "Distributed HLD tradeoffs, production AI/RAG/evals, FDE customer scoping, technical leadership"
+      },
+      {
+        "id": "staff",
+        "years": "8+",
+        "labels": {
+          "en": "Staff / Principal (L6+)",
+          "ja": "スタッフ・プリンシパル (L6+)",
+          "hi": "स्टाफ / प्रिंसिपल (L6+)",
+          "es": "Staff / Principal (L6+)",
+          "zh": "主任工程師 / 架構師 (L6+)",
+          "ko": "스태프 / 프린시펄 (L6+)"
+        },
+        "focus": "Multi-region scale, org-wide architecture, 0-to-1 ambiguity, cost/latency/reliability economics"
+      }
+    ],
+    "roles": [
+      {
+        "id": "sde",
+        "labels": {
+          "en": "Software Development Engineer (SDE)",
+          "ja": "ソフトウェア開発エンジニア (SDE)",
+          "hi": "सॉफ्टवेयर डेवलपमेंट इंजीनियर (SDE)",
+          "es": "Ingeniero de Desarrollo de Software (SDE)",
+          "zh": "軟體開發工程師 (SDE)",
+          "ko": "소프트웨어 개발 엔지니어 (SDE)"
+        },
+        "module_weights_by_level": {
+          "junior": {
+            "dsa": 0.65,
+            "lld_ood": 0.15,
+            "hld_system_design": 0.1,
+            "behavioral": 0.1
+          },
+          "mid": {
+            "dsa": 0.45,
+            "lld_ood": 0.2,
+            "hld_system_design": 0.25,
+            "behavioral": 0.1
+          },
+          "senior": {
+            "dsa": 0.25,
+            "lld_ood": 0.15,
+            "hld_system_design": 0.45,
+            "behavioral": 0.15
+          },
+          "staff": {
+            "dsa": 0.15,
+            "lld_ood": 0.1,
+            "hld_system_design": 0.55,
+            "behavioral": 0.2
+          }
+        }
+      },
+      {
+        "id": "ai_engineer",
+        "labels": {
+          "en": "AI / LLM Engineer",
+          "ja": "AI・LLMエンジニア",
+          "hi": "एआई / एलएलएम इंजीनियर",
+          "es": "Ingeniero de IA / LLM",
+          "zh": "AI / 大語言模型工程師",
+          "ko": "AI / LLM 엔지니어"
+        },
+        "module_weights_by_level": {
+          "junior": {
+            "dsa": 0.35,
+            "ai_foundations_rag": 0.35,
+            "ai_system_design": 0.15,
+            "evals_agents": 0.15
+          },
+          "mid": {
+            "dsa": 0.25,
+            "ai_foundations_rag": 0.3,
+            "ai_system_design": 0.25,
+            "evals_agents": 0.2
+          },
+          "senior": {
+            "dsa": 0.15,
+            "ai_foundations_rag": 0.2,
+            "ai_system_design": 0.35,
+            "evals_agents": 0.3
+          },
+          "staff": {
+            "dsa": 0.1,
+            "ai_foundations_rag": 0.15,
+            "ai_system_design": 0.45,
+            "evals_agents": 0.3
+          }
+        }
+      },
+      {
+        "id": "fde",
+        "labels": {
+          "en": "Forward Deployed Engineer (FDE)",
+          "ja": "フォワードデプロイドエンジニア (FDE)",
+          "hi": "फॉरवर्ड डिप्लॉयड इंजीनियर (FDE)",
+          "es": "Ingeniero Desplegado en Campo (FDE)",
+          "zh": "前線部署工程師 (FDE)",
+          "ko": "포워드 디플로이드 엔지니어 (FDE)"
+        },
+        "module_weights_by_level": {
+          "junior": {
+            "practical_coding_debugging": 0.45,
+            "rapid_prototyping": 0.25,
+            "fde_decomposition": 0.2,
+            "customer_comms": 0.1
+          },
+          "mid": {
+            "practical_coding_debugging": 0.35,
+            "rapid_prototyping": 0.25,
+            "fde_decomposition": 0.25,
+            "customer_comms": 0.15
+          },
+          "senior": {
+            "practical_coding_debugging": 0.25,
+            "rapid_prototyping": 0.2,
+            "fde_decomposition": 0.35,
+            "customer_comms": 0.2
+          },
+          "staff": {
+            "practical_coding_debugging": 0.15,
+            "rapid_prototyping": 0.15,
+            "fde_decomposition": 0.4,
+            "customer_comms": 0.3
+          }
+        }
+      }
+    ]
+  },
+  "system_design_modules": [
+    {
+      "id": "sd-fundamentals",
+      "track": "hld_system_design",
+      "levels": [
+        "junior",
+        "mid",
+        "senior",
+        "staff"
+      ],
+      "roles": [
+        "sde",
+        "ai_engineer",
+        "fde"
+      ],
+      "titles": {
+        "en": "Distributed System Design Fundamentals & Building Blocks",
+        "ja": "分散システム設計の基礎と構成要素"
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "System Design Interview: A Step-By-Step Guide",
+              "channel": "ByteByteGo",
+              "url": "https://www.youtube.com/watch?v=i7twT3x5yv8"
+            },
+            {
+              "title": "System Design for Beginners Course",
+              "channel": "freeCodeCamp.org (Gaurav Sen)",
+              "url": "https://www.youtube.com/watch?v=m8Icp_Cid5o"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "github",
+              "title": "donnemartin/system-design-primer",
+              "url": "https://github.com/donnemartin/system-design-primer"
+            },
+            {
+              "platform": "github",
+              "title": "ByteByteGoHq/system-design-101",
+              "url": "https://github.com/ByteByteGoHq/system-design-101"
+            },
+            {
+              "platform": "web",
+              "title": "System Design in a Hurry - Hello Interview",
+              "url": "https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction"
+            }
+          ]
+        },
+        "ja": {
+          "youtube": [
+            {
+              "title": "IT面接｜API設計・DB設計・サーバー開発 IT006",
+              "channel": "Japanese Job Interview - にほんのめんせつ",
+              "url": "https://www.youtube.com/watch?v=f7x2N0PW9bY"
+            }
+          ],
+          "articles": []
+        }
+      }
+    },
+    {
+      "id": "sd-url-shortener",
+      "track": "hld_system_design",
+      "levels": [
+        "junior",
+        "mid"
+      ],
+      "roles": [
+        "sde",
+        "fde"
+      ],
+      "titles": {
+        "en": "Design a URL Shortener (Bitly)",
+        "ja": "URL短縮サービス (Bitly) のシステム設計"
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Design a URL Shortener (Bitly) - System Design Interview",
+              "channel": "NeetCodeIO",
+              "url": "https://www.youtube.com/watch?v=qSJAvd5Mgio"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "web",
+              "title": "System Design Interview Course - ByteByteGo",
+              "url": "https://bytebytego.com/courses/system-design-interview"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "sd-news-feed-twitter",
+      "track": "hld_system_design",
+      "levels": [
+        "mid",
+        "senior",
+        "staff"
+      ],
+      "roles": [
+        "sde"
+      ],
+      "titles": {
+        "en": "Design Twitter / News Feed (Fan-out & Sharding)",
+        "ja": "Twitter・ニュースフィードの設計（ファンアウトとシャーディング）"
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Design Twitter - System Design Interview",
+              "channel": "NeetCode",
+              "url": "https://www.youtube.com/watch?v=o5n85GRKuzk"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "github",
+              "title": "ashishps1/awesome-system-design-resources",
+              "url": "https://github.com/ashishps1/awesome-system-design-resources"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "sd-realtime-chat-collab",
+      "track": "hld_system_design",
+      "levels": [
+        "senior",
+        "staff"
+      ],
+      "roles": [
+        "sde",
+        "fde"
+      ],
+      "titles": {
+        "en": "Design WhatsApp & Google Docs (WebSockets, CRDTs/OT, Messaging)",
+        "ja": "WhatsApp・Google Docsの設計（リアルタイム同期・WebSocket）"
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Design Google Docs - System Design Interview",
+              "channel": "NeetCodeIO",
+              "url": "https://www.youtube.com/watch?v=9JKBlkwg0yM"
+            },
+            {
+              "title": "WHATSAPP System Design: Chat Messaging Systems",
+              "channel": "Gaurav Sen",
+              "url": "https://www.youtube.com/watch?v=vvhC64hQZMk"
+            }
+          ],
+          "articles": []
+        }
+      }
+    },
+    {
+      "id": "sd-video-streaming",
+      "track": "hld_system_design",
+      "levels": [
+        "senior",
+        "staff"
+      ],
+      "roles": [
+        "sde"
+      ],
+      "titles": {
+        "en": "Design YouTube (Transcoding Pipeline, CDN & Adaptive Bitrate)",
+        "ja": "YouTubeの設計（動画変換パイプライン・CDN）"
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "System Design: Design YouTube",
+              "channel": "ByteByteGo",
+              "url": "https://www.youtube.com/watch?v=jWRW2xGMqSw"
+            }
+          ],
+          "articles": []
+        }
+      }
+    },
+    {
+      "id": "lld-ood-patterns",
+      "track": "lld_ood",
+      "levels": [
+        "junior",
+        "mid",
+        "senior"
+      ],
+      "roles": [
+        "sde",
+        "fde"
+      ],
+      "titles": {
+        "en": "Low-Level Design (LLD) & Object-Oriented Design Patterns",
+        "ja": "低レベル設計 (LLD) とオブジェクト指向デザインパターン"
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "Design Tic Tac Toe: Low Level Design Coding Interview Question",
+              "channel": "Gaurav Sen",
+              "url": "https://www.youtube.com/watch?v=gktZsX9Z8Kw"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "github",
+              "title": "GitHub system-design-questions Topic",
+              "url": "https://github.com/topics/system-design-questions"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "ai_engineer_modules": [
+    {
+      "id": "ai-roadmap-foundations",
+      "track": "ai_foundations_rag",
+      "levels": [
+        "junior",
+        "mid",
+        "senior"
+      ],
+      "roles": [
+        "ai_engineer",
+        "fde"
+      ],
+      "titles": {
+        "en": "Production AI Engineering Foundations & Roadmap",
+        "ja": "プロダクションAIエンジニアリング基礎とロードマップ"
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "AI Engineering with Chip Huyen",
+              "channel": "The Pragmatic Engineer",
+              "url": "https://www.youtube.com/watch?v=98o_L3jlixw"
+            },
+            {
+              "title": "How I'd Learn AI Engineering in 2026 (Complete Roadmap)",
+              "channel": "Dave Ebbelaar",
+              "url": "https://www.youtube.com/watch?v=O2UmHpNlwUw"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "web",
+              "title": "Roadmap for AI learning preparation - Hugging Face",
+              "url": "https://discuss.huggingface.co/t/roadmap-for-ai-learning-preparation/191308"
+            },
+            {
+              "platform": "github",
+              "title": "awesome-generative-ai-guide Interview Prep",
+              "url": "https://github.com/aishwaryanr/awesome-generative-ai-guide/blob/main/interview_prep/README.md"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ai-rag-retrieval",
+      "track": "ai_foundations_rag",
+      "levels": [
+        "junior",
+        "mid",
+        "senior",
+        "staff"
+      ],
+      "roles": [
+        "ai_engineer",
+        "fde"
+      ],
+      "titles": {
+        "en": "RAG Architecture, Hybrid Search (BM25 + Dense), Chunking & Reranking",
+        "ja": "RAGアーキテクチャ・ハイブリッド検索・チャンク設計"
+      },
+      "resources": {
+        "en": {
+          "youtube": [],
+          "articles": [
+            {
+              "platform": "github",
+              "title": "AI-Engineer-Interview-Questions: RAG & Retrieval",
+              "url": "https://github.com/ombharatiya/AI-Engineer-Interview-Questions/blob/main/04-rag-and-retrieval/questions.md"
+            },
+            {
+              "platform": "github",
+              "title": "ather-techie/rag-interview-system",
+              "url": "https://github.com/ather-techie/rag-interview-system"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ai-system-design-gateway",
+      "track": "ai_system_design",
+      "levels": [
+        "mid",
+        "senior",
+        "staff"
+      ],
+      "roles": [
+        "ai_engineer",
+        "sde",
+        "fde"
+      ],
+      "titles": {
+        "en": "AI System Design: LLM Gateways, Semantic Caching, Guardrails & Observability",
+        "ja": "AIシステム設計：LLMゲートウェイ・セマンティックキャッシュ・ガードレール"
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "AI System Design Tutorial",
+              "channel": "codebasics",
+              "url": "https://www.youtube.com/watch?v=S6jy0T85DFs"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "github",
+              "title": "ai-engineering-field-guide: AI System Design Questions",
+              "url": "https://github.com/alexeygrigorev/ai-engineering-field-guide/blob/main/interview/questions/04-ai-system-design.md"
+            },
+            {
+              "platform": "github",
+              "title": "amitshekhariitbhu/ai-engineering-interview-questions",
+              "url": "https://github.com/amitshekhariitbhu/ai-engineering-interview-questions/blob/main/README.md"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "ai-evals-agents",
+      "track": "evals_agents",
+      "levels": [
+        "mid",
+        "senior",
+        "staff"
+      ],
+      "roles": [
+        "ai_engineer",
+        "fde"
+      ],
+      "titles": {
+        "en": "LLM Evaluation Pipelines, Fine-Tuning vs RAG & Agentic Workflows",
+        "ja": "LLM評価パイプライン・ファインチューニング比較・エージェント設計"
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "AI Engineering: Building Applications with Foundation Models (Review)",
+              "channel": "Endless Hybrids",
+              "url": "https://www.youtube.com/watch?v=XbM-pgyPQ0k"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "github",
+              "title": "AI-Engineer-Interview-Questions Curated Resources",
+              "url": "https://github.com/ombharatiya/AI-Engineer-Interview-Questions/blob/main/resources/README.md"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "fde_modules": [
+    {
+      "id": "fde-interview-loop",
+      "track": "fde_decomposition",
+      "levels": [
+        "junior",
+        "mid",
+        "senior",
+        "staff"
+      ],
+      "roles": [
+        "fde"
+      ],
+      "titles": {
+        "en": "Forward Deployed Engineer (FDE) Interview Loop (Palantir, OpenAI, Anthropic)",
+        "ja": "フォワードデプロイドエンジニア (FDE) 面接対策ガイド"
+      },
+      "resources": {
+        "en": {
+          "youtube": [
+            {
+              "title": "How to Pass the Forward Deployed Engineer Interview (2026 Guide)",
+              "channel": "YouTube",
+              "url": "https://www.youtube.com/watch?v=C0id-lwlzYc"
+            },
+            {
+              "title": "I gave 15 Forward Deployed Engineer Interviews",
+              "channel": "YouTube",
+              "url": "https://www.youtube.com/watch?v=VnIDWlOzb6s"
+            }
+          ],
+          "articles": [
+            {
+              "platform": "github",
+              "title": "awesome-generative-ai-guide: FDE Interview Prep",
+              "url": "https://github.com/aishwaryanr/awesome-generative-ai-guide/blob/main/interview_prep/roles/forward-deployed-engineer/README.md"
+            },
+            {
+              "platform": "github",
+              "title": "AI-Engineer-Interview-Questions: FDE x AI Guide",
+              "url": "https://github.com/ombharatiya/AI-Engineer-Interview-Questions/blob/main/15-role-guides/forward-deployed-engineer.md"
+            },
+            {
+              "platform": "web",
+              "title": "The Definitive Guide to Forward Deployed Engineer Interviews in 2026",
+              "url": "https://www.sundeepteki.org/advice/the-definitive-guide-to-forward-deployed-engineer-interviews-in-2026"
+            },
+            {
+              "platform": "medium",
+              "title": "How to Prepare for the Forward Deployed Engineer Interviews",
+              "url": "https://medium.com/@milesk_33/how-to-prepare-for-the-forward-deployed-engineer-interviews-1decf75b8a7f"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "fde-agent-customer-integration",
+      "track": "rapid_prototyping",
+      "levels": [
+        "mid",
+        "senior",
+        "staff"
+      ],
+      "roles": [
+        "fde",
+        "ai_engineer"
+      ],
+      "titles": {
+        "en": "Customer Discovery, Ambiguous Problem Decomposition & AI Agent Deployment",
+        "ja": "顧客要件分解・プロトタイピング・AIエージェント本番導入"
+      },
+      "resources": {
+        "en": {
+          "youtube": [],
+          "articles": [
+            {
+              "platform": "web",
+              "title": "Forward Deployed Engineer Interview Guide 2026 - Thita.ai",
+              "url": "https://thita.ai/blog/fde/forward-deployed-engineer-interview-guide"
+            },
+            {
+              "platform": "web",
+              "title": "Anthropic FDE Interview Prep - Educative.io",
+              "url": "https://www.educative.io/courses/anthropic-forward-deployed-engineer-interview"
+            },
+            {
+              "platform": "medium",
+              "title": "Top 10 Forward Deployed Engineer Interview Questions",
+              "url": "https://medium.com/@milesk_33/top-10-forward-deployed-engineer-interview-questions-from-famous-ai-companies-e00920d0598e"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "platform_workflows": {
+    "spaced_repetition_engine": {
+      "algorithm": "FSRS (Free Spaced Repetition Scheduler)",
+      "library_url": "https://github.com/open-spaced-repetition/ts-fsrs",
+      "states": [
+        "new",
+        "learning",
+        "review",
+        "relearning"
+      ]
+    },
+    "learner_journey_stages": [
+      {
+        "stage": 1,
+        "id": "onboarding",
+        "action": "Select target role (sde | ai_engineer | fde), experience level (junior | mid | senior | staff), target timeline, and UI/content locale (en | ja | hi | es | zh | ko)"
+      },
+      {
+        "stage": 2,
+        "id": "diagnostic_and_roadmap",
+        "action": "Compute weighted React Flow DAG combining DSA, HLD/LLD, AI System Design, and FDE case modules according to role x level weights"
+      },
+      {
+        "stage": 3,
+        "id": "dual_mode_practice",
+        "action": "Route coding problems to Monaco Editor + Judge0 async runner; route System Design, AI Architecture, and FDE Discovery cases to interactive diagram canvas + structured rubric evaluation"
+      },
+      {
+        "stage": 4,
+        "id": "multilingual_study_loop",
+        "action": "Serve native locale YouTube + regional blog (Medium/Zenn/Qiita/Velog), falling back to English video with ?cc_lang_pref=<locale>&cc_load_policy=1"
+      },
+      {
+        "stage": 5,
+        "id": "fsrs_retention_and_readiness",
+        "action": "Schedule problem/design reviews via ts-fsrs DSR model and compute role-specific interview readiness score"
+      }
+    ]
+  }
+}

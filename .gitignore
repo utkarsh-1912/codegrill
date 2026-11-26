@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.npm-cache/
+.vercel/
+.env*
+!.env.example
+src/roadmap.generated.json.tmp
+server/data/

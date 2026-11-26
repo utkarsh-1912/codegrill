@@ -1,0 +1,24 @@
+{
+  "name": "codegrill",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "server": "node server/index.mjs",
+    "build": "vite build",
+    "preview": "vite preview",
+    "check": "node scripts/check-catalog.mjs",
+    "import:roadmap": "node scripts/import-roadmap.mjs",
+    "verify:directories": "node scripts/verify-directories.mjs"
+  },
+  "dependencies": {
+    "@utkristi/ui": "0.1.10",
+    "lucide-react": "0.468.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "vite": "^6.4.0"
+  }
+}
