@@ -209,6 +209,16 @@ export function ViewerPage({
             {' · '}M{String(currentModuleItem.modIndex + 1).padStart(2, '0')}
           </span>
         )}
+        <button
+          type="button"
+          className={`icon-btn viewer-fav-mobile ${favorited ? 'is-active' : ''}`}
+          onClick={handleToggleFav}
+          aria-pressed={favorited}
+          aria-label={favorited ? 'Remove from favorites' : 'Mark favorite / read again'}
+          title={favorited ? 'Saved to favorites' : 'Mark favorite / read again'}
+        >
+          <Star size={17} fill={favorited ? 'currentColor' : 'none'} aria-hidden="true" />
+        </button>
       </div>
       <h1>{activeTitle || data?.title || t.viewer.pluginBadge}</h1>
       {data?.author && data.author.toLowerCase() !== badgeLabel.toLowerCase() && (
@@ -283,7 +293,7 @@ export function ViewerPage({
         <div className="viewer-page-bar-left">
           <button
             type="button"
-            className={`icon-btn ${favorited ? 'is-active' : ''}`}
+            className={`icon-btn viewer-fav-desktop ${favorited ? 'is-active' : ''}`}
             onClick={handleToggleFav}
             aria-pressed={favorited}
             aria-label={favorited ? 'Remove from favorites' : 'Mark favorite / read again'}

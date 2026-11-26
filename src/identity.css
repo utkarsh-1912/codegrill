@@ -9046,3 +9046,34 @@ input[type="search"]::-webkit-search-results-decoration {
     flex: 0 0 auto;
   }
 }
+
+/* Mobile ViewerPage Favorite Button Placement */
+.viewer-title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.viewer-fav-mobile {
+  display: none;
+  margin-left: auto;
+}
+
+@media (max-width: 640px) {
+  .viewer-fav-desktop {
+    display: none !important;
+  }
+
+  .viewer-fav-mobile {
+    display: inline-grid !important;
+  }
+
+  .viewer-page-bar {
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+  }
+}

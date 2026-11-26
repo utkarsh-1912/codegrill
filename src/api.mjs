@@ -43,7 +43,7 @@ function toGitHubRawClient(rawUrl) {
     }
     if (url.hostname !== 'github.com' && url.hostname !== 'www.github.com') return null;
     const parts = url.pathname.split('/').filter(Boolean);
-    if (parts.length < 5 || parts[2] !== 'blob') return null;
+    if (parts.length < 5 || (parts[2] !== 'blob' && parts[2] !== 'raw')) return null;
     const [owner, repo, , ref, ...rest] = parts;
     return {
       rawUrl: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${rest.join('/')}`,
@@ -544,7 +544,7 @@ function parseMediumUrlClient(rawUrl) {
             // Fall through to raw code view if malformed
           }
         }
-        const kind = lower.endsWith('.md') || lower.endsWith('.markdown')
+        const kind = lower.endsWith('.md') || lower.endsWith('.mdx') || lower.endsWith('.markdown')
           ? 'markdown'
           : lower.endsWith('.txt')
             ? 'text'

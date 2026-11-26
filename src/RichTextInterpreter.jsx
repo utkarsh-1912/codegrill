@@ -78,7 +78,7 @@ function resolveResourceUrl(href, sourceUrl, forRawImage = false) {
     if (abs.protocol !== 'https:' && abs.protocol !== 'http:') return null;
     if (forRawImage && (abs.hostname === 'github.com' || abs.hostname === 'www.github.com')) {
       const parts = abs.pathname.split('/').filter(Boolean);
-      if (parts.length >= 5 && parts[2] === 'blob') {
+      if (parts.length >= 5 && (parts[2] === 'blob' || parts[2] === 'raw')) {
         const [owner, repo, , ref, ...rest] = parts;
         return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${rest.join('/')}`;
       }
@@ -567,10 +567,42 @@ function parseListBlock(lines, startIndex) {
   return { block: { type: root.ordered ? 'ol' : 'ul', items: root.items }, nextIndex: i };
 }
 
+function stripYamlFrontmatter(rawText) {
+  const text = String(rawText || '').replace(/^\uFEFF/, '').trimStart();
+  const match = /^---[ \t]*\r?\n([\s\S]*?)\r?\n---[ \t]*(?:\r?\n|$)/.exec(text);
+  if (!match) return text;
+
+  const fmBlock = match[1];
+  const body = text.slice(match[0].length).trimStart();
+
+  // Only treat as YAML frontmatter if it contains key: value lines
+  if (!/^[a-zA-Z0-9_-]+\s*:/m.test(fmBlock)) return text;
+
+  // If the markdown file has an actual body, strip the raw frontmatter completely
+  if (body.trim()) return body;
+
+  // For frontmatter-only category/guide stubs, render clean title/description/image without raw YAML metadata
+  const readField = (key) => {
+    const m = new RegExp(`^${key}\\s*:\\s*(.+)$`, 'm').exec(fmBlock);
+    return m ? m[1].trim().replace(/^['"]|['"]$/g, '') : '';
+  };
+  const title = readField('title');
+  const description = readField('description');
+  const image = readField('image');
+  const parts = [];
+  if (title) parts.push(`# ${title}`);
+  if (description) parts.push(description);
+  if (image && /^https?:\/\//i.test(image)) {
+    parts.push(`![${title || 'Diagram'}](${image})`);
+  }
+  return parts.join('\n\n') || body;
+}
+
 function parseRichBlocks(rawText, isPlainText = false) {
+  const cleanedRaw = isPlainText ? rawText : stripYamlFrontmatter(rawText);
   const normalized = isPlainText
-    ? String(rawText || '').replace(/\r\n?/g, '\n')
-    : normalizeHtmlBlocks(rawText);
+    ? String(cleanedRaw || '').replace(/\r\n?/g, '\n')
+    : normalizeHtmlBlocks(cleanedRaw);
   const lines = normalized.split('\n');
   const blocks = [];
   let i = 0;
