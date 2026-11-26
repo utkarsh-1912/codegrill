@@ -29,7 +29,12 @@ export const DEFAULT_APP_CONFIG = {
   },
   sources: [
     { label: 'LeetCode', url: 'https://leetcode.com/' },
-    { label: 'GitHub', url: 'https://github.com/doocs/leetcode/tree/main/solution' },
+    { label: 'Codeforces', url: 'https://codeforces.com/' },
+    { label: 'HackerRank', url: 'https://www.hackerrank.com/' },
+    { label: 'System Design Primer', url: 'https://github.com/donnemartin/system-design-primer' },
+    { label: 'Awesome LLD', url: 'https://github.com/ashishps1/awesome-low-level-design' },
+    { label: 'Doocs Solutions', url: 'https://github.com/doocs/leetcode/tree/main/solution' },
+    { label: 'Utkristi Colabs', url: 'https://utkristi-colabs.vercel.app/' },
   ],
   plugins: [],
 };

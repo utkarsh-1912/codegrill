@@ -55,7 +55,12 @@ export function loadServerConfig() {
     },
     sources: [
       { label: 'LeetCode', url: process.env.SOURCE_LEETCODE_URL || 'https://leetcode.com/' },
-      { label: 'GitHub', url: process.env.SOURCE_GITHUB_URL || 'https://github.com/doocs/leetcode/tree/main/solution' },
+      { label: 'Codeforces', url: process.env.SOURCE_CODEFORCES_URL || 'https://codeforces.com/' },
+      { label: 'HackerRank', url: process.env.SOURCE_HACKERRANK_URL || 'https://www.hackerrank.com/' },
+      { label: 'System Design Primer', url: 'https://github.com/donnemartin/system-design-primer' },
+      { label: 'Awesome LLD', url: 'https://github.com/ashishps1/awesome-low-level-design' },
+      { label: 'Doocs Solutions', url: process.env.SOURCE_GITHUB_URL || 'https://github.com/doocs/leetcode/tree/main/solution' },
+      { label: 'Utkristi Colabs', url: process.env.VITE_COLLAB_ROOMS_URL || process.env.COLLAB_ROOMS_URL || 'https://utkristi-colabs.vercel.app/' },
     ],
   };
 }

@@ -386,8 +386,41 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
       onClick={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <div className="viewer-panel">
         <div className="viewer-header">
-          <div className="viewer-title-group">
+          <div className="viewer-header-top">
             <Badge variant="outlined">{formatPluginBadge(data, t.viewer.pluginBadge)}</Badge>
+            <div className="viewer-header-actions">
+              <button
+                type="button"
+                className={`icon-btn ${favorited ? 'is-active' : ''}`}
+                onClick={handleToggleFav}
+                aria-pressed={favorited}
+                aria-label={favorited ? 'Remove from favorites' : 'Mark favorite / read again'}
+                title={favorited ? 'Saved to favorites' : 'Mark favorite / read again'}
+              >
+                <Star size={17} fill={favorited ? 'currentColor' : 'none'} aria-hidden="true" />
+              </button>
+              {onExpand && (
+                <button
+                  type="button"
+                  className="icon-btn"
+                  onClick={() => onExpand({
+                    ...item,
+                    url: activeUrl,
+                    title: activeTitle || data?.title || '',
+                    solutionLang: selectedLang,
+                  })}
+                  aria-label="Expand to full page"
+                  title="Expand to full page"
+                >
+                  <Maximize2 size={18} aria-hidden="true" />
+                </button>
+              )}
+              <button type="button" className="icon-btn" onClick={onClose} aria-label={t.viewer.close} title={t.viewer.close}>
+                <X size={20} aria-hidden="true" />
+              </button>
+            </div>
+          </div>
+          <div className="viewer-title-group">
             <h2>{activeTitle || data?.title}</h2>
             {data?.author && data.author.toLowerCase() !== formatPluginBadge(data, '').toLowerCase() && (
               <p className="viewer-meta">{data.author}</p>
@@ -396,37 +429,6 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
             {data?.siteName && data.siteName !== formatPluginBadge(data, '') && (
               <p className="viewer-meta">{data.siteName}</p>
             )}
-          </div>
-          <div className="viewer-header-actions">
-            <button
-              type="button"
-              className={`icon-btn ${favorited ? 'is-active' : ''}`}
-              onClick={handleToggleFav}
-              aria-pressed={favorited}
-              aria-label={favorited ? 'Remove from favorites' : 'Mark favorite / read again'}
-              title={favorited ? 'Saved to favorites' : 'Mark favorite / read again'}
-            >
-              <Star size={17} fill={favorited ? 'currentColor' : 'none'} aria-hidden="true" />
-            </button>
-            {onExpand && (
-              <button
-                type="button"
-                className="icon-btn"
-                onClick={() => onExpand({
-                  ...item,
-                  url: activeUrl,
-                  title: activeTitle || data?.title || '',
-                  solutionLang: selectedLang,
-                })}
-                aria-label="Expand to full page"
-                title="Expand to full page"
-              >
-                <Maximize2 size={18} aria-hidden="true" />
-              </button>
-            )}
-            <button type="button" className="icon-btn" onClick={onClose} aria-label={t.viewer.close} title={t.viewer.close}>
-              <X size={20} aria-hidden="true" />
-            </button>
           </div>
         </div>
 
