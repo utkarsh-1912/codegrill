@@ -149,6 +149,7 @@ export function SelectDropdown({
           id={listId}
           role="listbox"
           aria-label={ariaLabel}
+          data-select-menu="true"
           className={`custom-select-menu is-portaled align-${align}`}
           style={menuStyle}
         >

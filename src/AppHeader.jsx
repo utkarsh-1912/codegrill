@@ -53,6 +53,7 @@ export function AppHeader({
       }
     };
     const onMouseDown = (e) => {
+      if (e.target?.closest?.('[data-select-menu="true"]')) return;
       if (settingsRef.current && !settingsRef.current.contains(e.target)) {
         setSettingsOpen(false);
       }
