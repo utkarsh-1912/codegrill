@@ -229,6 +229,20 @@ function extractYouTubeChannelIdClient(rawUrl) {
   }
 }
 
+export async function fetchVideoTranscript(videoId, locale = 'en', baseUrl) {
+  if (!videoId) return { videoId: '', locale, cues: [], source: 'none' };
+  try {
+    const res = await fetch(
+      apiUrl(`/api/plugins/transcript?videoId=${encodeURIComponent(videoId)}&locale=${encodeURIComponent(locale)}`, baseUrl),
+      { signal: AbortSignal.timeout(7000) },
+    );
+    if (res.ok) return await res.json();
+  } catch {
+    // Graceful fallback handled by player
+  }
+  return { videoId, locale, cues: [], source: 'none' };
+}
+
 export async function fetchPluginContent(url, locale = 'en', baseUrl) {
   try {
     const res = await fetch(

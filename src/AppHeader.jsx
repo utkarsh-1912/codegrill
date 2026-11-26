@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Badge } from '@utkristi/ui';
 import { Maximize2, Menu, Minimize2, Moon, RotateCcw, Search, Settings, Sun, X } from 'lucide-react';
 import { BrandLogo } from './BrandLogo.jsx';
@@ -44,6 +45,16 @@ export function AppHeader({
     setSidebarOpen(false);
     setMobileSearchOpen(false);
   }, [page]);
+
+  // Lock body scroll while mobile sidebar drawer is open
+  useEffect(() => {
+    if (!sidebarOpen) return undefined;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [sidebarOpen]);
 
   useEffect(() => {
     if (mobileSearchOpen) {
@@ -394,13 +405,16 @@ export function AppHeader({
         )}
       </header>
 
-      {/* Mobile Sidebar Drawer */}
-      {sidebarOpen && (
+      {/* Overhauled Mobile Sidebar Drawer (Portal + Scroll Lock + Inline Language Pills) */}
+      {sidebarOpen && createPortal(
         <div
           className="mobile-sidebar-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Mobile navigation"
           onClick={(e) => { if (e.target === e.currentTarget) setSidebarOpen(false); }}
         >
-          <aside id="mobile-sidebar" className="mobile-sidebar" aria-label="Mobile navigation">
+          <aside id="mobile-sidebar" className="mobile-sidebar">
             <div className="mobile-sidebar-head">
               <a className="brand" href="/" onClick={linkClick('/')}>
                 <BrandLogo name={brandName} size={28} />
@@ -415,100 +429,112 @@ export function AppHeader({
               </button>
             </div>
 
-            <nav className="mobile-sidebar-nav" aria-label="Study navigation">
-              {pathIds.map((id, index) => (
-                <a
-                  key={id}
-                  href={'/' + id}
-                  lang={locale}
-                  aria-current={page === id ? 'page' : undefined}
-                  onClick={linkClick('/' + id)}
-                >
-                  {navLabels[index]}
-                </a>
-              ))}
-            </nav>
+            <div className="mobile-sidebar-scroll">
+              <nav className="mobile-sidebar-nav" aria-label="Study navigation">
+                {pathIds.map((id, index) => (
+                  <a
+                    key={id}
+                    href={'/' + id}
+                    lang={locale}
+                    aria-current={page === id ? 'page' : undefined}
+                    onClick={linkClick('/' + id)}
+                  >
+                    {navLabels[index]}
+                  </a>
+                ))}
+              </nav>
 
-            <div className="mobile-sidebar-footer">
-              <div className="settings-row">
-                <span>{t.palette.theme}</span>
-                <button
-                  type="button"
-                  className="locale-field icon-only-control"
-                  onClick={onToggleTheme}
-                  aria-label={isDark ? t.controls.switchToLight : t.controls.switchToDark}
-                >
-                  {isDark ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
-                </button>
-              </div>
-              <div className="settings-row">
-                <span>{t.palette.zen}</span>
-                <button
-                  type="button"
-                  className={`locale-field icon-only-control ${zenMode ? 'is-active' : ''}`}
-                  onClick={() => { onToggleZen(); setSidebarOpen(false); }}
-                  aria-pressed={zenMode}
-                  aria-label={zenMode ? t.controls.zenExit : t.controls.zenEnter}
-                >
-                  {zenMode ? <Minimize2 size={17} aria-hidden="true" /> : <Maximize2 size={17} aria-hidden="true" />}
-                </button>
-              </div>
-              <div className="settings-row">
-                <span>{t.controls.language}</span>
-                <SelectDropdown
-                  compact
-                  align="right"
-                  ariaLabel={t.controls.language}
-                  prefix={locale}
-                  value={locale}
-                  onChange={onLocaleChange}
-                  options={locales.map(({ code, native_name }) => ({
-                    value: code,
-                    label: native_name,
-                    badge: code,
-                    lang: code,
-                  }))}
-                />
-              </div>
-              <div className="settings-row">
-                {!confirmReset ? (
-                  <>
-                    <span>Reset progress</span>
-                    <button
-                      type="button"
-                      className="locale-field icon-only-control reset-trigger-btn"
-                      onClick={() => setConfirmReset(true)}
-                      aria-label="Reset progress"
-                    >
-                      <RotateCcw size={16} aria-hidden="true" />
-                    </button>
-                  </>
-                ) : (
-                  <div className="reset-confirm-row">
-                    <button
-                      type="button"
-                      className="reset-confirm-yes"
-                      onClick={() => {
-                        onResetProgress?.();
-                        setConfirmReset(false);
-                        setSidebarOpen(false);
-                      }}
-                    >
-                      Confirm reset
-                    </button>
-                    <button
-                      type="button"
-                      className="reset-confirm-no"
-                      onClick={() => setConfirmReset(false)}
-                    >
-                      {t.sheets.cancel}
-                    </button>
+              <div className="mobile-sidebar-section">
+                <span className="mobile-sidebar-section-label">{t.palette.settings}</span>
+
+                <div className="settings-row">
+                  <span>{t.palette.theme}</span>
+                  <button
+                    type="button"
+                    className="locale-field icon-only-control"
+                    onClick={onToggleTheme}
+                    aria-label={isDark ? t.controls.switchToLight : t.controls.switchToDark}
+                  >
+                    {isDark ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
+                  </button>
+                </div>
+
+                <div className="settings-row">
+                  <span>{t.palette.zen}</span>
+                  <button
+                    type="button"
+                    className={`locale-field icon-only-control ${zenMode ? 'is-active' : ''}`}
+                    onClick={() => { onToggleZen(); setSidebarOpen(false); }}
+                    aria-pressed={zenMode}
+                    aria-label={zenMode ? t.controls.zenExit : t.controls.zenEnter}
+                  >
+                    {zenMode ? <Minimize2 size={17} aria-hidden="true" /> : <Maximize2 size={17} aria-hidden="true" />}
+                  </button>
+                </div>
+
+                <div className="mobile-lang-block">
+                  <span>{t.controls.language}</span>
+                  <div className="mobile-lang-grid" role="group" aria-label={t.controls.language}>
+                    {locales.map(({ code, native_name }) => (
+                      <button
+                        key={code}
+                        type="button"
+                        className={`mobile-lang-pill ${locale === code ? 'is-active' : ''}`}
+                        aria-pressed={locale === code}
+                        onClick={() => onLocaleChange(code)}
+                        lang={code}
+                        title={native_name}
+                      >
+                        <span className="mobile-lang-code">{code}</span>
+                        <span className="mobile-lang-name">{native_name}</span>
+                      </button>
+                    ))}
                   </div>
-                )}
+                </div>
+
+                <div className="settings-divider" />
+
+                <div className="settings-row">
+                  {!confirmReset ? (
+                    <>
+                      <span>Reset progress</span>
+                      <button
+                        type="button"
+                        className="locale-field icon-only-control reset-trigger-btn"
+                        onClick={() => setConfirmReset(true)}
+                        aria-label="Reset progress"
+                      >
+                        <RotateCcw size={16} aria-hidden="true" />
+                      </button>
+                    </>
+                  ) : (
+                    <div className="reset-confirm-row">
+                      <button
+                        type="button"
+                        className="reset-confirm-yes"
+                        onClick={() => {
+                          onResetProgress?.();
+                          setConfirmReset(false);
+                          setSidebarOpen(false);
+                        }}
+                      >
+                        Confirm reset
+                      </button>
+                      <button
+                        type="button"
+                        className="reset-confirm-no"
+                        onClick={() => setConfirmReset(false)}
+                      >
+                        {t.sheets.cancel}
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </aside>
-        </div>
+        </div>,
+        document.body,
       )}
     </>
   );

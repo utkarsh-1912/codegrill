@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Badge, Button, Card, ThemeProvider, themes, useTheme } from '@utkristi/ui';
 import {
-  BookOpen, Check, ChevronRight, Circle, ExternalLink, FileCode2,
+  BookOpen, Check, ChevronLeft, ChevronRight, Circle, ExternalLink, FileCode2,
   Play, Search, Star, StickyNote, Video,
 } from 'lucide-react';
 import '@utkristi/ui/css';
@@ -120,6 +120,7 @@ function currentPage() {
     viewerTitle: page === 'viewer' ? (params.get('title') || '') : '',
     viewerKind: page === 'viewer' ? (params.get('kind') || '') : '',
     viewerLang: page === 'viewer' ? (params.get('lang') || '') : '',
+    viewerModuleId: page === 'viewer' ? (params.get('module') || '') : '',
   };
 }
 
@@ -127,7 +128,7 @@ function App() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [preferences, setPreferences] = useState(readPreferences);
   const { locale, completed, bookmarked, notes, activity, streak, longestStreak } = preferences;
-  const [{ page, pathname, problem: sharedProblem, topic, viewerUrl, viewerTitle, viewerKind, viewerLang }, setLocation] = useState(currentPage);
+  const [{ page, pathname, problem: sharedProblem, topic, viewerUrl, viewerTitle, viewerKind, viewerLang, viewerModuleId }, setLocation] = useState(currentPage);
   const [zenMode, setZenMode] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [appConfig, setAppConfig] = useState(DEFAULT_APP_CONFIG);
@@ -512,6 +513,8 @@ function App() {
             title={viewerTitle}
             kind={viewerKind}
             problem={sharedProblem ? problems.find((p) => p.slug === sharedProblem) : null}
+            moduleId={viewerModuleId}
+            allModules={modules}
             allProblems={problems}
             directories={directories}
             initialLang={viewerLang}
@@ -1072,7 +1075,7 @@ function ResourceDirectory({ locale, title, pageSize = 12, onOpenViewer }) {
   );
 }
 
-function Resources({ resources, locale, problemTitle, onOpenViewer }) {
+function Resources({ resources, locale, problemTitle, moduleId, onOpenViewer }) {
   const t = getMessages(locale);
   const links = resourcesFor(resources, locale, defaultLocale);
   if (!links.length) return <p className="resource-note">{t.problems.noResources}</p>;
@@ -1083,18 +1086,18 @@ function Resources({ resources, locale, problemTitle, onOpenViewer }) {
     <div className="resources">
       <h3>{t.problems.resourcesTitle}</h3>
       {links[0].locale !== locale && <p className="resource-note">{t.problems.showingEnglish}</p>}
-      <ResourceLinks links={links} problemTitle={problemTitle} onOpenViewer={onOpenViewer} />
+      <ResourceLinks links={links} problemTitle={problemTitle} moduleId={moduleId} onOpenViewer={onOpenViewer} />
       {!!englishLinks.length && (
         <details className="solution-files">
           <summary>{t.problems.englishResources}</summary>
-          <ResourceLinks links={englishLinks} problemTitle={problemTitle} onOpenViewer={onOpenViewer} />
+          <ResourceLinks links={englishLinks} problemTitle={problemTitle} moduleId={moduleId} onOpenViewer={onOpenViewer} />
         </details>
       )}
     </div>
   );
 }
 
-function ResourceLinks({ links, problemTitle, onOpenViewer }) {
+function ResourceLinks({ links, problemTitle, moduleId, onOpenViewer }) {
   return (
     <ul className="resource-links">
       {links.map(({ url, title, kind, platform, locale: linkLocale }) => {
@@ -1109,6 +1112,7 @@ function ResourceLinks({ links, problemTitle, onOpenViewer }) {
                 title: formatViewerTitle(problemTitle, cleanTitle),
                 kind: kind === 'video' ? 'video' : 'article',
                 problemTitle,
+                moduleId,
               })}
             >
               {kind === 'video' ? <Play size={16} aria-hidden="true" /> : <BookOpen size={16} aria-hidden="true" />}
@@ -1131,8 +1135,10 @@ function InterviewTracks({ locale, title, onOpenViewer }) {
   const t = getMessages(locale);
   const [roleId, setRoleId] = useState(roles[0]?.id || '');
   const [levelId, setLevelId] = useState(levels[1]?.id || levels[0]?.id || '');
+  const [activeModuleIndex, setActiveModuleIndex] = useState(0);
   const role = roles.find(({ id }) => id === roleId);
   const visible = modules.filter((item) => item.roles.includes(roleId) && item.levels.includes(levelId));
+  useEffect(() => { setActiveModuleIndex(0); }, [roleId, levelId]);
   const trackLabel = (id) => t.tracks.labels[id] ?? id.replaceAll('_', ' ');
   const weightEntries = Object.entries(role.module_weights_by_level[levelId] || {})
     .sort((a, b) => b[1] - a[1]);
@@ -1215,22 +1221,55 @@ function InterviewTracks({ locale, title, onOpenViewer }) {
       <h2 className="module-title">{t.tracks.learningModules}</h2>
       <p className="result-count" role="status">{visible.length}</p>
       {!visible.length && <p className="library-empty">{t.tracks.empty}</p>}
-      <div className="module-list">
-        {visible.map((item) => (
-          <Card variant="outlined" key={item.id}>
-            <details>
-              <summary>
-                <span lang={item.titles[locale] ? locale : defaultLocale}>{pickLabel(item.titles, locale)}</span>
-              </summary>
-              <Resources
-                resources={item.resources}
-                locale={locale}
-                problemTitle={pickLabel(item.titles, locale)}
-                onOpenViewer={onOpenViewer}
-              />
-            </details>
-          </Card>
-        ))}
+      <div className="connected-module-list">
+        {visible.map((item, idx) => {
+          const isOpen = idx === activeModuleIndex;
+          const prevMod = idx > 0 ? visible[idx - 1] : null;
+          const nextMod = idx < visible.length - 1 ? visible[idx + 1] : null;
+          return (
+            <div key={item.id} className={`connected-module-step ${isOpen ? 'is-active' : ''}`}>
+              <div className="module-rail-node" aria-hidden="true">
+                <span>{String(idx + 1).padStart(2, '0')}</span>
+              </div>
+              <Card variant="outlined" className="connected-module-card">
+                <button
+                  type="button"
+                  className="connected-module-trigger"
+                  aria-expanded={isOpen}
+                  onClick={() => setActiveModuleIndex(isOpen ? -1 : idx)}
+                >
+                  <span lang={item.titles[locale] ? locale : defaultLocale}>{pickLabel(item.titles, locale)}</span>
+                  <ChevronRight size={17} aria-hidden="true" />
+                </button>
+                {isOpen && (
+                  <div className="connected-module-body">
+                    <Resources
+                      resources={item.resources}
+                      locale={locale}
+                      problemTitle={pickLabel(item.titles, locale)}
+                      moduleId={item.id}
+                      onOpenViewer={onOpenViewer}
+                    />
+                    {(prevMod || nextMod) && (
+                      <div className="module-step-nav">
+                        {prevMod ? (
+                          <Button variant="outlined" size="sm" onClick={() => setActiveModuleIndex(idx - 1)}>
+                            <ChevronLeft size={15} aria-hidden="true" /> {pickLabel(prevMod.titles, locale)}
+                          </Button>
+                        ) : <span />}
+                        {nextMod ? (
+                          <Button variant="solid" size="sm" onClick={() => setActiveModuleIndex(idx + 1)}>
+                            {pickLabel(nextMod.titles, locale)} <ChevronRight size={15} aria-hidden="true" />
+                          </Button>
+                        ) : <span />}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Card>
+            </div>
+          );
+        })}
       </div>
     </section>
   );

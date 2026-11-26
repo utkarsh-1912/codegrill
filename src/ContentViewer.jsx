@@ -30,6 +30,7 @@ export function buildViewerPath(item) {
   if (item?.title) params.set('title', item.title);
   if (item?.kind) params.set('kind', item.kind);
   if (item?.problemSlug) params.set('problem', item.problemSlug);
+  if (item?.moduleId) params.set('module', item.moduleId);
   if (item?.solutionLang) params.set('lang', item.solutionLang);
   return `/viewer?${params.toString()}`;
 }
@@ -41,6 +42,8 @@ export function ContentViewerBody({
   data,
   loading,
   copied,
+  problem,
+  defaultShowScript = false,
   customPlayerTemplate,
   onCopyCode,
   onSelectSubUrl,
@@ -66,6 +69,9 @@ export function ContentViewerBody({
         embedUrl={data.embedUrl}
         sourceUrl={data.sourceUrl || activeUrl}
         title={data.title || activeTitle}
+        locale={locale}
+        problem={problem}
+        defaultShowScript={defaultShowScript}
         customPlayerTemplate={customPlayerTemplate}
       />
     );
@@ -78,6 +84,9 @@ export function ContentViewerBody({
           embedUrl={activeChannelEmbed}
           sourceUrl={selectedVideoId ? `https://www.youtube.com/watch?v=${selectedVideoId}` : activeUrl}
           title={data.title || activeTitle}
+          locale={locale}
+          problem={problem}
+          defaultShowScript={defaultShowScript}
           customPlayerTemplate={customPlayerTemplate}
         />
         {data.videos?.length > 0 && (

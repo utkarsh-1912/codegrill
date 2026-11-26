@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createPluginRegistry } from './plugins/registry.mjs';
+import { fetchYouTubeTranscript } from './plugins/transcript.mjs';
 import { buildAnalytics, createStore } from './store.mjs';
 import { getPublicConfig, loadServerConfig } from './config.mjs';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from '../src/sheets.mjs';
@@ -116,6 +117,14 @@ export function createServer(configOverrides = {}) {
         const locale = url.searchParams.get('locale') || seed.platform_metadata.default_locale;
         if (!target) return sendJson(res, 400, { error: 'Missing url parameter' });
         const result = await plugins.fetch(target, { locale });
+        return sendJson(res, 200, result);
+      }
+
+      if (req.method === 'GET' && pathname === '/api/plugins/transcript') {
+        const videoId = url.searchParams.get('videoId') || '';
+        const locale = url.searchParams.get('locale') || seed.platform_metadata.default_locale;
+        if (!videoId) return sendJson(res, 400, { error: 'Missing videoId parameter' });
+        const result = await fetchYouTubeTranscript(videoId, locale);
         return sendJson(res, 200, result);
       }
 
