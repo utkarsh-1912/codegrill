@@ -123,13 +123,18 @@ export function ProfilePage({
           <h3>{t.ui.domainProgressTitle}</h3>
           <div className="profile-progress-list">
             {domainBreakdown.map((item) => (
-              <div key={item.id} className="profile-progress-row">
+              <button
+                key={item.id}
+                type="button"
+                className="profile-progress-row profile-progress-btn"
+                onClick={() => onNavigate(`/roadmap?domain=${encodeURIComponent(item.id)}`)}
+              >
                 <div className="profile-progress-top">
                   <span className="profile-progress-name">{item.label}</span>
                   <strong>{item.done}<span>/{item.total}</span></strong>
                 </div>
                 <progress value={item.done} max={Math.max(1, item.total)} />
-              </div>
+              </button>
             ))}
           </div>
         </Card>

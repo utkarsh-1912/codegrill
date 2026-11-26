@@ -5454,3 +5454,82 @@ body,
   background: #f871711f;
   color: #f87171;
 }
+
+
+.viewer-panel .viewer-footer {
+  justify-content: space-between;
+  align-items: center;
+}
+
+.viewer-footer-left {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+
+/* Hide native browser search cancel X (prevents duplicate blue X in search inputs) */
+input[type="search"]::-webkit-search-cancel-button,
+input[type="search"]::-webkit-search-decoration,
+input[type="search"]::-webkit-search-results-button,
+input[type="search"]::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+/* Search Modal Domain Scope Tabs */
+.palette-scope-tabs {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 4px;
+  overflow-x: auto;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--ut-line);
+  background: var(--ut-bg);
+  scrollbar-width: none;
+}
+
+.palette-scope-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.palette-scope-tab {
+  flex: 0 0 auto;
+  padding: 4px 10px;
+  border: 1px solid var(--ut-line);
+  border-radius: 999px;
+  background: var(--ut-bg-2);
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out-expo), background-color var(--dur-fast) var(--ease-out-expo), color var(--dur-fast) var(--ease-out-expo);
+}
+
+.palette-scope-tab:hover {
+  color: var(--ink);
+  border-color: var(--ut-line-2);
+}
+
+.palette-scope-tab.is-active {
+  border-color: var(--ember);
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+}
+
+.profile-progress-btn {
+  width: 100%;
+  padding: 6px 8px;
+  margin: -6px -8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  text-align: start;
+  cursor: pointer;
+  transition: background-color var(--dur-fast) var(--ease-out-expo);
+}
+
+.profile-progress-btn:hover {
+  background: var(--ut-bg-3);
+}

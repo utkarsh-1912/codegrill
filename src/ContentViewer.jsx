@@ -332,31 +332,6 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
             )}
           </div>
           <div className="viewer-header-actions">
-            {history.length > 1 && (
-              <div className="viewer-history-nav" role="group" aria-label="Nested plugin history">
-                <button
-                  type="button"
-                  className="icon-btn"
-                  disabled={!canGoBack}
-                  onClick={goBack}
-                  aria-label="Back"
-                  title="Back"
-                >
-                  <ArrowLeft size={16} aria-hidden="true" />
-                </button>
-                <span className="viewer-history-count">{historyIndex + 1}/{history.length}</span>
-                <button
-                  type="button"
-                  className="icon-btn"
-                  disabled={!canGoForward}
-                  onClick={goForward}
-                  aria-label="Forward"
-                  title="Forward"
-                >
-                  <ArrowRight size={16} aria-hidden="true" />
-                </button>
-              </div>
-            )}
             {onExpand && (
               <button
                 type="button"
@@ -415,6 +390,33 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
         </div>
 
         <div className="viewer-footer">
+          <div className="viewer-footer-left">
+            {history.length > 1 && (
+              <div className="viewer-history-nav" role="group" aria-label="Nested plugin history">
+                <button
+                  type="button"
+                  className="icon-btn"
+                  disabled={!canGoBack}
+                  onClick={goBack}
+                  aria-label="Back"
+                  title="Back"
+                >
+                  <ArrowLeft size={16} aria-hidden="true" />
+                </button>
+                <span className="viewer-history-count">{historyIndex + 1}/{history.length}</span>
+                <button
+                  type="button"
+                  className="icon-btn"
+                  disabled={!canGoForward}
+                  onClick={goForward}
+                  aria-label="Forward"
+                  title="Forward"
+                >
+                  <ArrowRight size={16} aria-hidden="true" />
+                </button>
+              </div>
+            )}
+          </div>
           <Button variant="quiet" size="sm" href={activeUrl} target="_blank" rel="noopener noreferrer">
             {t.viewer.openOriginal} <ExternalLink size={14} aria-hidden="true" />
           </Button>

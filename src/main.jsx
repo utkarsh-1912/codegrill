@@ -48,14 +48,44 @@ import {
 
 const { roadmap_categories: categories, languages } = curriculum;
 const problems = mergeCatalogProblems(curriculum.problems);
-const directories = curriculum.directories
-  .filter(({ url }) => safeUrl(url)?.hostname !== 'neetcode.io')
-  .map((entry) => {
-    if (!/neetcode/i.test(entry.name)) return /neetcode/i.test(entry.description ?? '') ? { ...entry, description: undefined } : entry;
-    const name = entry.name === 'NeetCode' ? 'Coding walkthroughs'
-      : entry.name.includes('freeCodeCamp') ? 'freeCodeCamp coding interview course' : 'Coding solutions repository';
-    return { ...entry, name, description: undefined };
-  });
+const EXTRA_ENGINEERING_DIRECTORIES = [
+  {
+    name: 'System Design Primer (HLD)',
+    url: 'https://github.com/donnemartin/system-design-primer',
+    description: 'Scalability, caching, sharding, CAP theorem, and distributed system design blueprints.',
+    locale: 'en',
+  },
+  {
+    name: 'Awesome Low-Level Design (LLD & OOD)',
+    url: 'https://github.com/ashishps1/awesome-low-level-design',
+    description: 'SOLID principles, design patterns, and machine coding solutions (Parking Lot, Splitwise, BookMyShow).',
+    locale: 'en',
+  },
+  {
+    name: 'System Design Architecture Guide',
+    url: 'https://github.com/karanpratapsingh/system-design',
+    description: 'Databases, replication, message queues, load balancing, and real-world system architectures.',
+    locale: 'en',
+  },
+  {
+    name: 'Tech Interview Handbook (Behavioral, SQL & CS)',
+    url: 'https://github.com/yangshun/tech-interview-handbook',
+    description: 'Curated interview guides covering behavioral STAR prep, CS fundamentals, and study plans.',
+    locale: 'en',
+  },
+];
+
+const directories = [
+  ...EXTRA_ENGINEERING_DIRECTORIES,
+  ...curriculum.directories
+    .filter(({ url }) => safeUrl(url)?.hostname !== 'neetcode.io')
+    .map((entry) => {
+      if (!/neetcode/i.test(entry.name)) return /neetcode/i.test(entry.description ?? '') ? { ...entry, description: undefined } : entry;
+      const name = entry.name === 'NeetCode' ? 'Coding walkthroughs'
+        : entry.name.includes('freeCodeCamp') ? 'freeCodeCamp coding interview course' : 'Coding solutions repository';
+      return { ...entry, name, description: undefined };
+    }),
+];
 
 function sourcePlatform(url, fallback) {
   const host = safeUrl(url)?.hostname.replace(/^www\./, '');
@@ -116,11 +146,16 @@ function currentPage() {
   const isKnown = validPages.has(segment);
   const page = isKnown ? segment : 'not-found';
 
+  const domainParam = params.get('domain') || '';
+  const validDomain = ROADMAP_DOMAINS.some((d) => d.id === domainParam) ? domainParam : '';
+
   return {
     page,
     pathname: window.location.pathname,
     problem: (page === 'problems' || page === 'rooms' || page === 'viewer') && problemSlugs.has(problemParam) ? problemParam : '',
     topic: page === 'problems' && !problemParam && categories.some(({ id }) => id === topicParam) ? topicParam : '',
+    roadmapDomain: page === 'roadmap' ? validDomain : '',
+    roadmapTopic: page === 'roadmap' ? topicParam : '',
     viewerUrl: page === 'viewer' ? (params.get('url') || '') : '',
     viewerTitle: page === 'viewer' ? (params.get('title') || '') : '',
     viewerKind: page === 'viewer' ? (params.get('kind') || '') : '',
@@ -133,7 +168,7 @@ function App() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [preferences, setPreferences] = useState(readPreferences);
   const { locale, completed, bookmarked, notes, activity, streak, longestStreak } = preferences;
-  const [{ page, pathname, problem: sharedProblem, topic, viewerUrl, viewerTitle, viewerKind, viewerLang, viewerModuleId }, setLocation] = useState(currentPage);
+  const [{ page, pathname, problem: sharedProblem, topic, roadmapDomain, roadmapTopic, viewerUrl, viewerTitle, viewerKind, viewerLang, viewerModuleId }, setLocation] = useState(currentPage);
   const [zenMode, setZenMode] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [appConfig, setAppConfig] = useState(DEFAULT_APP_CONFIG);
@@ -464,6 +499,8 @@ function App() {
             next={next}
             locale={locale}
             title={t.nav.roadmap}
+            initialDomain={roadmapDomain}
+            initialTopicId={roadmapTopic}
             onOpen={openProblems}
             onOpenViewer={setViewerItem}
             onNavigate={navigate}
@@ -593,12 +630,29 @@ function App() {
         problems={problems}
         categories={categories}
         sheets={allSheets}
+        modules={modules}
         locale={locale}
         defaultLocale={defaultLocale}
         onSelect={(item) => {
           if (item.kind === 'problem') openProblemBySlug(item.id);
           else if (item.kind === 'topic') openProblems(item.id);
           else if (item.kind === 'sheet') navigate('/sheets');
+          else if (item.kind === 'domain-topic') {
+            navigate(`/roadmap?${new URLSearchParams({ domain: item.domainId, topic: item.id })}`);
+          } else if (item.kind === 'module') {
+            const mod = modules.find((m) => m.id === item.id);
+            const primary = mod ? resourcesFor(mod.resources, locale, defaultLocale)[0] : null;
+            if (primary) {
+              navigate(buildViewerPath({
+                url: primary.url,
+                title: item.label,
+                kind: primary.kind === 'video' ? 'video' : 'article',
+                moduleId: mod.id,
+              }));
+            } else {
+              navigate('/tracks');
+            }
+          }
         }}
       />
     </div>
@@ -607,11 +661,26 @@ function App() {
 
 const DOMAIN_CHECKS_KEY = 'codegrill:domain-roadmap:v1';
 
-function Roadmap({ roadmap, next, locale, title, onOpen, onOpenViewer, onNavigate }) {
+function Roadmap({ roadmap, next, locale, title, initialDomain = '', initialTopicId = '', onOpen, onOpenViewer, onNavigate }) {
   const t = getMessages(locale);
-  const [domain, setDomain] = useState('dsa');
+  const [domain, setDomain] = useState(initialDomain || 'dsa');
   const [stage, setStage] = useState('all');
-  const [selectedId, setSelectedId] = useState(next?.id ?? roadmap[0].id);
+  const [selectedId, setSelectedId] = useState(initialTopicId || next?.id || roadmap[0].id);
+
+  useEffect(() => {
+    if (initialDomain) {
+      setDomain(initialDomain);
+      setStage('all');
+      if (initialTopicId) {
+        setSelectedId(initialTopicId);
+      } else if (initialDomain === 'dsa') {
+        setSelectedId(next?.id ?? roadmap[0].id);
+      } else {
+        const list = buildDomainRoadmap(initialDomain, domainChecks);
+        if (list[0]) setSelectedId(list[0].id);
+      }
+    }
+  }, [initialDomain, initialTopicId]);
   const [domainChecks, setDomainChecks] = useState(() => {
     try {
       return JSON.parse(localStorage.getItem(DOMAIN_CHECKS_KEY) || '{}') || {};
