@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Maximize2, Menu, Minimize2, Moon, RotateCcw, Search, Settings, Sun, User, X } from 'lucide-react';
+import { ChevronRight, Maximize2, Menu, Minimize2, Moon, RotateCcw, Search, Settings, Sun, User, X } from 'lucide-react';
 import { BrandLogo } from './BrandLogo.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
 import { getMessages } from './i18n.mjs';
@@ -129,42 +129,52 @@ export function AppHeader({
                 </button>
 
                 {settingsOpen && (
-                  <div className="settings-popover" role="dialog" aria-label={t.palette.settings}>
-                    <div className="settings-popover-header settings-popover-status-only">
-                      <span className="settings-sync-pill">
-                        <span className={`sync-dot ${backendOnline ? 'is-online' : ''}`} />
-                        {backendOnline ? t.controls.backendOnline : t.controls.backendLocal}
+                  <div className="settings-popover settings-menu-v2" role="dialog" aria-label={t.palette.settings}>
+                    <a
+                      href="/profile"
+                      className={`settings-profile-card ${page === 'profile' ? 'is-active' : ''}`}
+                      aria-current={page === 'profile' ? 'page' : undefined}
+                      onClick={linkClick('/profile')}
+                    >
+                      <span className="settings-profile-avatar" aria-hidden="true">
+                        <User size={16} />
                       </span>
-                    </div>
+                      <span className="settings-profile-copy">
+                        <strong>{t.nav.profile}</strong>
+                        <small className="settings-sync-inline">
+                          <span className={`sync-dot ${backendOnline ? 'is-online' : ''}`} />
+                          {backendOnline ? t.controls.backendOnline : t.controls.backendLocal}
+                        </small>
+                      </span>
+                      <ChevronRight size={15} className="settings-profile-chevron" aria-hidden="true" />
+                    </a>
 
-                    <div className="settings-row">
-                      <span>{t.palette.theme}</span>
+                    <div className="settings-divider" />
+
+                    <div className="settings-quick-grid">
                       <button
                         type="button"
-                        className="locale-field icon-only-control"
+                        className={`settings-quick-tile ${isDark ? 'is-active' : ''}`}
                         onClick={onToggleTheme}
                         aria-label={isDark ? t.controls.switchToLight : t.controls.switchToDark}
-                        title={isDark ? t.controls.switchToLight : t.controls.switchToDark}
                       >
-                        {isDark ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
+                        {isDark ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
+                        <span>{t.palette.theme}</span>
                       </button>
-                    </div>
 
-                    <div className="settings-row">
-                      <span>{t.palette.zen}</span>
                       <button
                         type="button"
-                        className={`locale-field icon-only-control ${zenMode ? 'is-active' : ''}`}
-                        onClick={() => { onToggleZen(); setSettingsOpen(false); }}
+                        className={`settings-quick-tile ${zenMode ? 'is-active' : ''}`}
                         aria-pressed={zenMode}
+                        onClick={() => { onToggleZen(); setSettingsOpen(false); }}
                         aria-label={zenMode ? t.controls.zenExit : t.controls.zenEnter}
-                        title={zenMode ? t.controls.zenExit : t.controls.zenEnter}
                       >
-                        {zenMode ? <Minimize2 size={17} aria-hidden="true" /> : <Maximize2 size={17} aria-hidden="true" />}
+                        {zenMode ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
+                        <span>{t.palette.zen}</span>
                       </button>
                     </div>
 
-                    <div className="settings-row">
+                    <div className="settings-lang-row">
                       <span>{t.controls.language}</span>
                       <SelectDropdown
                         compact
@@ -184,57 +194,37 @@ export function AppHeader({
 
                     <div className="settings-divider" />
 
-                    <div className="settings-row">
-                      <span>{t.nav.profile}</span>
-                      <a
-                        href="/profile"
-                        className={`locale-field icon-only-control ${page === 'profile' ? 'is-active' : ''}`}
-                        aria-current={page === 'profile' ? 'page' : undefined}
-                        aria-label={t.nav.profile}
-                        title={t.nav.profile}
-                        onClick={linkClick('/profile')}
+                    {!confirmReset ? (
+                      <button
+                        type="button"
+                        className="settings-danger-item"
+                        onClick={() => setConfirmReset(true)}
                       >
-                        <User size={17} aria-hidden="true" />
-                      </a>
-                    </div>
-
-                    <div className="settings-row">
-                      {!confirmReset ? (
-                        <>
-                          <span>{t.ui.resetProgress}</span>
-                          <button
-                            type="button"
-                            className="locale-field icon-only-control reset-trigger-btn"
-                            onClick={() => setConfirmReset(true)}
-                            aria-label={t.ui.resetProgress}
-                            title={t.ui.resetProgress}
-                          >
-                            <RotateCcw size={16} aria-hidden="true" />
-                          </button>
-                        </>
-                      ) : (
-                        <div className="reset-confirm-row">
-                          <button
-                            type="button"
-                            className="reset-confirm-yes"
-                            onClick={() => {
-                              onResetProgress?.();
-                              setConfirmReset(false);
-                              setSettingsOpen(false);
-                            }}
-                          >
-                            {t.ui.confirmReset}
-                          </button>
-                          <button
-                            type="button"
-                            className="reset-confirm-no"
-                            onClick={() => setConfirmReset(false)}
-                          >
-                            {t.sheets.cancel}
-                          </button>
-                        </div>
-                      )}
-                    </div>
+                        <RotateCcw size={15} aria-hidden="true" />
+                        <span>{t.ui.resetProgress}</span>
+                      </button>
+                    ) : (
+                      <div className="reset-confirm-row">
+                        <button
+                          type="button"
+                          className="reset-confirm-yes"
+                          onClick={() => {
+                            onResetProgress?.();
+                            setConfirmReset(false);
+                            setSettingsOpen(false);
+                          }}
+                        >
+                          {t.ui.confirmReset}
+                        </button>
+                        <button
+                          type="button"
+                          className="reset-confirm-no"
+                          onClick={() => setConfirmReset(false)}
+                        >
+                          {t.sheets.cancel}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 )}
               </div>
