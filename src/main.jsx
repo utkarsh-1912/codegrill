@@ -20,6 +20,7 @@ import { ContentViewer } from './ContentViewer.jsx';
 import { LedgerDashboard } from './LedgerDashboard.jsx';
 import { CommandPalette } from './CommandPalette.jsx';
 import { ProblemPracticeBar } from './ProblemPracticeBar.jsx';
+import { BrandLogo } from './BrandLogo.jsx';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from './sheets.mjs';
 import { DEFAULT_APP_CONFIG } from './config.mjs';
 import { getMessages } from './i18n.mjs';
@@ -294,8 +295,8 @@ function App() {
 
       <header className="app-header">
         <div className="header-inner">
-          <a className="brand" href="#home">
-            <img src="/codegrill.svg" alt="" width="34" height="34" />{appConfig.brand.name}
+          <a className="brand" href="#home" aria-label={appConfig.brand.name}>
+            <BrandLogo name={appConfig.brand.name} size={32} />
           </a>
           <nav aria-label="Study navigation">
             {pathIds.map((id, index) => {

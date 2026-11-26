@@ -1,0 +1,23 @@
+{
+  "name": "Codegrill — Technical Interview Forge",
+  "short_name": "Codegrill",
+  "description": "Multilingual coding interview roadmap, curated DSA sheets, and in-app walkthrough plugins.",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#e0521f",
+  "background_color": "#151210",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/codegrill.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

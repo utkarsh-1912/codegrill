@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, Card } from '@utkristi/ui';
 import { getMessages } from './i18n.mjs';
+import { BrandLogo } from './BrandLogo.jsx';
 
 export const sitePages = ['home', 'how-it-works', 'about', 'help'];
 
@@ -158,8 +159,8 @@ export function SiteFooter({ locale = 'en', config }) {
     <footer className="app-footer">
       <div className="shell site-footer-inner">
         <div className="footer-brand">
-          <a className="brand" href="#home">
-            <img src="/codegrill.svg" width="29" height="29" alt="" />{brandName}
+          <a className="brand" href="#home" aria-label={brandName}>
+            <BrandLogo name={brandName} size={28} />
           </a>
           <p>{t.site.footerTagline}</p>
         </div>

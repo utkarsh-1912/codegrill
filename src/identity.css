@@ -1498,3 +1498,42 @@ progress.diff-hard::-moz-progress-bar { background: #dc2626; }
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Brand Logo Lockup */
+.brand-lockup {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.brand-emblem {
+  display: block;
+  flex-shrink: 0;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px #c2410c33;
+}
+
+.brand-wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  font-family: var(--display-font);
+  font-size: 1.42rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.brand-prefix {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.brand-suffix {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.brand-dot {
+  color: var(--ember);
+  font-weight: 800;
+}

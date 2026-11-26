@@ -1,1 +1,22 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#ff683a"/><path fill="#201d22" d="M19 13h34l-6 9H25l-8 20h12l5-10h-9l4-7h20L37 51H15l-8-9z"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+    <linearGradient id="cg-forge" x1="6" y1="4" x2="58" y2="60" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#ff8547"/>
+      <stop offset="52%" stop-color="#f05a28"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+    <linearGradient id="cg-ember" x1="24" y1="18" x2="40" y2="46" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#fff4e6"/>
+      <stop offset="100%" stop-color="#ffd1a9"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="15" fill="url(#cg-forge)"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="13.5" stroke="#fff4e6" stroke-opacity="0.22" stroke-width="1.5"/>
+  <!-- Outer code forge brackets -->
+  <path d="M23 19L11 32L23 45" stroke="#1b120d" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M41 19L53 32L41 45" stroke="#1b120d" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Three glowing grill bars in the center -->
+  <rect x="26" y="21" width="12" height="4.5" rx="2.25" fill="url(#cg-ember)"/>
+  <rect x="24" y="29.75" width="16" height="4.5" rx="2.25" fill="#1b120d"/>
+  <rect x="26" y="38.5" width="12" height="4.5" rx="2.25" fill="url(#cg-ember)"/>
+</svg>
