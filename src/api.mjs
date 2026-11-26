@@ -246,6 +246,27 @@ export async function fetchVideoTranscript(videoId, locale = 'en', baseUrl) {
 }
 
 export async function fetchPluginContent(url, locale = 'en', baseUrl) {
+  if (String(url || '').startsWith('/docs/')) {
+    try {
+      const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+      if (res.ok) {
+        const content = await res.text();
+        const heading = /^#\s+(.+)$/m.exec(content)?.[1]?.trim();
+        const fileLabel = url.split('/').pop()?.replace(/\.md$/i, '') || 'Guide';
+        return {
+          plugin: 'codegrill-docs',
+          kind: 'markdown',
+          title: heading || fileLabel,
+          siteName: 'Codegrill Docs',
+          content,
+          sourceUrl: url,
+        };
+      }
+    } catch {
+      // Fall through
+    }
+  }
+
   try {
     const res = await fetch(
       apiUrl(`/api/plugins/fetch?url=${encodeURIComponent(url)}&locale=${encodeURIComponent(locale)}`, baseUrl),
@@ -605,7 +626,8 @@ function parseMediumUrlClient(rawUrl) {
           `This course page on **${host}** redirects to a paid or sign-in gate and cannot be extracted in-app.`,
           '',
           '### Open-Access Guides You Can Read Right Here',
-          '- [ByteByteGoHq / system-design-101 (Official Free Repo)](https://github.com/ByteByteGoHq/system-design-101)',
+          '- [ByteByteGoHq / system-design-101 (README)](https://github.com/ByteByteGoHq/system-design-101/blob/main/README.md)',
+          '- [ByteByteGoHq / system-design-101 (Data & Diagrams)](https://github.com/ByteByteGoHq/system-design-101/tree/main/data)',
           '- [donnemartin / system-design-primer](https://github.com/donnemartin/system-design-primer)',
           '- [ashishps1 / awesome-system-design-resources](https://github.com/ashishps1/awesome-system-design-resources)',
           '- [ashishps1 / awesome-low-level-design](https://github.com/ashishps1/awesome-low-level-design)',

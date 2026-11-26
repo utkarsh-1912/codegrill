@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 360" fill="none">
+  <defs>
+    <linearGradient id="lbg" x1="0" y1="0" x2="920" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1c1410"/>
+      <stop offset="100%" stop-color="#2a1c14"/>
+    </linearGradient>
+  </defs>
+  <rect width="920" height="360" rx="18" fill="url(#lbg)"/>
+  <text x="36" y="44" fill="#fff7ee" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700">LLD &amp; Object-Oriented Design Pattern Matrix</text>
+  <text x="36" y="66" fill="#c7b8ab" font-family="IBM Plex Mono, monospace" font-size="11">CREATIONAL · STRUCTURAL · BEHAVIORAL · CONCURRENCY PATTERNS FOR INTERVIEWS</text>
+
+  <rect x="36" y="96" width="268" height="224" rx="14" fill="#2e2018" stroke="#ff8547" stroke-width="1.5"/>
+  <text x="56" y="128" fill="#ff8547" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="700">01 · CREATIONAL</text>
+  <text x="56" y="160" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="600">Factory / Abstract Factory</text>
+  <text x="56" y="180" fill="#c7b8ab" font-family="Inter, sans-serif" font-size="11">Vehicle, Notification, Payment gateways</text>
+  <text x="56" y="216" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="600">Builder Pattern</text>
+  <text x="56" y="236" fill="#c7b8ab" font-family="Inter, sans-serif" font-size="11">Immutable configs, Query / Request builders</text>
+  <text x="56" y="272" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="600">Singleton (Thread-Safe)</text>
+  <text x="56" y="292" fill="#c7b8ab" font-family="Inter, sans-serif" font-size="11">Connection pools, Config registry</text>
+
+  <rect x="326" y="96" width="268" height="224" rx="14" fill="#2e2018" stroke="#6b4733" stroke-width="1.5"/>
+  <text x="346" y="128" fill="#ffb085" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="700">02 · STRUCTURAL</text>
+  <text x="346" y="160" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="600">Adapter &amp; Facade</text>
+  <text x="346" y="180" fill="#c7b8ab" font-family="Inter, sans-serif" font-size="11">Wrap legacy APIs, simplify subsystems</text>
+  <text x="346" y="216" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="600">Decorator Pattern</text>
+  <text x="346" y="236" fill="#c7b8ab" font-family="Inter, sans-serif" font-size="11">Composable middleware, caching, retries</text>
+  <text x="346" y="272" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="600">Proxy Pattern</text>
+  <text x="346" y="292" fill="#c7b8ab" font-family="Inter, sans-serif" font-size="11">Access control, lazy loading, rate limits</text>
+
+  <rect x="616" y="96" width="268" height="224" rx="14" fill="#2e2018" stroke="#ff8547" stroke-width="1.5"/>
+  <text x="636" y="128" fill="#ff8547" font-family="IBM Plex Mono, monospace" font-size="12" font-weight="700">03 · BEHAVIORAL</text>
+  <text x="636" y="160" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="600">Strategy Pattern</text>
+  <text x="636" y="180" fill="#c7b8ab" font-family="Inter, sans-serif" font-size="11">Pricing, Eviction (LRU/LFU), Matching</text>
+  <text x="636" y="216" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="600">State Pattern</text>
+  <text x="636" y="236" fill="#c7b8ab" font-family="Inter, sans-serif" font-size="11">Elevator, Order &amp; Vending lifecycles</text>
+  <text x="636" y="272" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="600">Observer / Pub-Sub</text>
+  <text x="636" y="292" fill="#c7b8ab" font-family="Inter, sans-serif" font-size="11">Notifications, stock tickers, audit hooks</text>
+</svg>

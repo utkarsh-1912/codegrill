@@ -71,6 +71,7 @@ function MathView({ tex, display = false }) {
 function resolveResourceUrl(href, sourceUrl, forRawImage = false) {
   const clean = String(href || '').trim();
   if (!clean || clean.startsWith('#')) return null;
+  if (clean.startsWith('/docs/')) return clean;
 
   try {
     const abs = new URL(clean);

@@ -1947,18 +1947,18 @@
           "articles": [
             {
               "platform": "github",
-              "title": "donnemartin/system-design-primer",
-              "url": "https://github.com/donnemartin/system-design-primer"
+              "title": "donnemartin/system-design-primer — Complete HLD Guide",
+              "url": "https://github.com/donnemartin/system-design-primer/blob/master/README.md"
             },
             {
               "platform": "github",
-              "title": "ByteByteGoHq/system-design-101",
-              "url": "https://github.com/ByteByteGoHq/system-design-101"
+              "title": "ByteByteGoHq/system-design-101 — System Design Blueprint",
+              "url": "https://github.com/ByteByteGoHq/system-design-101/blob/main/data/guides/system-design-blueprint-the-ultimate-guide.md"
             },
             {
-              "platform": "web",
-              "title": "System Design in a Hurry - Hello Interview",
-              "url": "https://www.hellointerview.com/learn/system-design/in-a-hurry/introduction"
+              "platform": "github",
+              "title": "ByteByteGoHq/system-design-101 — Data & Diagrams",
+              "url": "https://github.com/ByteByteGoHq/system-design-101/tree/main/data"
             }
           ]
         },
@@ -2006,8 +2006,13 @@
             },
             {
               "platform": "github",
-              "title": "ByteByteGoHq/system-design-101 (Open-Source Guide)",
-              "url": "https://github.com/ByteByteGoHq/system-design-101"
+              "title": "ByteByteGoHq/system-design-101 — README",
+              "url": "https://github.com/ByteByteGoHq/system-design-101/blob/main/README.md"
+            },
+            {
+              "platform": "github",
+              "title": "ByteByteGoHq/system-design-101 — Data & Diagrams",
+              "url": "https://github.com/ByteByteGoHq/system-design-101/tree/main/data"
             }
           ]
         }
@@ -2040,8 +2045,18 @@
           "articles": [
             {
               "platform": "github",
-              "title": "ashishps1/awesome-system-design-resources",
-              "url": "https://github.com/ashishps1/awesome-system-design-resources"
+              "title": "donnemartin/system-design-primer — Twitter Timeline Design",
+              "url": "https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/twitter/README.md"
+            },
+            {
+              "platform": "github",
+              "title": "ByteByteGoHq — How Twitter Recommends Tweets",
+              "url": "https://github.com/ByteByteGoHq/system-design-101/blob/main/data/guides/how-does-twitter-recommend-tweets.md"
+            },
+            {
+              "platform": "github",
+              "title": "ashishps1/awesome-system-design-resources — README",
+              "url": "https://github.com/ashishps1/awesome-system-design-resources/blob/main/README.md"
             }
           ]
         }
@@ -2135,8 +2150,18 @@
           "articles": [
             {
               "platform": "github",
-              "title": "GitHub system-design-questions Topic",
-              "url": "https://github.com/topics/system-design-questions"
+              "title": "ashishps1/awesome-low-level-design — Complete LLD Roadmap",
+              "url": "https://github.com/ashishps1/awesome-low-level-design/blob/main/README.md"
+            },
+            {
+              "platform": "github",
+              "title": "ashishps1/awesome-low-level-design — Parking Lot Spec",
+              "url": "https://github.com/ashishps1/awesome-low-level-design/blob/main/problems/parking-lot.md"
+            },
+            {
+              "platform": "github",
+              "title": "ByteByteGoHq — 18 Key Design Patterns",
+              "url": "https://github.com/ByteByteGoHq/system-design-101/blob/main/data/guides/18-key-design-patterns-every-developer-should-know.md"
             }
           ]
         }
@@ -2344,14 +2369,14 @@
               "url": "https://github.com/ombharatiya/AI-Engineer-Interview-Questions/blob/main/15-role-guides/forward-deployed-engineer.md"
             },
             {
-              "platform": "web",
-              "title": "The Definitive Guide to Forward Deployed Engineer Interviews in 2026",
-              "url": "https://www.sundeepteki.org/advice/the-definitive-guide-to-forward-deployed-engineer-interviews-in-2026"
+              "platform": "github",
+              "title": "FDE Field Manual — What Is an FDE?",
+              "url": "https://github.com/vrdivi/forward-deployed-engineer-field-manual/blob/main/docs/00-start-here/what-is-an-fde.md"
             },
             {
-              "platform": "medium",
-              "title": "How to Prepare for the Forward Deployed Engineer Interviews",
-              "url": "https://medium.com/@milesk_33/how-to-prepare-for-the-forward-deployed-engineer-interviews-1decf75b8a7f"
+              "platform": "github",
+              "title": "Forward Deployed Engineer Complete Roadmap",
+              "url": "https://github.com/techmahato/forward-deployed-engineer-roadmap/blob/main/README.md"
             }
           ]
         }
@@ -2378,19 +2403,19 @@
           "youtube": [],
           "articles": [
             {
-              "platform": "web",
-              "title": "Forward Deployed Engineer Interview Guide 2026 - Thita.ai",
-              "url": "https://thita.ai/blog/fde/forward-deployed-engineer-interview-guide"
+              "platform": "github",
+              "title": "Anthropic Claude Cookbooks — Customer Service Tool-Use Agent (.ipynb)",
+              "url": "https://github.com/anthropics/claude-cookbooks/blob/main/tool_use/customer_service_agent.ipynb"
             },
             {
-              "platform": "web",
-              "title": "Anthropic FDE Interview Prep - Educative.io",
-              "url": "https://www.educative.io/courses/anthropic-forward-deployed-engineer-interview"
+              "platform": "github",
+              "title": "Anthropic Claude Cookbooks — Orchestrator-Workers Pattern (.ipynb)",
+              "url": "https://github.com/anthropics/claude-cookbooks/blob/main/patterns/agents/orchestrator_workers.ipynb"
             },
             {
-              "platform": "medium",
-              "title": "Top 10 Forward Deployed Engineer Interview Questions",
-              "url": "https://medium.com/@milesk_33/top-10-forward-deployed-engineer-interview-questions-from-famous-ai-companies-e00920d0598e"
+              "platform": "github",
+              "title": "Model Context Protocol (MCP) — Official Integration Servers",
+              "url": "https://github.com/modelcontextprotocol/servers/blob/main/README.md"
             }
           ]
         }

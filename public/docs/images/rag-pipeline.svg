@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 380" fill="none">
+  <defs>
+    <linearGradient id="rbg" x1="0" y1="0" x2="920" y2="380" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1c1410"/>
+      <stop offset="100%" stop-color="#2a1c14"/>
+    </linearGradient>
+    <marker id="rarrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#ff8547"/>
+    </marker>
+  </defs>
+  <rect width="920" height="380" rx="18" fill="url(#rbg)"/>
+  <text x="36" y="44" fill="#fff7ee" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700">Production Hybrid RAG Pipeline</text>
+  <text x="36" y="66" fill="#c7b8ab" font-family="IBM Plex Mono, monospace" font-size="11">QUERY REWRITE → BM25 + DENSE HNSW → RECIPROCAL RANK FUSION → CROSS-ENCODER RERANK → GROUNDED LLM</text>
+
+  <rect x="34" y="154" width="112" height="72" rx="12" fill="#2e2018" stroke="#6b4733" stroke-width="1.5"/>
+  <text x="90" y="186" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">User Query</text>
+  <text x="90" y="205" text-anchor="middle" fill="#c7b8ab" font-family="IBM Plex Mono, monospace" font-size="10">+ Tenant ACL</text>
+
+  <rect x="190" y="102" width="144" height="68" rx="12" fill="#362218" stroke="#ff8547" stroke-width="1.5"/>
+  <text x="262" y="132" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">BM25 Sparse</text>
+  <text x="262" y="151" text-anchor="middle" fill="#ffb085" font-family="IBM Plex Mono, monospace" font-size="10">Exact Terms / IDs</text>
+
+  <rect x="190" y="208" width="144" height="68" rx="12" fill="#362218" stroke="#ff8547" stroke-width="1.5"/>
+  <text x="262" y="238" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">Dense Vector</text>
+  <text x="262" y="257" text-anchor="middle" fill="#ffb085" font-family="IBM Plex Mono, monospace" font-size="10">HNSW Pre-Filtered</text>
+
+  <rect x="384" y="154" width="132" height="72" rx="12" fill="#2e2018" stroke="#ff8547" stroke-width="1.5"/>
+  <text x="450" y="186" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">RRF Merge</text>
+  <text x="450" y="205" text-anchor="middle" fill="#ffb085" font-family="IBM Plex Mono, monospace" font-size="10">Top-50 Candidates</text>
+
+  <rect x="562" y="154" width="136" height="72" rx="12" fill="#2e2018" stroke="#6b4733" stroke-width="1.5"/>
+  <text x="630" y="186" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">Reranker</text>
+  <text x="630" y="205" text-anchor="middle" fill="#c7b8ab" font-family="IBM Plex Mono, monospace" font-size="10">Cross-Encoder Top-5</text>
+
+  <rect x="744" y="146" width="142" height="88" rx="14" fill="#ff693d"/>
+  <text x="815" y="186" text-anchor="middle" fill="#1b110b" font-family="Inter, sans-serif" font-size="14" font-weight="800">Grounded LLM</text>
+  <text x="815" y="206" text-anchor="middle" fill="#2a160c" font-family="IBM Plex Mono, monospace" font-size="10">Inline Citations</text>
+
+  <rect x="34" y="316" width="852" height="36" rx="9" fill="#261913" stroke="#4d3222" stroke-width="1.2"/>
+  <text x="460" y="339" text-anchor="middle" fill="#e8d8cc" font-family="IBM Plex Mono, monospace" font-size="11">Evaluation Metrics: Retrieval Recall@K · MRR · Context Precision · Faithfulness · Groundedness</text>
+
+  <path d="M146 176 L184 138" stroke="#ff8547" stroke-width="2" marker-end="url(#rarrow)"/>
+  <path d="M146 204 L184 240" stroke="#ff8547" stroke-width="2" marker-end="url(#rarrow)"/>
+  <path d="M334 138 L378 176" stroke="#ff8547" stroke-width="2" marker-end="url(#rarrow)"/>
+  <path d="M334 240 L378 204" stroke="#ff8547" stroke-width="2" marker-end="url(#rarrow)"/>
+  <path d="M516 190 H556" stroke="#ff8547" stroke-width="2" marker-end="url(#rarrow)"/>
+  <path d="M698 190 H738" stroke="#ff8547" stroke-width="2" marker-end="url(#rarrow)"/>
+</svg>

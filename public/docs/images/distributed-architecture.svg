@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 420" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="920" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#1c1410"/>
+      <stop offset="100%" stop-color="#2a1c14"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#ff8547"/>
+      <stop offset="100%" stop-color="#d94e1f"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M 0 1 L 10 5 L 0 9 z" fill="#ff8547"/>
+    </marker>
+  </defs>
+  <rect width="920" height="420" rx="18" fill="url(#bg)"/>
+  <g opacity="0.1" stroke="#ff9b6a" stroke-width="1">
+    <path d="M0 70 H920 M0 140 H920 M0 210 H920 M0 280 H920 M0 350 H920"/>
+    <path d="M115 0 V420 M230 0 V420 M345 0 V420 M460 0 V420 M575 0 V420 M690 0 V420 M805 0 V420"/>
+  </g>
+  <text x="36" y="44" fill="#fff7ee" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="700">Reference Distributed Architecture</text>
+  <text x="36" y="66" fill="#c7b8ab" font-family="IBM Plex Mono, monospace" font-size="11">EDGE → LOAD BALANCER → STATELESS API → CACHE / SHARDED DB / ASYNC QUEUE</text>
+
+  <!-- Client + Edge -->
+  <rect x="36" y="165" width="110" height="72" rx="12" fill="#2e2018" stroke="#6b4733" stroke-width="1.5"/>
+  <text x="91" y="197" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">Clients</text>
+  <text x="91" y="216" text-anchor="middle" fill="#c7b8ab" font-family="IBM Plex Mono, monospace" font-size="10">Web / Mobile</text>
+
+  <rect x="190" y="165" width="128" height="72" rx="12" fill="#362218" stroke="#ff8547" stroke-width="1.8"/>
+  <text x="254" y="197" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">CDN + L7 LB</text>
+  <text x="254" y="216" text-anchor="middle" fill="#ffb085" font-family="IBM Plex Mono, monospace" font-size="10">TLS · Rate Limit</text>
+
+  <!-- API Fleet -->
+  <rect x="366" y="145" width="148" height="112" rx="14" fill="url(#accent)"/>
+  <text x="440" y="192" text-anchor="middle" fill="#1b110b" font-family="Inter, sans-serif" font-size="14" font-weight="800">Stateless API</text>
+  <text x="440" y="212" text-anchor="middle" fill="#2a160c" font-family="IBM Plex Mono, monospace" font-size="10">Auto-scaled Pods</text>
+  <text x="440" y="230" text-anchor="middle" fill="#2a160c" font-family="IBM Plex Mono, monospace" font-size="10">Auth · Validation</text>
+
+  <!-- Right Storage & Async -->
+  <rect x="576" y="88" width="150" height="66" rx="12" fill="#2e2018" stroke="#ff8547" stroke-width="1.5"/>
+  <text x="651" y="117" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">Redis Cluster</text>
+  <text x="651" y="136" text-anchor="middle" fill="#ffb085" font-family="IBM Plex Mono, monospace" font-size="10">Cache-Aside · TTL</text>
+
+  <rect x="576" y="176" width="150" height="66" rx="12" fill="#2e2018" stroke="#6b4733" stroke-width="1.5"/>
+  <text x="651" y="205" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">Primary + Replicas</text>
+  <text x="651" y="224" text-anchor="middle" fill="#c7b8ab" font-family="IBM Plex Mono, monospace" font-size="10">Sharded SQL / NoSQL</text>
+
+  <rect x="576" y="264" width="150" height="66" rx="12" fill="#2e2018" stroke="#6b4733" stroke-width="1.5"/>
+  <text x="651" y="293" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">Kafka / SQS</text>
+  <text x="651" y="312" text-anchor="middle" fill="#c7b8ab" font-family="IBM Plex Mono, monospace" font-size="10">Async Event Bus</text>
+
+  <rect x="768" y="264" width="118" height="66" rx="12" fill="#362218" stroke="#ff8547" stroke-width="1.5"/>
+  <text x="827" y="293" text-anchor="middle" fill="#fff7ee" font-family="Inter, sans-serif" font-size="13" font-weight="700">Workers</text>
+  <text x="827" y="312" text-anchor="middle" fill="#ffb085" font-family="IBM Plex Mono, monospace" font-size="10">Fanout · Search</text>
+
+  <!-- Observability Footer -->
+  <rect x="36" y="356" width="850" height="36" rx="9" fill="#261913" stroke="#4d3222" stroke-width="1.2"/>
+  <text x="461" y="379" text-anchor="middle" fill="#e8d8cc" font-family="IBM Plex Mono, monospace" font-size="11">Observability Plane: Distributed Tracing (OpenTelemetry) · Metrics (Prometheus) · Structured Logs · Circuit Breakers</text>
+
+  <!-- Arrows -->
+  <path d="M146 201 H184" stroke="#ff8547" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M318 201 H360" stroke="#ff8547" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M514 176 L570 124" stroke="#ff8547" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M514 205 H570" stroke="#ff8547" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M514 234 L570 294" stroke="#ff8547" stroke-width="2" marker-end="url(#arrow)"/>
+  <path d="M726 297 H762" stroke="#ff8547" stroke-width="2" marker-end="url(#arrow)"/>
+</svg>

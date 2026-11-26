@@ -16,6 +16,9 @@ export function resourcesFor(resources, locale, defaultLocale = 'en') {
       ...(group?.youtube ?? []).map((item) => ({ ...item, kind: 'video' })),
       ...(group?.articles ?? []).map((item) => ({ ...item, kind: 'article' })),
     ].flatMap((item) => {
+      if (typeof item.url === 'string' && item.url.startsWith('/docs/')) {
+        return [{ ...item, url: item.url, locale: language }];
+      }
       const url = safeUrl(item.url);
       if (!url) return [];
       if (language !== locale && item.kind === 'video' && videoHosts.has(url.hostname)) {

@@ -89,14 +89,54 @@ export function parseGitHubTreeUrl(rawUrl) {
   }
 }
 
+export function parseGitHubRepoRoot(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    if (url.hostname !== 'github.com' && url.hostname !== 'www.github.com') return null;
+    const parts = url.pathname.split('/').filter(Boolean);
+    if (parts.length !== 2) return null;
+    if (['topics', 'explore', 'marketplace', 'settings', 'orgs', 'search'].includes(parts[0].toLowerCase())) return null;
+    return { owner: parts[0], repo: parts[1] };
+  } catch {
+    return null;
+  }
+}
+
 export const githubPlugin = {
   id: 'github-content',
   name: 'GitHub Solution, Editorial & Directory Fetcher',
   kind: 'code',
   canHandle(url) {
-    return Boolean(toGitHubRawUrl(url) || parseGitHubTreeUrl(url));
+    return Boolean(toGitHubRawUrl(url) || parseGitHubTreeUrl(url) || parseGitHubRepoRoot(url));
   },
   async fetch(rawUrl, { signal } = {}) {
+    const repoRoot = parseGitHubRepoRoot(rawUrl);
+    if (repoRoot) {
+      const apiEndpoint = `https://api.github.com/repos/${repoRoot.owner}/${repoRoot.repo}/readme`;
+      const response = await fetch(apiEndpoint, {
+        signal,
+        headers: {
+          'User-Agent': 'Codegrill-Plugin/1.0',
+          Accept: 'application/vnd.github.raw+json',
+        },
+      });
+      if (!response.ok) {
+        throw new Error(`GitHub README API returned HTTP ${response.status}`);
+      }
+      const content = await response.text();
+      return {
+        plugin: 'github-content',
+        kind: 'markdown',
+        title: `${repoRoot.owner}/${repoRoot.repo} — README.md`,
+        repo: `${repoRoot.owner}/${repoRoot.repo}`,
+        filePath: 'README.md',
+        language: 'markdown',
+        content: content.slice(0, 120000),
+        truncated: content.length > 120000,
+        sourceUrl: `https://github.com/${repoRoot.owner}/${repoRoot.repo}/blob/HEAD/README.md`,
+      };
+    }
+
     const tree = parseGitHubTreeUrl(rawUrl);
     if (tree) {
       const apiPath = tree.dirPath ? `/${tree.dirPath}` : '';

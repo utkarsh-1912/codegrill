@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -21,6 +21,7 @@ import {
   parseRoomInput,
   roomsDirectory,
 } from '../src/rooms.mjs';
+import { getAllTrackModules } from '../src/trackContent.mjs';
 import { getMessages } from '../src/i18n.mjs';
 import { createStore } from '../server/store.mjs';
 import { createPluginRegistry } from '../server/plugins/registry.mjs';
@@ -137,5 +138,16 @@ const debrief = buildRoomDebriefMarkdown({
 });
 assert.ok(debrief.includes('Strong Hire'));
 assert.ok(debrief.includes('Design a URL Shortener'));
+
+// 10. Complete Interview Tracks content coverage (guides, questions, videos, docs)
+const seedData = JSON.parse(readFileSync(new URL('../src/multilingual_leetcode_dataset.json', import.meta.url), 'utf8'));
+const trackMods = getAllTrackModules(seedData);
+assert.ok(trackMods.length >= 14, `Expected >= 14 track modules, got ${trackMods.length}`);
+for (const mod of trackMods) {
+  assert.ok(mod.studyGuide && mod.studyGuide.length > 80, `${mod.id} missing built-in studyGuide`);
+  assert.ok(Array.isArray(mod.questions) && mod.questions.length >= 2, `${mod.id} missing practice questions`);
+  assert.ok((mod.resources?.en?.youtube || []).length >= 1, `${mod.id} missing video walkthrough`);
+  assert.ok((mod.resources?.en?.articles || []).length >= 1, `${mod.id} missing doc/repo resource`);
+}
 
 console.log('All unit and integration tests passed.');

@@ -21,6 +21,7 @@ export function formatViewerTitle(problemTitle, resourceTitle) {
 
 export function formatPluginBadge(data, fallback) {
   if (!data?.plugin) return fallback;
+  if (data.plugin === 'codegrill-docs') return 'Codegrill Docs';
   if (data.plugin.startsWith('youtube')) return 'YouTube';
   if (data.plugin.startsWith('github')) return 'GitHub';
   if (data.plugin.startsWith('medium')) return 'Medium';

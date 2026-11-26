@@ -11,7 +11,9 @@ import {
   Copy,
   Download,
   ExternalLink,
+  Maximize2,
   MessageSquare,
+  Minimize2,
   Network,
   Pause,
   Play,
@@ -112,6 +114,8 @@ export function StudyRooms({
       : createDefaultRoomState('dsa')
   ));
   const [editorTab, setEditorTab] = useState('write');
+  const [conductorTab, setConductorTab] = useState('session'); // 'session' | 'rubric'
+  const [padExpanded, setPadExpanded] = useState(false);
   const [swapOpen, setSwapOpen] = useState(false);
   const [swapQuery, setSwapQuery] = useState('');
   const [copiedInvite, setCopiedInvite] = useState(false);
@@ -429,25 +433,43 @@ export function StudyRooms({
     );
     const isLowTime = roomState.timerRemainingSec > 0 && roomState.timerRemainingSec <= 300;
     const lineCount = (roomState.notes || '').split('\n').length;
+    const wordCount = (roomState.notes || '').trim() ? (roomState.notes || '').trim().split(/\s+/).length : 0;
+    const roomMascotMood = completedStages === activeFormat.stages.length && activeFormat.stages.length > 0
+      ? 'happy'
+      : roomState.timerRunning
+        ? 'loading'
+        : 'idle';
 
     return (
       <section className="page-section rooms-page room-workspace">
-        <div className="room-topbar">
-          <div className="room-topbar-left">
-            <Button variant="quiet" size="sm" onClick={() => onNavigate?.('/rooms')}>
+        <div className="room-studio-hero">
+          <div className="room-studio-hero-left">
+            <Button variant="quiet" size="sm" className="room-back-btn" onClick={() => onNavigate?.('/rooms')}>
               <ArrowLeft size={15} aria-hidden="true" /> Lobby
             </Button>
-            <span className="room-id-pill">
-              <span className="room-live-dot" aria-hidden="true" />#{validActiveRoom}
-            </span>
-            <span className="room-format-pill">{activeFormat.label}</span>
-            <span className="room-presence-pill" title={participantList.join(', ')}>
-              <Users size={13} aria-hidden="true" /> {participantList.length} active
-            </span>
+            <div className="room-hero-companion" aria-hidden="true">
+              <Mascot mood={roomMascotMood} size={46} label="Ember session companion" />
+            </div>
+            <div className="room-studio-identity">
+              <div className="room-studio-badges">
+                <span className="room-id-pill is-dark">
+                  <span className="room-live-dot" aria-hidden="true" />#{validActiveRoom}
+                </span>
+                <span className="room-format-pill is-dark">{activeFormat.label}</span>
+                <span className="room-presence-pill is-dark" title={participantList.join(', ')}>
+                  <Users size={13} aria-hidden="true" /> {participantList.length} active
+                </span>
+              </div>
+              <h1 className="room-studio-title">{activeExerciseTitle}</h1>
+            </div>
           </div>
 
-          <div className="room-topbar-actions">
-            <div className="room-role-pills" role="group" aria-label="Session role">
+          <div className="room-studio-hero-right">
+            <span className={`room-mini-clock ${isLowTime ? 'is-warning' : ''}`} title="Remaining time">
+              <Clock size={13} aria-hidden="true" /> {formatClock(roomState.timerRemainingSec)}
+            </span>
+
+            <div className="room-role-pills is-dark" role="group" aria-label="Session role">
               {ROOM_ROLES.map((r) => (
                 <button
                   key={r.id}
@@ -463,34 +485,50 @@ export function StudyRooms({
             <Button
               variant="outlined"
               size="sm"
+              className="room-hero-outline-btn"
               onClick={() => copyRoomLink(validActiveRoom, roomState.mode, roomState.problemSlug)}
             >
               {copiedInvite ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-              {copiedInvite ? 'Copied' : 'Invite link'}
+              {copiedInvite ? 'Copied' : 'Invite'}
             </Button>
 
             {colabsUrl && (
               <Button variant="solid" size="sm" href={colabsUrl.href} target="_blank" rel="noopener noreferrer">
-                Colabs Editor <ExternalLink size={14} aria-hidden="true" />
+                Colabs <ExternalLink size={14} aria-hidden="true" />
               </Button>
             )}
+
+            <button
+              type="button"
+              className="icon-btn room-expand-btn"
+              onClick={() => setPadExpanded((v) => !v)}
+              aria-pressed={padExpanded}
+              aria-label={padExpanded ? 'Show conductor sidebar' : 'Expand scratchpad'}
+              title={padExpanded ? 'Show conductor sidebar' : 'Expand scratchpad'}
+            >
+              {padExpanded ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
+            </button>
           </div>
         </div>
 
-        <div className="room-studio-grid">
+        <div className={`room-studio-grid ${padExpanded ? 'is-expanded' : ''}`}>
           <div className="room-main-pane">
             <Card variant="outlined" className="room-brief-card">
               <div className="room-brief-head">
                 <div className="room-brief-copy">
                   <span className="eyebrow">Active Exercise · {activeFormat.short}</span>
-                  <h2>{activeExerciseTitle}</h2>
+                  <div className="room-brief-title-row">
+                    <h2>{activeExerciseTitle}</h2>
+                    {activeProblem && (
+                      <span className="difficulty-badge" data-level={activeProblem.difficulty}>
+                        {activeProblem.difficulty}
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <div className="room-brief-actions">
                   {activeProblem && (
                     <>
-                      <span className="difficulty-badge" data-level={activeProblem.difficulty}>
-                        {activeProblem.difficulty}
-                      </span>
                       {onOpenProblem && (
                         <Button variant="outlined" size="sm" onClick={() => onOpenProblem(activeProblem.slug)}>
                           Open Problem
@@ -633,6 +671,12 @@ export function StudyRooms({
                   >
                     + Math
                   </button>
+                  <button
+                    type="button"
+                    onClick={() => insertSnippet('| Component | Trade-off | Choice |\n| --- | --- | --- |\n| Cache | Speed vs Staleness | Redis TTL |')}
+                  >
+                    + Table
+                  </button>
                 </div>
               </div>
 
@@ -654,148 +698,177 @@ export function StudyRooms({
               </div>
 
               <div className="room-pad-footer">
-                <span>Markdown · KaTeX · Mermaid</span>
-                <span>{lineCount} lines · auto-saved</span>
+                <span>Markdown · KaTeX · Mermaid · Live sync</span>
+                <span>{wordCount} words · {lineCount} lines · auto-saved</span>
               </div>
             </Card>
           </div>
 
-          <aside className="room-side-pane">
-            <Card variant="outlined" className="room-widget-card">
-              <div className="room-widget-head">
-                <span className="room-widget-title">
-                  <Clock size={15} aria-hidden="true" /> Interview Timer
-                </span>
-                <div className="room-timer-presets">
-                  {[15, 30, 45, 60].map((mins) => (
-                    <button
-                      key={mins}
-                      type="button"
-                      className={roomState.timerDurationSec === mins * 60 ? 'is-active' : ''}
-                      onClick={() => updateRoomState({
-                        timerDurationSec: mins * 60,
-                        timerRemainingSec: mins * 60,
-                        timerRunning: false,
-                        timerUpdatedAt: Date.now(),
-                      })}
-                    >
-                      {mins}m
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div className={`room-timer-display ${isLowTime ? 'is-warning' : ''}`}>
-                {formatClock(roomState.timerRemainingSec)}
-              </div>
-              <div className="room-progress-track" aria-hidden="true">
-                <div className="room-progress-fill" style={{ width: `${timerPct}%` }} />
-              </div>
-
-              <div className="room-timer-controls">
-                <Button
-                  variant="solid"
-                  size="sm"
-                  onClick={() => updateRoomState((prev) => ({
-                    ...prev,
-                    timerRunning: !prev.timerRunning,
-                    timerUpdatedAt: Date.now(),
-                  }))}
+          {!padExpanded && (
+            <aside className="room-side-pane">
+              <div className="room-conductor-tabs" role="tablist" aria-label="Conductor tools">
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={conductorTab === 'session'}
+                  className={conductorTab === 'session' ? 'is-active' : ''}
+                  onClick={() => setConductorTab('session')}
                 >
-                  {roomState.timerRunning ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
-                  {roomState.timerRunning ? 'Pause' : 'Start'}
-                </Button>
-                <Button
-                  variant="outlined"
-                  size="sm"
-                  onClick={() => updateRoomState((prev) => ({
-                    ...prev,
-                    timerRemainingSec: prev.timerDurationSec,
-                    timerRunning: false,
-                    timerUpdatedAt: Date.now(),
-                  }))}
+                  Timer &amp; Stages ({completedStages}/{activeFormat.stages.length})
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={conductorTab === 'rubric'}
+                  className={conductorTab === 'rubric' ? 'is-active' : ''}
+                  onClick={() => setConductorTab('rubric')}
                 >
-                  <RotateCcw size={14} aria-hidden="true" /> Reset
-                </Button>
-              </div>
-            </Card>
-
-            <Card variant="outlined" className="room-widget-card">
-              <div className="room-widget-head">
-                <span className="room-widget-title">Stage Checklist</span>
-                <span className="room-stage-count">{completedStages}/{activeFormat.stages.length}</span>
-              </div>
-              <div className="room-progress-track" aria-hidden="true">
-                <div className="room-progress-fill" style={{ width: `${stagePct}%` }} />
-              </div>
-              <ul className="room-stage-list">
-                {activeFormat.stages.map((stage, idx) => (
-                  <li key={idx}>
-                    <label>
-                      <input
-                        type="checkbox"
-                        checked={Boolean(roomState.checklist[idx])}
-                        onChange={() => updateRoomState((prev) => {
-                          const nextList = [...prev.checklist];
-                          nextList[idx] = !nextList[idx];
-                          return { ...prev, checklist: nextList };
-                        })}
-                      />
-                      <span className={roomState.checklist[idx] ? 'is-done' : ''}>{stage}</span>
-                    </label>
-                  </li>
-                ))}
-              </ul>
-            </Card>
-
-            <Card variant="outlined" className="room-widget-card">
-              <div className="room-widget-head">
-                <span className="room-widget-title">Interviewer Rubric</span>
-                {avgScore && <span className="room-score-avg">{avgScore} / 4.0</span>}
+                  Rubric {avgScore ? `· ${avgScore}` : '& Debrief'}
+                </button>
               </div>
 
-              <div className="room-rubric-list">
-                {RUBRIC_DIMENSIONS.map((dim) => {
-                  const val = roomState.scores?.[dim.id] || 0;
-                  return (
-                    <div key={dim.id} className="room-rubric-row">
-                      <span>{dim.label}</span>
-                      <div className="room-score-pills" role="group" aria-label={dim.label}>
-                        {[1, 2, 3, 4].map((score) => (
+              {conductorTab === 'session' && (
+                <>
+                  <Card variant="outlined" className="room-widget-card">
+                    <div className="room-widget-head">
+                      <span className="room-widget-title">
+                        <Clock size={15} aria-hidden="true" /> Interview Timer
+                      </span>
+                      <div className="room-timer-presets">
+                        {[15, 30, 45, 60].map((mins) => (
                           <button
-                            key={score}
+                            key={mins}
                             type="button"
-                            className={val === score ? 'is-active' : ''}
-                            onClick={() => updateRoomState((prev) => ({
-                              ...prev,
-                              scores: { ...prev.scores, [dim.id]: prev.scores[dim.id] === score ? 0 : score },
-                            }))}
+                            className={roomState.timerDurationSec === mins * 60 ? 'is-active' : ''}
+                            onClick={() => updateRoomState({
+                              timerDurationSec: mins * 60,
+                              timerRemainingSec: mins * 60,
+                              timerRunning: false,
+                              timerUpdatedAt: Date.now(),
+                            })}
                           >
-                            {score}
+                            {mins}m
                           </button>
                         ))}
                       </div>
                     </div>
-                  );
-                })}
-              </div>
 
-              <div className="room-signal-bar">
-                <span>Signal</span>
-                <strong>{hireSignal}</strong>
-              </div>
+                    <div className={`room-timer-display ${isLowTime ? 'is-warning' : ''}`}>
+                      {formatClock(roomState.timerRemainingSec)}
+                    </div>
+                    <div className="room-progress-track" aria-hidden="true">
+                      <div className="room-progress-fill" style={{ width: `${timerPct}%` }} />
+                    </div>
 
-              <div className="room-debrief-actions">
-                <Button variant="outlined" size="sm" onClick={() => handleExportDebrief(false)}>
-                  {copiedDebrief ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-                  {copiedDebrief ? 'Copied' : 'Copy debrief'}
-                </Button>
-                <Button variant="solid" size="sm" onClick={() => handleExportDebrief(true)}>
-                  <Download size={14} aria-hidden="true" /> Export .md
-                </Button>
-              </div>
-            </Card>
-          </aside>
+                    <div className="room-timer-controls">
+                      <Button
+                        variant="solid"
+                        size="sm"
+                        onClick={() => updateRoomState((prev) => ({
+                          ...prev,
+                          timerRunning: !prev.timerRunning,
+                          timerUpdatedAt: Date.now(),
+                        }))}
+                      >
+                        {roomState.timerRunning ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
+                        {roomState.timerRunning ? 'Pause' : 'Start'}
+                      </Button>
+                      <Button
+                        variant="outlined"
+                        size="sm"
+                        onClick={() => updateRoomState((prev) => ({
+                          ...prev,
+                          timerRemainingSec: prev.timerDurationSec,
+                          timerRunning: false,
+                          timerUpdatedAt: Date.now(),
+                        }))}
+                      >
+                        <RotateCcw size={14} aria-hidden="true" /> Reset
+                      </Button>
+                    </div>
+                  </Card>
+
+                  <Card variant="outlined" className="room-widget-card">
+                    <div className="room-widget-head">
+                      <span className="room-widget-title">Stage Checklist</span>
+                      <span className="room-stage-count">{completedStages}/{activeFormat.stages.length}</span>
+                    </div>
+                    <div className="room-progress-track" aria-hidden="true">
+                      <div className="room-progress-fill" style={{ width: `${stagePct}%` }} />
+                    </div>
+                    <ul className="room-stage-list">
+                      {activeFormat.stages.map((stage, idx) => (
+                        <li key={idx}>
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={Boolean(roomState.checklist[idx])}
+                              onChange={() => updateRoomState((prev) => {
+                                const nextList = [...prev.checklist];
+                                nextList[idx] = !nextList[idx];
+                                return { ...prev, checklist: nextList };
+                              })}
+                            />
+                            <span className={roomState.checklist[idx] ? 'is-done' : ''}>{stage}</span>
+                          </label>
+                        </li>
+                      ))}
+                    </ul>
+                  </Card>
+                </>
+              )}
+
+              {conductorTab === 'rubric' && (
+                <Card variant="outlined" className="room-widget-card">
+                  <div className="room-widget-head">
+                    <span className="room-widget-title">Interviewer Rubric</span>
+                    {avgScore && <span className="room-score-avg">{avgScore} / 4.0</span>}
+                  </div>
+
+                  <div className="room-rubric-list">
+                    {RUBRIC_DIMENSIONS.map((dim) => {
+                      const val = roomState.scores?.[dim.id] || 0;
+                      return (
+                        <div key={dim.id} className="room-rubric-row">
+                          <span>{dim.label}</span>
+                          <div className="room-score-pills" role="group" aria-label={dim.label}>
+                            {[1, 2, 3, 4].map((score) => (
+                              <button
+                                key={score}
+                                type="button"
+                                className={val === score ? 'is-active' : ''}
+                                onClick={() => updateRoomState((prev) => ({
+                                  ...prev,
+                                  scores: { ...prev.scores, [dim.id]: prev.scores[dim.id] === score ? 0 : score },
+                                }))}
+                              >
+                                {score}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="room-signal-bar">
+                    <span>Signal</span>
+                    <strong>{hireSignal}</strong>
+                  </div>
+
+                  <div className="room-debrief-actions">
+                    <Button variant="outlined" size="sm" onClick={() => handleExportDebrief(false)}>
+                      {copiedDebrief ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+                      {copiedDebrief ? 'Copied' : 'Copy debrief'}
+                    </Button>
+                    <Button variant="solid" size="sm" onClick={() => handleExportDebrief(true)}>
+                      <Download size={14} aria-hidden="true" /> Export .md
+                    </Button>
+                  </div>
+                </Card>
+              )}
+            </aside>
+          )}
         </div>
       </section>
     );

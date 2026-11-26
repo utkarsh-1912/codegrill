@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { Button, Card } from '@utkristi/ui';
-import { ArrowRight, BookOpen, Star } from 'lucide-react';
+import { ArrowRight, BookOpen, Flame, Star, Users } from 'lucide-react';
 import { LedgerDashboard } from './LedgerDashboard.jsx';
 import { PlatformProfiles } from './PlatformProfiles.jsx';
+import { Mascot } from './Mascot.jsx';
 import { DOMAIN_TOPICS, ROADMAP_DOMAINS, buildDomainRoadmap } from './domainRoadmaps.mjs';
 import { getChecklistStudyGuide } from './studyMaterial.mjs';
 import { readFavoriteContent, toggleFavoriteContent } from './favorites.mjs';
@@ -101,16 +102,67 @@ export function ProfilePage({
     });
   }, [locale, completed, problems.length]);
 
+  const linkedCount = useMemo(
+    () => Object.values(linkedProfiles || {}).filter((p) => p?.handle).length,
+    [linkedProfiles],
+  );
+  const totalFavorites = savedGuides.length + savedContent.length;
+  const mascotMood = streak >= 3 || completed.size >= 10
+    ? 'happy'
+    : completed.size > 0
+      ? 'idle'
+      : 'loading';
+  const mascotCaption = streak >= 3
+    ? `On fire · ${streak}d streak`
+    : completed.size > 0
+      ? `${completed.size} solved · Keep building`
+      : 'Ready for your first solve';
+
   return (
     <section className="page-section profile-page">
-      <div className="section-heading">
-        <div>
-          <h1 lang={locale}>{t.ui.profilePageTitle}</h1>
+      <div className="profile-hero-banner">
+        <div className="profile-hero-copy">
+          <h1 lang={locale}>{t.ui.profilePageTitle}<span>.</span></h1>
           <p>{t.ui.profilePageSubtitle}</p>
+
+          <div className="profile-hero-kpis">
+            <div className="profile-kpi-pill">
+              <strong>{completed.size}<span>/{problems.length}</span></strong>
+              <small>Solved</small>
+            </div>
+            <div className="profile-kpi-pill">
+              <strong><Flame size={15} aria-hidden="true" /> {streak}d</strong>
+              <small>Best {longestStreak}d</small>
+            </div>
+            <div className="profile-kpi-pill">
+              <strong>{totalFavorites}</strong>
+              <small>Favorites</small>
+            </div>
+            <div className="profile-kpi-pill">
+              <strong>{linkedCount}</strong>
+              <small>Platforms</small>
+            </div>
+          </div>
+
+          <div className="marketing-hero-actions">
+            <Button variant="solid" size="sm" onClick={() => onNavigate('/roadmap')}>
+              {t.nav.roadmap} <ArrowRight size={14} aria-hidden="true" />
+            </Button>
+            <Button variant="outlined" size="sm" onClick={() => onNavigate('/tracks')}>
+              {t.nav.tracks}
+            </Button>
+            <Button variant="quiet" size="sm" onClick={() => onNavigate('/rooms')}>
+              <Users size={14} aria-hidden="true" /> {t.nav.rooms}
+            </Button>
+          </div>
         </div>
-        <Button variant="outlined" size="sm" onClick={() => onNavigate('/roadmap')}>
-          {t.nav.roadmap} <ArrowRight size={14} aria-hidden="true" />
-        </Button>
+
+        <div className="marketing-hero-stage" aria-hidden="true">
+          <div className="legal-orbit-ring ring-1" />
+          <div className="legal-orbit-ring ring-2" />
+          <Mascot mood={mascotMood} size={136} label="Ember profile companion" />
+          <span className="marketing-hero-caption">{mascotCaption}</span>
+        </div>
       </div>
 
       <LedgerDashboard
@@ -168,14 +220,23 @@ export function ProfilePage({
         </Card>
       </div>
 
-      {(savedGuides.length > 0 || savedContent.length > 0) && (
-        <Card variant="outlined" className="profile-saved-guides">
-          <div className="profile-saved-head">
-            <h3>
-              <Star size={16} fill="currentColor" aria-hidden="true" /> Favorites &amp; Read Again
-            </h3>
-            <span>{savedGuides.length + savedContent.length}</span>
+      <Card variant="outlined" className="profile-saved-guides">
+        <div className="profile-saved-head">
+          <h3>
+            <Star size={16} fill="currentColor" aria-hidden="true" /> Favorites &amp; Read Again
+          </h3>
+          <span>{totalFavorites}</span>
+        </div>
+
+        {totalFavorites === 0 ? (
+          <div className="profile-saved-empty">
+            <Mascot mood="idle" size={76} label="No favorites saved yet" />
+            <div>
+              <strong>Your reading queue is clear</strong>
+              <p>Star any study guide, GitHub doc, notebook, or video walkthrough in the viewer to revisit it here before interviews.</p>
+            </div>
           </div>
+        ) : (
           <div className="profile-saved-list">
             {savedContent.map((fav) => (
               <div key={fav.id} className="profile-saved-row">
@@ -186,14 +247,14 @@ export function ProfilePage({
                     url: fav.url,
                     title: fav.title,
                     kind: fav.kind,
-                    content: fav.content || '',
+                    content: fav.content || fav.inlineContent || '',
                     sourceUrl: fav.sourceUrl || fav.url || '',
                   })}
                 >
                   <BookOpen size={15} aria-hidden="true" />
                   <span>
                     <strong>{fav.title}</strong>
-                    <small>{fav.badge || fav.kind}</small>
+                    <small>{fav.badge || fav.siteName || fav.kind}</small>
                   </span>
                 </button>
                 <button
@@ -246,8 +307,8 @@ export function ProfilePage({
               );
             })}
           </div>
-        </Card>
-      )}
+        )}
+      </Card>
 
       <PlatformProfiles
         linkedProfiles={linkedProfiles}

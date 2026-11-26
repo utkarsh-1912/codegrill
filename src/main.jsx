@@ -13,6 +13,8 @@ import curriculum from './roadmap.generated.json';
 import { matchingProblems, resourcesFor, roadmapFor, safeUrl } from './catalog.mjs';
 import { problemShareUrl, studyLocation } from './rooms.mjs';
 import { StudyRooms } from './StudyRooms.jsx';
+import { TracksPage } from './TracksPage.jsx';
+import { getAllTrackModules } from './trackContent.mjs';
 import { SiteFooter, SitePages, Workflow, sitePages } from './SitePages.jsx';
 import { SheetsPage } from './SheetsPage.jsx';
 import { ContentViewer, buildViewerPath, formatViewerTitle } from './ContentViewer.jsx';
@@ -100,7 +102,7 @@ const metadata = seed.platform_metadata;
 const { roles, experience_levels: levels } = seed.roles_and_experience_matrix;
 const locales = metadata.supported_locales;
 const defaultLocale = metadata.default_locale;
-const modules = [...seed.system_design_modules, ...seed.ai_engineer_modules, ...seed.fde_modules];
+const modules = getAllTrackModules(seed);
 const problemSlugs = new Set(problems.map(({ slug }) => slug));
 
 const pathIds = ['roadmap', 'sheets', 'problems', 'tracks', 'resources', 'rooms'];
@@ -584,7 +586,20 @@ function App() {
           />
         )}
 
-        {page === 'tracks' && <InterviewTracks locale={locale} title={t.nav.tracks} onOpenViewer={setViewerItem} onNavigate={navigate} />}
+        {page === 'tracks' && (
+          <TracksPage
+            locale={locale}
+            defaultLocale={defaultLocale}
+            title={t.nav.tracks}
+            roles={roles}
+            levels={levels}
+            modules={modules}
+            problems={problems}
+            onOpenViewer={setViewerItem}
+            onOpenProblem={openProblemBySlug}
+            onNavigate={navigate}
+          />
+        )}
         {page === 'resources' && (
           <ResourceDirectory
             locale={locale}
