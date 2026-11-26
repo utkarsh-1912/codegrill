@@ -24,6 +24,9 @@ export const DEFAULT_APP_CONFIG = {
     problemsPerPage: 20,
     resourcesPerPage: 12,
   },
+  player: {
+    customPlayerTemplate: (typeof import.meta !== 'undefined' && import.meta.env?.VITE_CUSTOM_PLAYER_URL) || '',
+  },
   sources: [
     { label: 'LeetCode', url: 'https://leetcode.com/' },
     { label: 'GitHub', url: 'https://github.com/doocs/leetcode/tree/main/solution' },
@@ -47,6 +50,7 @@ export function mergeAppConfig(remote) {
     },
     interview: { ...DEFAULT_APP_CONFIG.interview, ...(remote.interview || {}) },
     pagination: { ...DEFAULT_APP_CONFIG.pagination, ...(remote.pagination || {}) },
+    player: { ...DEFAULT_APP_CONFIG.player, ...(remote.player || {}) },
     sources: Array.isArray(remote.sources) && remote.sources.length ? remote.sources : DEFAULT_APP_CONFIG.sources,
     plugins: Array.isArray(remote.plugins) ? remote.plugins : DEFAULT_APP_CONFIG.plugins,
   };

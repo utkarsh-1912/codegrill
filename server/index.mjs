@@ -132,6 +132,12 @@ export function createServer(configOverrides = {}) {
         return sendJson(res, 200, saved);
       }
 
+      if (req.method === 'DELETE' && pathname === '/api/progress') {
+        const profile = url.searchParams.get('profile') || config.defaultProfile;
+        const fresh = await store.resetProgress(profile);
+        return sendJson(res, 200, fresh);
+      }
+
       if (req.method === 'GET' && pathname === '/api/sheets') {
         const custom = await store.listCustomSheets();
         return sendJson(res, 200, { builtin: BUILTIN_SHEETS, custom });

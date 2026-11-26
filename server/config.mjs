@@ -50,6 +50,9 @@ export function loadServerConfig() {
       problemsPerPage: envInt('PROBLEMS_PER_PAGE', 20, 5, 100),
       resourcesPerPage: envInt('RESOURCES_PER_PAGE', 12, 4, 50),
     },
+    player: {
+      customPlayerTemplate: process.env.CUSTOM_PLAYER_URL || process.env.VITE_CUSTOM_PLAYER_URL || '',
+    },
     sources: [
       { label: 'LeetCode', url: process.env.SOURCE_LEETCODE_URL || 'https://leetcode.com/' },
       { label: 'GitHub', url: process.env.SOURCE_GITHUB_URL || 'https://github.com/doocs/leetcode/tree/main/solution' },
@@ -64,6 +67,7 @@ export function getPublicConfig(serverConfig, pluginList = []) {
     planner: serverConfig.planner,
     interview: serverConfig.interview,
     pagination: serverConfig.pagination,
+    player: serverConfig.player,
     sources: serverConfig.sources,
     plugins: pluginList,
   };

@@ -37,6 +37,7 @@ import {
   fetchDailyChallenge,
   fetchRemoteProgress,
   readLocalCustomSheets,
+  resetRemoteProgress,
   saveRemoteProgress,
   writeLocalCustomSheets,
 } from './api.mjs';
@@ -302,6 +303,34 @@ function App() {
     });
   }
 
+  async function resetProgress() {
+    setPreferences((current) => ({
+      locale: current.locale,
+      completed: new Set(),
+      bookmarked: new Set(),
+      notes: {},
+      activity: {},
+      streak: 0,
+      longestStreak: 0,
+    }));
+    try {
+      localStorage.setItem(preferenceKey, JSON.stringify({
+        locale,
+        completed: [],
+        bookmarked: [],
+        notes: {},
+        activity: {},
+        streak: 0,
+        longestStreak: 0,
+      }));
+    } catch {
+      // Ignore storage errors
+    }
+    if (backendOnline) {
+      await resetRemoteProgress(appConfig.defaultProfile);
+    }
+  }
+
   async function handleCreateSheet(payload) {
     const createdRemote = await createCustomSheetApi(payload);
     const sheet = createdRemote || normalizeCustomSheet(payload, problemSlugs);
@@ -346,6 +375,7 @@ function App() {
         onLocaleChange={(nextLocale) => setPreferences((current) => ({ ...current, locale: nextLocale }))}
         onToggleTheme={() => setTheme(isDark ? 'light' : 'dark')}
         onToggleZen={() => setZenMode((v) => !v)}
+        onResetProgress={resetProgress}
         onOpenPalette={() => setPaletteOpen(true)}
         onNavigate={navigate}
         onSelectSearchItem={(item) => {
@@ -365,6 +395,7 @@ function App() {
             topicCount={categories.length}
             problemCount={problems.length}
             sheetCount={allSheets.length}
+            config={appConfig}
             onNavigate={navigate}
           />
         )}
@@ -487,6 +518,7 @@ function App() {
             languages={languages}
             locale={locale}
             defaultLocale={defaultLocale}
+            customPlayerTemplate={appConfig.player.customPlayerTemplate}
             onNavigate={navigate}
           />
         )}
@@ -503,6 +535,7 @@ function App() {
         item={viewerItem}
         locale={locale}
         languages={languages}
+        customPlayerTemplate={appConfig.player.customPlayerTemplate}
         onClose={() => setViewerItem(null)}
         onExpand={(expandedItem) => {
           setViewerItem(null);

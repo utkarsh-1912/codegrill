@@ -188,6 +188,15 @@ export function createStore(filePath, defaultProfileId = 'default') {
       const streaks = computeStreaks(activity);
       return { ...next, streak: streaks.current, longestStreak: streaks.longest };
     },
+    async resetProgress(profileId = defaultProfileId) {
+      const data = await load();
+      const id = safeProfileId(profileId);
+      const currentLocale = data.profiles[id]?.locale || DEFAULT_PROFILE.locale;
+      const fresh = { ...DEFAULT_PROFILE, locale: currentLocale, updatedAt: new Date().toISOString() };
+      data.profiles[id] = fresh;
+      await persist();
+      return { ...fresh, streak: 0, longestStreak: 0 };
+    },
     async listCustomSheets() {
       const data = await load();
       return data.customSheets;

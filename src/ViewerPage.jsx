@@ -16,6 +16,7 @@ export function ViewerPage({
   languages,
   locale,
   defaultLocale,
+  customPlayerTemplate,
   onNavigate,
 }) {
   const t = getMessages(locale);
@@ -126,6 +127,7 @@ export function ViewerPage({
             data={data}
             loading={loading}
             copied={copied}
+            customPlayerTemplate={customPlayerTemplate}
             onCopyCode={copyCode}
             onSelectSubUrl={(nextUrl, nextTitle) => {
               setActiveUrl(nextUrl);

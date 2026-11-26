@@ -5,6 +5,7 @@ import { fetchPluginContent } from './api.mjs';
 import { getMessages } from './i18n.mjs';
 import { LoadingState } from './LoadingState.jsx';
 import { RichTextInterpreter } from './RichTextInterpreter.jsx';
+import { CustomVideoPlayer } from './CustomVideoPlayer.jsx';
 
 export function formatViewerTitle(problemTitle, resourceTitle) {
   const cleanProb = String(problemTitle || '').trim();
@@ -40,6 +41,7 @@ export function ContentViewerBody({
   data,
   loading,
   copied,
+  customPlayerTemplate,
   onCopyCode,
   onSelectSubUrl,
 }) {
@@ -60,28 +62,24 @@ export function ContentViewerBody({
 
   if (data?.kind === 'video') {
     return (
-      <div className="video-frame-wrap">
-        <iframe
-          src={data.embedUrl}
-          title={data.title || activeTitle}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        />
-      </div>
+      <CustomVideoPlayer
+        embedUrl={data.embedUrl}
+        sourceUrl={data.sourceUrl || activeUrl}
+        title={data.title || activeTitle}
+        customPlayerTemplate={customPlayerTemplate}
+      />
     );
   }
 
   if (data?.kind === 'channel') {
     return (
       <div className="channel-viewer">
-        <div className="video-frame-wrap">
-          <iframe
-            src={activeChannelEmbed}
-            title={data.title || activeTitle}
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          />
-        </div>
+        <CustomVideoPlayer
+          embedUrl={activeChannelEmbed}
+          sourceUrl={selectedVideoId ? `https://www.youtube.com/watch?v=${selectedVideoId}` : activeUrl}
+          title={data.title || activeTitle}
+          customPlayerTemplate={customPlayerTemplate}
+        />
         {data.videos?.length > 0 && (
           <div className="channel-video-grid">
             {data.videos.map((vid) => (
@@ -126,7 +124,14 @@ export function ContentViewerBody({
   }
 
   if (data?.kind === 'markdown' || data?.kind === 'text') {
-    return <RichTextInterpreter content={data.content} format={data.kind} />;
+    return (
+      <RichTextInterpreter
+        content={data.content}
+        format={data.kind}
+        sourceUrl={data.sourceUrl || activeUrl}
+        onOpenLink={(nextUrl, nextTitle) => onSelectSubUrl?.(nextUrl, nextTitle)}
+      />
+    );
   }
 
   if (data?.kind === 'code') {
@@ -164,7 +169,7 @@ export function ContentViewerBody({
   );
 }
 
-export function ContentViewer({ item, locale, languages, onClose, onExpand }) {
+export function ContentViewer({ item, locale, languages, customPlayerTemplate, onClose, onExpand }) {
   const t = getMessages(locale);
   const [activeUrl, setActiveUrl] = useState(item?.url || '');
   const [activeTitle, setActiveTitle] = useState(item?.title || '');
@@ -287,6 +292,7 @@ export function ContentViewer({ item, locale, languages, onClose, onExpand }) {
             data={data}
             loading={loading}
             copied={copied}
+            customPlayerTemplate={customPlayerTemplate}
             onCopyCode={copyCode}
             onSelectSubUrl={(nextUrl, nextTitle) => {
               setActiveUrl(nextUrl);

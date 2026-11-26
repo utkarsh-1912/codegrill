@@ -29,6 +29,16 @@ function extractYouTubeIdClient(rawUrl) {
 function toGitHubRawClient(rawUrl) {
   try {
     const url = new URL(rawUrl);
+    if (url.hostname === 'raw.githubusercontent.com') {
+      const parts = url.pathname.split('/').filter(Boolean);
+      if (parts.length < 4) return null;
+      return {
+        rawUrl: url.href,
+        filename: parts[parts.length - 1] || 'solution',
+        repo: `${parts[0]}/${parts[1]}`,
+        filePath: parts.slice(3).join('/'),
+      };
+    }
     if (url.hostname !== 'github.com' && url.hostname !== 'www.github.com') return null;
     const parts = url.pathname.split('/').filter(Boolean);
     if (parts.length < 5 || parts[2] !== 'blob') return null;
@@ -37,7 +47,26 @@ function toGitHubRawClient(rawUrl) {
       rawUrl: `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${rest.join('/')}`,
       filename: rest[rest.length - 1] || 'solution',
       repo: `${owner}/${repo}`,
+      filePath: rest.join('/'),
     };
+  } catch {
+    return null;
+  }
+}
+
+function parseGitHubTreeClient(rawUrl) {
+  try {
+    const url = new URL(rawUrl);
+    if (url.hostname !== 'github.com' && url.hostname !== 'www.github.com') return null;
+    const parts = url.pathname.split('/').filter(Boolean);
+    if (parts.length === 2) {
+      return { owner: parts[0], repo: parts[1], ref: '', dirPath: '' };
+    }
+    if (parts.length >= 4 && parts[2] === 'tree') {
+      const [owner, repo, , ref, ...rest] = parts;
+      return { owner, repo, ref, dirPath: rest.join('/') };
+    }
+    return null;
   } catch {
     return null;
   }
@@ -108,6 +137,19 @@ export async function saveRemoteProgress(payload, profile = DEFAULT_APP_CONFIG.d
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(3000),
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function resetRemoteProgress(profile = DEFAULT_APP_CONFIG.defaultProfile, baseUrl) {
+  try {
+    const res = await fetch(apiUrl(`/api/progress?profile=${encodeURIComponent(profile)}`, baseUrl), {
+      method: 'DELETE',
       signal: AbortSignal.timeout(3000),
     });
     if (!res.ok) return null;
@@ -233,6 +275,42 @@ export async function fetchPluginContent(url, locale = 'en', baseUrl) {
       embedUrl: embed.href,
       sourceUrl: url,
     };
+  }
+
+  const ghTree = parseGitHubTreeClient(url);
+  if (ghTree) {
+    try {
+      const apiPath = ghTree.dirPath ? `/${ghTree.dirPath}` : '';
+      const refQuery = ghTree.ref ? `?ref=${encodeURIComponent(ghTree.ref)}` : '';
+      const res = await fetch(
+        `https://api.github.com/repos/${ghTree.owner}/${ghTree.repo}/contents${apiPath}${refQuery}`,
+        {
+          signal: AbortSignal.timeout(8000),
+          headers: { Accept: 'application/vnd.github+json' },
+        },
+      );
+      if (res.ok) {
+        const list = await res.json();
+        const entries = (Array.isArray(list) ? list : [])
+          .slice(0, 150)
+          .map((entry) => ({
+            name: entry.name,
+            type: entry.type,
+            path: entry.path,
+            url: entry.html_url || url,
+          }));
+        return {
+          plugin: 'github-content-client',
+          kind: 'directory',
+          title: ghTree.dirPath || `${ghTree.owner}/${ghTree.repo}`,
+          repo: `${ghTree.owner}/${ghTree.repo}`,
+          entries,
+          sourceUrl: url,
+        };
+      }
+    } catch {
+      // Ignore fallback error
+    }
   }
 
   const gh = toGitHubRawClient(url);

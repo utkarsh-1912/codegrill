@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Badge } from '@utkristi/ui';
-import { Maximize2, Menu, Minimize2, Moon, Search, Settings, Sun, X } from 'lucide-react';
+import { Maximize2, Menu, Minimize2, Moon, RotateCcw, Search, Settings, Sun, X } from 'lucide-react';
 import { BrandLogo } from './BrandLogo.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
 import { getMessages } from './i18n.mjs';
@@ -22,6 +22,7 @@ export function AppHeader({
   onLocaleChange,
   onToggleTheme,
   onToggleZen,
+  onResetProgress,
   onOpenPalette,
   onSelectSearchItem,
   onNavigate,
@@ -29,16 +30,26 @@ export function AppHeader({
   const t = getMessages(locale);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [confirmReset, setConfirmReset] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [navQuery, setNavQuery] = useState('');
   const [searchFocused, setSearchFocused] = useState(false);
 
   const settingsRef = useRef(null);
   const searchRef = useRef(null);
+  const mobileSearchInputRef = useRef(null);
 
   // Close sidebar on navigation
   useEffect(() => {
     setSidebarOpen(false);
+    setMobileSearchOpen(false);
   }, [page]);
+
+  useEffect(() => {
+    if (mobileSearchOpen) {
+      requestAnimationFrame(() => mobileSearchInputRef.current?.focus());
+    }
+  }, [mobileSearchOpen]);
 
   // Close popovers on Escape or outside click
   useEffect(() => {
@@ -47,6 +58,7 @@ export function AppHeader({
         setSidebarOpen(false);
         setSettingsOpen(false);
         setSearchFocused(false);
+        setMobileSearchOpen(false);
       }
     };
     const onMouseDown = (e) => {
@@ -166,7 +178,21 @@ export function AppHeader({
           </nav>
 
           <div className="header-right">
-            <div className="navbar-search-wrap" ref={searchRef}>
+            <button
+              type="button"
+              className={`locale-field icon-only-control mobile-search-btn ${mobileSearchOpen ? 'is-active' : ''}`}
+              onClick={() => {
+                setMobileSearchOpen((v) => !v);
+                setSettingsOpen(false);
+              }}
+              aria-expanded={mobileSearchOpen}
+              aria-label={t.palette.placeholder}
+              title={t.palette.placeholder}
+            >
+              <Search size={18} aria-hidden="true" />
+            </button>
+
+            <div className="navbar-search-wrap desktop-search" ref={searchRef}>
               <form className="navbar-search" onSubmit={handleSearchSubmit} role="search">
                 <Search size={16} aria-hidden="true" />
                 <input
@@ -275,11 +301,97 @@ export function AppHeader({
                       }))}
                     />
                   </div>
+
+                  <div className="settings-divider" />
+
+                  <div className="settings-row">
+                    {!confirmReset ? (
+                      <>
+                        <span>Reset progress</span>
+                        <button
+                          type="button"
+                          className="locale-field icon-only-control reset-trigger-btn"
+                          onClick={() => setConfirmReset(true)}
+                          aria-label="Reset progress"
+                          title="Reset progress"
+                        >
+                          <RotateCcw size={16} aria-hidden="true" />
+                        </button>
+                      </>
+                    ) : (
+                      <div className="reset-confirm-row">
+                        <button
+                          type="button"
+                          className="reset-confirm-yes"
+                          onClick={() => {
+                            onResetProgress?.();
+                            setConfirmReset(false);
+                            setSettingsOpen(false);
+                          }}
+                        >
+                          Confirm reset
+                        </button>
+                        <button
+                          type="button"
+                          className="reset-confirm-no"
+                          onClick={() => setConfirmReset(false)}
+                        >
+                          {t.sheets.cancel}
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>
           </div>
         </div>
+        {mobileSearchOpen && (
+          <div className="mobile-search-bar">
+            <form className="navbar-search" onSubmit={handleSearchSubmit} role="search">
+              <Search size={16} aria-hidden="true" />
+              <input
+                ref={mobileSearchInputRef}
+                type="search"
+                value={navQuery}
+                placeholder={t.palette.placeholder}
+                aria-label={t.palette.placeholder}
+                onChange={(e) => setNavQuery(e.target.value)}
+              />
+              {navQuery && (
+                <button
+                  type="button"
+                  className="navbar-search-clear"
+                  onClick={() => setNavQuery('')}
+                  aria-label={t.problems.clearFilters}
+                >
+                  <X size={14} aria-hidden="true" />
+                </button>
+              )}
+            </form>
+            {navQuery.trim() && (
+              <div className="mobile-search-results" role="listbox">
+                {searchResults.length > 0 ? searchResults.map((item) => (
+                  <button
+                    key={`${item.kind}:${item.id}`}
+                    type="button"
+                    role="option"
+                    className="navbar-search-option"
+                    onClick={() => {
+                      handleSearchSelect(item);
+                      setMobileSearchOpen(false);
+                    }}
+                  >
+                    <span>{item.label}</span>
+                    <Badge variant="outlined">{item.meta}</Badge>
+                  </button>
+                )) : (
+                  <p className="navbar-search-empty">{t.problems.empty}</p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </header>
 
       {/* Mobile Sidebar Drawer */}
@@ -357,6 +469,42 @@ export function AppHeader({
                     lang: code,
                   }))}
                 />
+              </div>
+              <div className="settings-row">
+                {!confirmReset ? (
+                  <>
+                    <span>Reset progress</span>
+                    <button
+                      type="button"
+                      className="locale-field icon-only-control reset-trigger-btn"
+                      onClick={() => setConfirmReset(true)}
+                      aria-label="Reset progress"
+                    >
+                      <RotateCcw size={16} aria-hidden="true" />
+                    </button>
+                  </>
+                ) : (
+                  <div className="reset-confirm-row">
+                    <button
+                      type="button"
+                      className="reset-confirm-yes"
+                      onClick={() => {
+                        onResetProgress?.();
+                        setConfirmReset(false);
+                        setSidebarOpen(false);
+                      }}
+                    >
+                      Confirm reset
+                    </button>
+                    <button
+                      type="button"
+                      className="reset-confirm-no"
+                      onClick={() => setConfirmReset(false)}
+                    >
+                      {t.sheets.cancel}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </aside>

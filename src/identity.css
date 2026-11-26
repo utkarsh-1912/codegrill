@@ -1651,8 +1651,13 @@ progress.diff-hard::-moz-progress-bar { background: #dc2626; }
   margin-left: auto;
 }
 
-.mobile-menu-btn {
+.mobile-menu-btn,
+.mobile-search-btn {
   display: none !important;
+}
+
+.mobile-search-bar {
+  display: none;
 }
 
 .navbar-search-wrap {
@@ -2857,14 +2862,42 @@ body,
     margin-inline: 0;
   }
 
+  .mobile-menu-btn,
+  .mobile-search-btn {
+    display: grid !important;
+  }
+
+  .app-header .desktop-search {
+    display: none;
+  }
+
+  .mobile-search-bar {
+    display: grid;
+    gap: 8px;
+    padding: 0 12px 10px;
+    border-top: 1px solid var(--ut-line);
+    padding-top: 10px;
+    background: var(--ut-bg-2);
+    animation: popoverDrop var(--dur-fast) var(--ease-out-expo) both;
+  }
+
+  .mobile-search-results {
+    display: grid;
+    max-height: 55vh;
+    overflow-y: auto;
+    border: 1px solid var(--ut-line);
+    border-radius: 10px;
+    background: var(--ut-bg);
+  }
+
   .header-left {
     flex: 0 0 auto;
-    gap: 8px;
+    gap: 10px;
   }
 
   .header-right {
-    flex: 1 1 0;
-    min-width: 0;
+    flex: 0 0 auto;
+    margin-left: auto;
     justify-content: flex-end;
     gap: 8px;
   }
@@ -2873,13 +2906,6 @@ body,
     width: 38px;
     height: 38px;
     flex-shrink: 0;
-  }
-
-  .navbar-search-wrap {
-    flex: 1 1 0;
-    min-width: 0;
-    width: 0;
-    max-width: 280px;
   }
 
   .settings-anchor {
@@ -2982,11 +3008,13 @@ body,
 
 @media (max-width: 560px) {
   .brand-wordmark {
-    display: none;
+    display: inline-flex;
+    font-size: 1.24rem;
   }
 
-  .navbar-search-wrap {
-    max-width: none;
+  .brand-emblem {
+    width: 28px;
+    height: 28px;
   }
 
   .site-stats {
@@ -3183,4 +3211,159 @@ body,
     flex-direction: column;
     align-items: center;
   }
+}
+
+
+/* Custom Forge Video Player, Reset Progress & Legal Pages */
+.custom-player {
+  display: grid;
+  gap: 0;
+  border: 1px solid var(--ut-line);
+  border-radius: 11px;
+  overflow: hidden;
+  background: #0d0a08;
+}
+
+.custom-player .video-frame-wrap {
+  border-radius: 0;
+}
+
+.custom-player video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #000;
+}
+
+.player-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--ut-bg-3);
+  border-top: 1px solid var(--ut-line);
+}
+
+.player-controls-left,
+.player-controls-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.player-speed-btn {
+  padding: 4px 9px;
+  border: 1px solid var(--ut-line);
+  border-radius: 7px;
+  background: var(--ut-bg-2);
+  color: var(--ink);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.player-speed-btn:hover,
+.player-speed-btn.is-active {
+  border-color: var(--ember);
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+}
+
+.settings-divider {
+  height: 1px;
+  background: var(--ut-line);
+  margin: 2px 0;
+}
+
+.reset-trigger-btn:hover {
+  border-color: #dc2626 !important;
+  color: #dc2626 !important;
+}
+
+.reset-confirm-row {
+  display: flex;
+  width: 100%;
+  gap: 6px;
+}
+
+.reset-confirm-yes,
+.reset-confirm-no {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 7px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.reset-confirm-yes {
+  border: 1px solid #dc2626;
+  background: #dc2626;
+  color: #fff;
+}
+
+.reset-confirm-no {
+  border: 1px solid var(--ut-line);
+  background: var(--ut-bg);
+  color: var(--ink);
+}
+
+.legal-card {
+  padding: clamp(18px, 3vw, 28px);
+  background: var(--ut-bg-2);
+  border-radius: 12px;
+  display: grid;
+  gap: 12px;
+  line-height: 1.65;
+}
+
+.legal-card h2 {
+  font-family: var(--display-font);
+  font-size: 1.25rem;
+  margin-top: 6px;
+}
+
+.legal-card p {
+  color: var(--muted);
+  max-width: 72ch;
+}
+
+.legal-card code {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.86em;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: var(--ut-bg-3);
+  color: var(--ut-accent);
+}
+
+.footer-legal {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.footer-legal a {
+  color: var(--muted);
+  text-decoration: none;
+}
+
+.footer-legal a:hover {
+  color: var(--ut-accent);
+  text-decoration: underline;
+}
+
+
+.rt-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 9px;
+  border: 1px solid var(--ut-line);
+  margin: 6px 0;
+  background: var(--ut-bg);
 }

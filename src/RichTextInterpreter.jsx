@@ -1,20 +1,67 @@
 import React, { useMemo, useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 
-function isSafeHref(href) {
+function resolveResourceUrl(href, sourceUrl, forRawImage = false) {
+  const clean = String(href || '').trim();
+  if (!clean || clean.startsWith('#')) return null;
+
   try {
-    const url = new URL(href);
-    return url.protocol === 'https:' || url.protocol === 'http:';
+    const abs = new URL(clean);
+    if (abs.protocol !== 'https:' && abs.protocol !== 'http:') return null;
+    if (forRawImage && (abs.hostname === 'github.com' || abs.hostname === 'www.github.com')) {
+      const parts = abs.pathname.split('/').filter(Boolean);
+      if (parts.length >= 5 && parts[2] === 'blob') {
+        const [owner, repo, , ref, ...rest] = parts;
+        return `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/${rest.join('/')}`;
+      }
+    }
+    return abs.href;
+  } catch {
+    // Relative URL — resolve against sourceUrl (especially GitHub blob/raw URLs)
+    if (!sourceUrl) return null;
+    try {
+      const base = new URL(sourceUrl);
+      if (base.hostname === 'github.com' || base.hostname === 'www.github.com') {
+        const parts = base.pathname.split('/').filter(Boolean);
+        if (parts.length >= 4 && (parts[2] === 'blob' || parts[2] === 'tree')) {
+          const [owner, repo, , ref, ...rest] = parts;
+          const dirParts = parts[2] === 'blob' ? rest.slice(0, -1) : rest;
+          const baseOrigin = forRawImage
+            ? `https://raw.githubusercontent.com/${owner}/${repo}/${ref}/`
+            : `https://github.com/${owner}/${repo}/blob/${ref}/`;
+          const baseDir = clean.startsWith('/')
+            ? baseOrigin
+            : `${baseOrigin}${dirParts.length ? `${dirParts.join('/')}/` : ''}`;
+          return new URL(clean.replace(/^\/+/, ''), baseDir).href;
+        }
+      }
+      return new URL(clean, base).href;
+    } catch {
+      return null;
+    }
+  }
+}
+
+function isInAppLink(url) {
+  try {
+    const u = new URL(url);
+    return (
+      u.hostname === 'github.com' ||
+      u.hostname === 'www.github.com' ||
+      u.hostname === 'raw.githubusercontent.com' ||
+      u.hostname.endsWith('youtube.com') ||
+      u.hostname === 'youtu.be'
+    );
   } catch {
     return false;
   }
 }
 
-// Parse inline markdown: `code`, **bold**, *italic*, ~~strike~~, [label](url)
-function renderInline(text, keyPrefix = 'in') {
+// Parse inline markdown: ![alt](img), `code`, **bold**, *italic*, ~~strike~~, [label](url)
+function renderInline(text, { sourceUrl, onOpenLink, keyPrefix = 'in' } = {}) {
   if (!text) return null;
   const tokens = [];
-  const pattern = /(`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|~~[^~]+~~|\*[^*\n]+\*|_[^_\n]+_|\[([^\]]+)\]\(([^)\s]+)\))/g;
+  const pattern = /(!\[([^\]]*)\]\(([^)\s]+)(?:\s+"[^"]*")?\)|`[^`]+`|\*\*[^*]+\*\*|__[^_]+__|~~[^~]+~~|\*[^*\n]+\*|_[^_\n]+_|\[([^\]]+)\]\(([^)\s]+)(?:\s+"[^"]*")?\))/g;
   let lastIndex = 0;
   let match;
   let idx = 0;
@@ -26,20 +73,49 @@ function renderInline(text, keyPrefix = 'in') {
     const token = match[0];
     const key = `${keyPrefix}-${idx++}`;
 
-    if (token.startsWith('`')) {
+    if (token.startsWith('![')) {
+      const alt = match[2] || '';
+      const src = resolveResourceUrl(match[3], sourceUrl, true);
+      if (src) {
+        tokens.push(
+          <img
+            key={key}
+            src={src}
+            alt={alt}
+            className="rt-image"
+            loading="lazy"
+          />,
+        );
+      }
+    } else if (token.startsWith('`')) {
       tokens.push(<code key={key} className="rt-inline-code">{token.slice(1, -1)}</code>);
     } else if (token.startsWith('**') || token.startsWith('__')) {
-      tokens.push(<strong key={key}>{renderInline(token.slice(2, -2), key)}</strong>);
+      tokens.push(<strong key={key}>{renderInline(token.slice(2, -2), { sourceUrl, onOpenLink, keyPrefix: key })}</strong>);
     } else if (token.startsWith('~~')) {
-      tokens.push(<del key={key}>{renderInline(token.slice(2, -2), key)}</del>);
+      tokens.push(<del key={key}>{renderInline(token.slice(2, -2), { sourceUrl, onOpenLink, keyPrefix: key })}</del>);
     } else if (token.startsWith('*') || token.startsWith('_')) {
-      tokens.push(<em key={key}>{renderInline(token.slice(1, -1), key)}</em>);
+      tokens.push(<em key={key}>{renderInline(token.slice(1, -1), { sourceUrl, onOpenLink, keyPrefix: key })}</em>);
     } else if (token.startsWith('[')) {
-      const label = match[2];
-      const href = match[3];
-      if (isSafeHref(href)) {
+      const label = match[4];
+      const resolved = resolveResourceUrl(match[5], sourceUrl, false);
+      if (resolved && onOpenLink && isInAppLink(resolved)) {
         tokens.push(
-          <a key={key} href={href} target="_blank" rel="noopener noreferrer" className="rt-link">
+          <a
+            key={key}
+            href={resolved}
+            className="rt-link"
+            onClick={(e) => {
+              if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+              e.preventDefault();
+              onOpenLink(resolved, label);
+            }}
+          >
+            {label}
+          </a>,
+        );
+      } else if (resolved) {
+        tokens.push(
+          <a key={key} href={resolved} target="_blank" rel="noopener noreferrer" className="rt-link">
             {label}
           </a>,
         );
@@ -125,6 +201,15 @@ function parseRichBlocks(rawText, isPlainText = false) {
       continue;
     }
 
+    // Standalone HTML <img src="..." alt="...">
+    const htmlImgMatch = /<img[^>]+src=["']([^"']+)["'][^>]*>/i.exec(trimmed);
+    if (htmlImgMatch && trimmed.startsWith('<')) {
+      const altMatch = /alt=["']([^"']*)["']/i.exec(trimmed);
+      blocks.push({ type: 'image', src: htmlImgMatch[1], alt: altMatch?.[1] || '' });
+      i += 1;
+      continue;
+    }
+
     // Headings # ... ######
     const headingMatch = /^(#{1,6})\s+(.+?)\s*#*$/.exec(trimmed);
     if (headingMatch) {
@@ -187,19 +272,22 @@ function parseRichBlocks(rawText, isPlainText = false) {
       continue;
     }
 
-    // Paragraph (strip simple inline HTML tags safely if present in GitHub READMEs)
+    // Paragraph (convert simple <a href="...">text</a> to markdown links before stripping other HTML)
     const paraLines = [];
     while (
       i < lines.length &&
       lines[i].trim() !== '' &&
-      !/^(#{1,6}\s|```|>|[-*+]\s|\d+\.\s|---|\*\*\*|___)/.test(lines[i].trim())
+      !/^(#{1,6}\s|```|>|[-*+]\s|\d+\.\s|---|\*\*\*|___|<img\b)/i.test(lines[i].trim())
     ) {
-      const cleaned = lines[i].replace(/<[^>]+>/g, '').trim();
+      const withLinks = lines[i].replace(/<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, '[$2]($1)');
+      const cleaned = withLinks.replace(/<[^>]+>/g, '').trim();
       if (cleaned) paraLines.push(cleaned);
       i += 1;
     }
     if (paraLines.length) {
       blocks.push({ type: 'paragraph', text: paraLines.join(' ') });
+    } else {
+      i += 1;
     }
   }
 
@@ -232,12 +320,13 @@ function CodeBlock({ language, content }) {
   );
 }
 
-export function RichTextInterpreter({ content, format = 'markdown' }) {
+export function RichTextInterpreter({ content, format = 'markdown', sourceUrl, onOpenLink }) {
   const [rawMode, setRawMode] = useState(false);
   const blocks = useMemo(
     () => parseRichBlocks(content, format === 'text'),
     [content, format],
   );
+  const inlineOpts = { sourceUrl, onOpenLink };
 
   return (
     <div className="rich-text-shell">
@@ -259,13 +348,17 @@ export function RichTextInterpreter({ content, format = 'markdown' }) {
             const key = `b-${index}`;
             if (block.type === 'heading') {
               const Tag = `h${Math.min(6, Math.max(2, block.level + 1))}`;
-              return <Tag key={key} className={`rt-h rt-h${block.level}`}>{renderInline(block.text, key)}</Tag>;
+              return <Tag key={key} className={`rt-h rt-h${block.level}`}>{renderInline(block.text, { ...inlineOpts, keyPrefix: key })}</Tag>;
+            }
+            if (block.type === 'image') {
+              const resolved = resolveResourceUrl(block.src, sourceUrl, true);
+              return resolved ? <img key={key} src={resolved} alt={block.alt} className="rt-image" loading="lazy" /> : null;
             }
             if (block.type === 'code') {
               return <CodeBlock key={key} language={block.language} content={block.content} />;
             }
             if (block.type === 'quote') {
-              return <blockquote key={key} className="rt-quote">{renderInline(block.text, key)}</blockquote>;
+              return <blockquote key={key} className="rt-quote">{renderInline(block.text, { ...inlineOpts, keyPrefix: key })}</blockquote>;
             }
             if (block.type === 'hr') {
               return <hr key={key} className="rt-hr" />;
@@ -273,14 +366,14 @@ export function RichTextInterpreter({ content, format = 'markdown' }) {
             if (block.type === 'ul') {
               return (
                 <ul key={key} className="rt-list">
-                  {block.items.map((item, j) => <li key={`${key}-${j}`}>{renderInline(item, `${key}-${j}`)}</li>)}
+                  {block.items.map((item, j) => <li key={`${key}-${j}`}>{renderInline(item, { ...inlineOpts, keyPrefix: `${key}-${j}` })}</li>)}
                 </ul>
               );
             }
             if (block.type === 'ol') {
               return (
                 <ol key={key} className="rt-list">
-                  {block.items.map((item, j) => <li key={`${key}-${j}`}>{renderInline(item, `${key}-${j}`)}</li>)}
+                  {block.items.map((item, j) => <li key={`${key}-${j}`}>{renderInline(item, { ...inlineOpts, keyPrefix: `${key}-${j}` })}</li>)}
                 </ol>
               );
             }
@@ -289,18 +382,18 @@ export function RichTextInterpreter({ content, format = 'markdown' }) {
                 <div key={key} className="rt-table-wrap">
                   <table className="rt-table">
                     <thead>
-                      <tr>{block.headers.map((h, j) => <th key={j}>{renderInline(h, `${key}-h-${j}`)}</th>)}</tr>
+                      <tr>{block.headers.map((h, j) => <th key={j}>{renderInline(h, { ...inlineOpts, keyPrefix: `${key}-h-${j}` })}</th>)}</tr>
                     </thead>
                     <tbody>
                       {block.rows.map((row, r) => (
-                        <tr key={r}>{row.map((cell, c) => <td key={c}>{renderInline(cell, `${key}-${r}-${c}`)}</td>)}</tr>
+                        <tr key={r}>{row.map((cell, c) => <td key={c}>{renderInline(cell, { ...inlineOpts, keyPrefix: `${key}-${r}-${c}` })}</td>)}</tr>
                       ))}
                     </tbody>
                   </table>
                 </div>
               );
             }
-            return <p key={key} className="rt-p">{renderInline(block.text, key)}</p>;
+            return <p key={key} className="rt-p">{renderInline(block.text, { ...inlineOpts, keyPrefix: key })}</p>;
           })}
         </article>
       )}

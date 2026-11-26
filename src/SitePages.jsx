@@ -4,7 +4,7 @@ import { getMessages } from './i18n.mjs';
 import { BrandLogo } from './BrandLogo.jsx';
 import { ForgeAtlas } from './ForgeAtlas.jsx';
 
-export const sitePages = ['home', 'how-it-works', 'about', 'help'];
+export const sitePages = ['home', 'how-it-works', 'about', 'help', 'privacy', 'terms', 'copyright'];
 
 const workflowLinks = ['/sheets', '/problems', '/roadmap', '/roadmap'];
 
@@ -34,8 +34,11 @@ export function Workflow({ locale = 'en', onNavigate }) {
   );
 }
 
-export function SitePages({ page, locale = 'en', topicCount, problemCount, sheetCount, onNavigate }) {
+export function SitePages({ page, locale = 'en', topicCount, problemCount, sheetCount, config, onNavigate }) {
   const t = getMessages(locale);
+  const brandName = config?.brand?.name || 'codegrill';
+  const ecosystem = config?.brand?.ecosystem || 'Utkristi';
+  const year = new Date().getFullYear();
 
   if (page === 'home') {
     return (
@@ -133,6 +136,67 @@ export function SitePages({ page, locale = 'en', topicCount, problemCount, sheet
     );
   }
 
+  if (page === 'privacy') {
+    return (
+      <section className="page-section marketing-page">
+        <div className="section-heading">
+          <div>
+            <h1>Privacy notice</h1>
+            <p>How {brandName} stores your study progress, notes, and embedded media preferences.</p>
+          </div>
+        </div>
+        <Card variant="outlined" className="legal-card">
+          <h2>Local-first storage & optional sync</h2>
+          <p>Your solved problems, revision bookmarks, personal notes, activity ledger, and custom series are stored locally in your browser via <code>localStorage</code> and optionally synced with your self-hosted or connected {brandName} backend instance.</p>
+          <h2>Privacy-enhanced embeds</h2>
+          <p>Walkthrough videos load through YouTube&apos;s privacy-enhanced domain (<code>youtube-nocookie.com</code>) or your configured custom player template. Solution code and Markdown editorials are fetched through the {brandName} plugin layer without third-party ad trackers.</p>
+          <h2>Full control & reset</h2>
+          <p>You can permanently erase all saved progress, bookmarks, notes, and streak history at any time from the Settings menu using <strong>Reset progress</strong>.</p>
+        </Card>
+      </section>
+    );
+  }
+
+  if (page === 'terms') {
+    return (
+      <section className="page-section marketing-page">
+        <div className="section-heading">
+          <div>
+            <h1>Terms of use</h1>
+            <p>Guidelines for using {brandName} and its integrated study tools.</p>
+          </div>
+        </div>
+        <Card variant="outlined" className="legal-card">
+          <h2>Educational & interview preparation use</h2>
+          <p>{brandName} is provided as an educational workspace to organize coding interview roadmaps, curated practice series, personal notes, and study rooms. Content is provided &ldquo;as is&rdquo; without warranty of interview outcomes.</p>
+          <h2>Third-party platforms & plugins</h2>
+          <p>Built-in plugins retrieve publicly accessible metadata, open-source code files, and official embeddable video streams from third-party platforms (such as LeetCode, YouTube, GitHub, and technical blogs). Use of external platforms remains subject to their respective terms.</p>
+          <h2>User-created series & notes</h2>
+          <p>Custom sheets and personal notes you author belong to you and are stored solely for your study workflow.</p>
+        </Card>
+      </section>
+    );
+  }
+
+  if (page === 'copyright') {
+    return (
+      <section className="page-section marketing-page">
+        <div className="section-heading">
+          <div>
+            <h1>Copyright & attribution</h1>
+            <p>© {year} {brandName} · {ecosystem}. All platform UI, plugins, and original tooling rights reserved.</p>
+          </div>
+        </div>
+        <Card variant="outlined" className="legal-card">
+          <h2>Open-source & community attributions</h2>
+          <p>Problem metadata, multilingual translations, and reference solution indexes incorporate open-source contributions from community repositories including <code>doocs/leetcode</code> and <code>neetcode-gh/leetcode</code> under their respective open-source licenses.</p>
+          <h2>Third-party trademarks & video creators</h2>
+          <p>LeetCode, YouTube, GitHub, takeUforward (Striver), Blind 75, and Grind 75 are trademarks or community curriculums of their respective owners. Video walkthroughs remain the intellectual property of their original creators and are played via official embeddable players with source attribution.</p>
+        </Card>
+      </section>
+    );
+  }
+
   return (
     <section className="page-section marketing-page">
       <div className="section-heading">
@@ -194,8 +258,12 @@ export function SiteFooter({ locale = 'en', config, onNavigate }) {
         </nav>
       </div>
       <div className="shell footer-bottom">
-        <span>{brandName} · {ecosystem}</span>
-        <span>{t.nav.roadmap} · {t.nav.sheets} · {t.nav.problems}</span>
+        <span>© {new Date().getFullYear()} {brandName} · {ecosystem}</span>
+        <div className="footer-legal">
+          <a href="/privacy" onClick={navHandler(onNavigate, '/privacy')}>Privacy</a>
+          <a href="/terms" onClick={navHandler(onNavigate, '/terms')}>Terms</a>
+          <a href="/copyright" onClick={navHandler(onNavigate, '/copyright')}>Copyright</a>
+        </div>
       </div>
     </footer>
   );
