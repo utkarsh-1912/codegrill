@@ -1172,3 +1172,329 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, #ff693d, #f59e0
   .landing-hero { grid-template-columns: 1fr; gap: 0; }
   .landing-hero img { justify-self: end; width: min(52%, 185px); margin-top: -6px; }
 }
+
+
+/* Editorial Tactile Brand Identity — Newsreader Serif + Forge Ledger + Practice Bar + Command Palette */
+:root {
+  --display-font: "Newsreader", Georgia, "Times New Roman", serif;
+}
+
+.hero h1,
+.landing-hero h1,
+.section-heading h1,
+.section-heading h2,
+.marketing-section > h2,
+.topic-inspector h3,
+.active-sheet-meta h2,
+.ledger-daily h3 {
+  font-family: var(--display-font);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.hero,
+.landing-hero {
+  position: relative;
+}
+
+.landing-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.06;
+  background-image: radial-gradient(#ff9b6a 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Bento Forge Ledger */
+.ledger-bento {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.95fr) minmax(0, 1.15fr);
+  gap: 12px;
+  margin: 14px 0 22px;
+}
+
+.ledger-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px;
+  background: var(--ut-bg-2);
+  border: 1px solid var(--ut-line);
+  border-radius: 12px;
+}
+
+.ledger-eyebrow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--ut-accent);
+}
+
+.ledger-eyebrow time {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+.ledger-daily h3 {
+  font-size: 1.28rem;
+  line-height: 1.2;
+}
+
+.ledger-daily-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ledger-topic-tag {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.ledger-daily-cta {
+  margin-top: auto;
+}
+
+.difficulty-bars {
+  display: grid;
+  gap: 10px;
+}
+
+.difficulty-bar-row {
+  display: grid;
+  gap: 4px;
+}
+
+.difficulty-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.84rem;
+}
+
+.difficulty-bar-label strong span {
+  color: var(--muted);
+  font-weight: 400;
+}
+
+progress.diff-easy::-webkit-progress-value { background: #16a34a; }
+progress.diff-easy::-moz-progress-bar { background: #16a34a; }
+progress.diff-medium::-webkit-progress-value { background: #f59e0b; }
+progress.diff-medium::-moz-progress-bar { background: #f59e0b; }
+progress.diff-hard::-webkit-progress-value { background: #dc2626; }
+progress.diff-hard::-moz-progress-bar { background: #dc2626; }
+
+.ledger-stamp-grid {
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.ledger-stamp {
+  aspect-ratio: 1;
+  border-radius: 4px;
+  background: var(--ut-bg-3);
+  border: 1px solid var(--ut-line);
+}
+
+.ledger-stamp.level-1 { background: #fdba74; border-color: #fb923c; }
+.ledger-stamp.level-2 { background: #f97316; border-color: #ea580c; }
+.ledger-stamp.level-3 { background: #c2410c; border-color: #9a3412; }
+
+.ledger-revision {
+  margin-top: auto;
+  padding-top: 8px;
+  border-top: 1px solid var(--ut-line);
+}
+
+.ledger-rev-label {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.ledger-rev-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ledger-rev-chips button {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--ut-line);
+  background: var(--ut-bg);
+  color: var(--ink);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+
+.ledger-rev-chips button:hover {
+  border-color: var(--ember);
+  color: var(--ut-accent);
+}
+
+.ledger-rev-empty {
+  margin-top: auto;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+/* Practice Forge Bar — Socratic Hints + Session Timer + Spoken Checklist */
+.practice-forge-bar {
+  display: grid;
+  gap: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  border: 1px solid var(--ut-line);
+  border-radius: 10px;
+  background: var(--ut-bg);
+}
+
+.practice-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.timer-block {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.timer-readout {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.96rem;
+  font-weight: 600;
+  color: var(--ut-accent);
+  padding: 4px 9px;
+  border-radius: 6px;
+  background: var(--ember-soft);
+  margin-right: 4px;
+}
+
+.hint-step-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--ut-line);
+  background: var(--ut-bg-2);
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.hint-step-btn:hover {
+  border-color: var(--ember);
+  color: var(--ut-accent);
+  background: var(--ember-soft);
+}
+
+.hint-drawer {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--ember);
+  background: var(--ut-bg-2);
+  border-radius: 0 8px 8px 0;
+  font-size: 0.9rem;
+}
+
+.verbal-checklist {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.verbal-checklist label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 9px;
+  border-radius: 99px;
+  border: 1px solid var(--ut-line);
+  background: var(--ut-bg-2);
+  font-size: 0.78rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.verbal-checklist label.is-checked {
+  border-color: var(--ember);
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+  font-weight: 600;
+}
+
+.verbal-checklist input {
+  accent-color: var(--ember);
+  margin: 0;
+}
+
+/* Command Palette */
+.palette-panel {
+  width: min(600px, 100%);
+}
+
+.palette-input-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--ut-line);
+  color: var(--muted);
+}
+
+.palette-input-row input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1rem;
+  outline: none;
+}
+
+.palette-results {
+  max-height: 360px;
+  overflow-y: auto;
+  display: grid;
+}
+
+.palette-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  border: 0;
+  border-bottom: 1px solid var(--ut-line);
+  background: transparent;
+  color: var(--ink);
+  text-align: start;
+  cursor: pointer;
+}
+
+.palette-item:hover {
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+}
+
+@media (max-width: 960px) {
+  .ledger-bento {
+    grid-template-columns: 1fr;
+  }
+}

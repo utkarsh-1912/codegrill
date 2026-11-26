@@ -3,10 +3,13 @@ import { readFileSync } from 'node:fs';
 import { matchingProblems, resourcesFor, roadmapFor, safeUrl } from '../src/catalog.mjs';
 import { newRoomId, problemShareUrl, roomEditor, roomInvite, roomsDirectory, studyLocation } from '../src/rooms.mjs';
 import { BUILTIN_SHEETS, buildWeeklyPlan, normalizeCustomSheet, resolveSheetProblems } from '../src/sheets.mjs';
-import { MESSAGES, SUPPORTED_LOCALES } from '../src/i18n.mjs';
+import { MESSAGES, SUPPORTED_LOCALES, getMessages } from '../src/i18n.mjs';
 import { createPluginRegistry } from '../server/plugins/registry.mjs';
 import { extractYouTubeId } from '../server/plugins/youtube.mjs';
 import { toGitHubRawUrl } from '../server/plugins/github.mjs';
+import { getPublicConfig, loadServerConfig } from '../server/config.mjs';
+import { buildAnalytics } from '../server/store.mjs';
+import { pickDailyProblem } from '../server/index.mjs';
 
 const seed = JSON.parse(readFileSync(new URL('../src/multilingual_leetcode_dataset.json', import.meta.url), 'utf8'));
 const curriculum = JSON.parse(readFileSync(new URL('../src/roadmap.generated.json', import.meta.url), 'utf8'));
@@ -112,10 +115,25 @@ assert.deepEqual(custom.slugs, ['two-sum']);
 
 // Verify complete i18n coverage
 for (const code of SUPPORTED_LOCALES) {
-  assert.ok(MESSAGES[code]?.nav?.sheets, `${code} missing nav.sheets`);
-  assert.ok(MESSAGES[code]?.viewer?.pluginBadge, `${code} missing viewer.pluginBadge`);
-  assert.ok(MESSAGES[code]?.sheets?.createSeries, `${code} missing sheets.createSeries`);
+  const m = getMessages(code);
+  assert.ok(m?.nav?.sheets, `${code} missing nav.sheets`);
+  assert.ok(m?.viewer?.pluginBadge, `${code} missing viewer.pluginBadge`);
+  assert.ok(m?.sheets?.createSeries, `${code} missing sheets.createSeries`);
+  assert.ok(m?.ledger?.dailyEyebrow, `${code} missing ledger.dailyEyebrow`);
+  assert.ok(m?.practice?.verbalSteps?.length === 4, `${code} missing practice.verbalSteps`);
+  assert.ok(m?.faq?.length >= 4, `${code} missing faq`);
 }
+
+// Verify zero-hardcode server config, daily challenge, and analytics
+const serverCfg = loadServerConfig();
+const pubCfg = getPublicConfig(serverCfg);
+assert.ok(pubCfg.planner.minWeeks < pubCfg.planner.maxWeeks);
+assert.ok(pubCfg.interview.defaultTimerMinutes > 0);
+const daily = pickDailyProblem(problems, new Date('2026-11-26T00:00:00Z'));
+assert.ok(problemSlugs.has(daily.slug), 'Daily challenge must be a valid catalog problem');
+const analytics = buildAnalytics({ completed: ['two-sum'], bookmarked: ['two-sum'], activity: { '2026-11-26': 1 } }, problems, categories, pubCfg.interview.activityDays);
+assert.equal(analytics.solvedCount, 1);
+assert.equal(analytics.ledger.length, pubCfg.interview.activityDays);
 
 // Verify built-in content & video plugins
 const registry = createPluginRegistry();

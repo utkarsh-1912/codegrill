@@ -202,7 +202,9 @@ function App() {
       completed: [...completed],
       bookmarked: [...bookmarked],
       notes,
+      activity,
       streak,
+      longestStreak,
     };
     try {
       localStorage.setItem(preferenceKey, JSON.stringify(payload));
@@ -210,24 +212,38 @@ function App() {
       // Ignore storage errors
     }
     if (backendOnline && hydratedRef.current) {
-      saveRemoteProgress(payload).then((saved) => {
-        if (saved && typeof saved.streak === 'number' && saved.streak !== streak) {
-          setPreferences((curr) => ({ ...curr, streak: saved.streak }));
+      saveRemoteProgress(payload, appConfig.defaultProfile).then((saved) => {
+        if (saved && (saved.streak !== streak || saved.longestStreak !== longestStreak)) {
+          setPreferences((curr) => ({
+            ...curr,
+            streak: Number(saved.streak || curr.streak || 0),
+            longestStreak: Number(saved.longestStreak || curr.longestStreak || 0),
+          }));
         }
       });
     }
-  }, [locale, completed, bookmarked, notes, backendOnline]);
+  }, [locale, completed, bookmarked, notes, activity, backendOnline, appConfig.defaultProfile]);
 
   function openProblems(category = '') {
     window.location.hash = category ? 'problems?' + new URLSearchParams({ topic: category }) : 'problems';
   }
 
+  function openProblemBySlug(slug) {
+    window.location.hash = 'problems?' + new URLSearchParams({ problem: slug });
+  }
+
   function toggleComplete(slug) {
     setPreferences((current) => {
       const updated = new Set(current.completed);
-      if (updated.has(slug)) updated.delete(slug);
-      else updated.add(slug);
-      return { ...current, completed: updated };
+      const nextActivity = { ...(current.activity || {}) };
+      if (updated.has(slug)) {
+        updated.delete(slug);
+      } else {
+        updated.add(slug);
+        const today = new Date().toISOString().slice(0, 10);
+        nextActivity[today] = (nextActivity[today] || 0) + 1;
+      }
+      return { ...current, completed: updated, activity: nextActivity };
     });
   }
 
@@ -279,7 +295,7 @@ function App() {
       <header className="app-header">
         <div className="header-inner">
           <a className="brand" href="#home">
-            <img src="/codegrill.svg" alt="" width="34" height="34" />codegrill
+            <img src="/codegrill.svg" alt="" width="34" height="34" />{appConfig.brand.name}
           </a>
           <nav aria-label="Study navigation">
             {pathIds.map((id, index) => {
@@ -298,6 +314,15 @@ function App() {
               title={backendOnline ? t.controls.backendOnline : t.controls.backendLocal}
               aria-label={backendOnline ? t.controls.backendOnline : t.controls.backendLocal}
             />
+            <button
+              type="button"
+              className="locale-field icon-only-control"
+              onClick={() => setPaletteOpen(true)}
+              aria-label={t.palette.open}
+              title={t.palette.open}
+            >
+              <Search size={18} aria-hidden="true" />
+            </button>
             <label className="locale-field language-field" title={t.controls.language}>
               <Globe2 size={18} aria-hidden="true" />
               <select aria-label={t.controls.language} value={locale}
@@ -369,6 +394,20 @@ function App() {
               {bookmarked.size > 0 && <> · <strong>{bookmarked.size}</strong> {t.progress.bookmarked}</>}
             </p>
           </Card>
+          <LedgerDashboard
+            problems={problems}
+            categories={categories}
+            completed={completed}
+            bookmarked={bookmarked}
+            activity={activity}
+            dailyChallenge={dailyChallenge}
+            streak={streak}
+            longestStreak={longestStreak}
+            activityDays={appConfig.interview.activityDays}
+            locale={locale}
+            defaultLocale={defaultLocale}
+            onOpenProblem={openProblemBySlug}
+          />
           <Roadmap roadmap={roadmap} next={next} locale={locale} title={t.nav.roadmap} onOpen={openProblems} />
           {!zenMode && (
             <section className="marketing-section">
@@ -384,6 +423,7 @@ function App() {
             problems={problems}
             categories={categories}
             languages={languages}
+            plannerConfig={appConfig.planner}
             locale={locale}
             defaultLocale={defaultLocale}
             completed={completed}
@@ -411,6 +451,7 @@ function App() {
             sharedProblem={sharedProblem}
             setTopic={openProblems}
             title={t.nav.problems}
+            timerMinutes={appConfig.interview.defaultTimerMinutes}
             onOpenViewer={setViewerItem}
           />
         )}
@@ -424,13 +465,28 @@ function App() {
         )}
       </main>
 
-      {!zenMode && <SiteFooter locale={locale} />}
+      {!zenMode && <SiteFooter locale={locale} config={appConfig} />}
 
       <ContentViewer
         item={viewerItem}
         locale={locale}
         languages={languages}
         onClose={() => setViewerItem(null)}
+      />
+
+      <CommandPalette
+        open={paletteOpen}
+        onClose={() => setPaletteOpen(false)}
+        problems={problems}
+        categories={categories}
+        sheets={allSheets}
+        locale={locale}
+        defaultLocale={defaultLocale}
+        onSelect={(item) => {
+          if (item.kind === 'problem') openProblemBySlug(item.id);
+          else if (item.kind === 'topic') openProblems(item.id);
+          else if (item.kind === 'sheet') window.location.hash = 'sheets';
+        }}
       />
     </div>
   );
@@ -541,7 +597,7 @@ function Roadmap({ roadmap, next, locale, title, onOpen }) {
 
 function ProblemLibrary({
   locale, title, topic, setTopic, completed, bookmarked, notes,
-  toggleComplete, toggleBookmark, saveNote, sharedProblem, onOpenViewer,
+  toggleComplete, toggleBookmark, saveNote, sharedProblem, timerMinutes, onOpenViewer,
 }) {
   const t = getMessages(locale);
   const [query, setQuery] = useState('');
@@ -668,13 +724,7 @@ function ProblemLibrary({
               </div>
               <div className="problem-detail" hidden={!expanded} id={'details-' + problem.slug}>
                 {expanded && <>
-                  {problem.optimal_approach && (
-                    <dl className="approach">
-                      <div><dt>{t.problems.approach}</dt><dd>{problem.optimal_approach}</dd></div>
-                      <div><dt>{t.problems.time}</dt><dd><code>{problem.time_complexity}</code></dd></div>
-                      <div><dt>{t.problems.space}</dt><dd><code>{problem.space_complexity}</code></dd></div>
-                    </dl>
-                  )}
+                  <ProblemPracticeBar problem={problem} locale={locale} defaultTimerMinutes={timerMinutes} />
                   <div className="rooms-actions">
                     {safeUrl(problem.leetcode_url) && (
                       <Button variant="solid" href={problem.leetcode_url} target="_blank" rel="noopener noreferrer">
@@ -886,8 +936,8 @@ function ResourceLinks({ links, problemTitle, onOpenViewer }) {
 
 function InterviewTracks({ locale, title, onOpenViewer }) {
   const t = getMessages(locale);
-  const [roleId, setRoleId] = useState('sde');
-  const [levelId, setLevelId] = useState('mid');
+  const [roleId, setRoleId] = useState(roles[0]?.id || '');
+  const [levelId, setLevelId] = useState(levels[1]?.id || levels[0]?.id || '');
   const role = roles.find(({ id }) => id === roleId);
   const visible = modules.filter((item) => item.roles.includes(roleId) && item.levels.includes(levelId));
   const trackLabel = (id) => t.tracks.labels[id] ?? id.replaceAll('_', ' ');
