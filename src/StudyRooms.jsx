@@ -384,13 +384,13 @@ export function StudyRooms({
   }
 
   const problemOptions = useMemo(() => ([
-    { value: '', label: 'No problem attached (open session)' },
+    { value: '', label: t.studio.rooms.noProblemAttached },
     ...problems.slice(0, 177).map((p) => ({
       value: p.slug,
       label: `${p.leetcode_id}. ${getProblemTitle(p, locale, defaultLocale)}`,
-      badge: p.difficulty,
+      badge: t.sheets[p.difficulty?.toLowerCase()] || p.difficulty,
     })),
-  ]), [problems, locale, defaultLocale]);
+  ]), [problems, locale, defaultLocale, t]);
 
   const activeFormat = getRoomFormat(roomState.mode);
   const activeProblem = useMemo(
@@ -510,14 +510,14 @@ export function StudyRooms({
           <div className="room-studio-row-top">
             <div className="room-studio-hero-left">
               <Button variant="quiet" size="sm" className="room-back-btn" onClick={() => onNavigate?.('/rooms')}>
-                <ArrowLeft size={15} aria-hidden="true" /> Lobby
+                <ArrowLeft size={15} aria-hidden="true" /> {t.studio.rooms.lobby}
               </Button>
               <span className="room-id-pill is-dark">
                 <span className="room-live-dot" aria-hidden="true" />#{validActiveRoom}
               </span>
-              <span className="room-format-pill is-dark">{activeFormat.label}</span>
+              <span className="room-format-pill is-dark">{t.studio.rooms.formats[activeFormat.id] || activeFormat.label}</span>
               <span className="room-presence-pill is-dark" title={participantList.join(', ')}>
-                <Users size={13} aria-hidden="true" /> {participantList.length} active
+                <Users size={13} aria-hidden="true" /> {participantList.length} {t.studio.rooms.active}
               </span>
             </div>
 
@@ -526,7 +526,7 @@ export function StudyRooms({
                 <Clock size={13} aria-hidden="true" /> {formatClock(roomState.timerRemainingSec)}
               </span>
 
-              <div className="room-role-pills is-dark" role="group" aria-label="Session role">
+              <div className="room-role-pills is-dark" role="group" aria-label={t.studio.rooms.role}>
                 {ROOM_ROLES.map((r) => (
                   <button
                     key={r.id}
@@ -534,7 +534,7 @@ export function StudyRooms({
                     className={profile.role === r.id ? 'is-active' : ''}
                     onClick={() => updateProfile({ role: r.id })}
                   >
-                    {r.label}
+                    {t.studio.rooms.roles[r.id] || r.label}
                   </button>
                 ))}
               </div>
@@ -546,7 +546,7 @@ export function StudyRooms({
                 onClick={() => copyRoomLink(validActiveRoom, roomState.mode, roomState.problemSlug)}
               >
                 {copiedInvite ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-                {copiedInvite ? 'Copied' : 'Invite'}
+                {copiedInvite ? t.studio.rooms.copied : t.studio.rooms.invite}
               </Button>
 
               {colabsUrl && (
@@ -571,12 +571,12 @@ export function StudyRooms({
           <div className="room-studio-row-exercise">
             <div className="room-exercise-main">
               <div className="room-exercise-copy">
-                <span className="room-exercise-eyebrow">Active Exercise · {activeFormat.short}</span>
+                <span className="room-exercise-eyebrow">{t.studio.rooms.activeExercise} · {activeFormat.short}</span>
                 <div className="room-brief-title-row">
                   <h1 className="room-studio-title">{activeExerciseTitle}</h1>
                   {activeProblem && (
                     <span className="room-diff-pill" data-level={activeProblem.difficulty}>
-                      {activeProblem.difficulty}
+                      {t.sheets[activeProblem.difficulty?.toLowerCase()] || activeProblem.difficulty}
                     </span>
                   )}
                 </div>
@@ -588,7 +588,7 @@ export function StudyRooms({
                 <>
                   {onOpenProblem && (
                     <Button variant="outlined" size="sm" className="room-hero-outline-btn" onClick={() => onOpenProblem(activeProblem.slug)}>
-                      Open Problem
+                      {t.studio.rooms.openProblem}
                     </Button>
                   )}
                   {activeProblem.leetcode_url && (
@@ -600,13 +600,13 @@ export function StudyRooms({
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      Practice <ArrowUpRight size={14} aria-hidden="true" />
+                      {t.studio.rooms.practice} <ArrowUpRight size={14} aria-hidden="true" />
                     </Button>
                   )}
                 </>
               )}
               <Button variant="quiet" size="sm" className="room-back-btn" onClick={() => setSwapOpen((v) => !v)}>
-                {swapOpen ? 'Done' : 'Change'}
+                {swapOpen ? t.studio.rooms.done : t.studio.rooms.change}
               </Button>
             </div>
           </div>
@@ -764,7 +764,7 @@ export function StudyRooms({
                         onClick={() => setRevealedHints((h) => ({ ...h, pattern: !h.pattern }))}
                       >
                         <Lightbulb size={13} aria-hidden="true" />
-                        {revealedHints.pattern ? 'Hide Hint' : 'Hint 1: Pattern'}
+                        {revealedHints.pattern ? t.studio.rooms.hideHint : t.studio.rooms.hintPattern}
                       </button>
                       <button
                         type="button"
@@ -772,7 +772,7 @@ export function StudyRooms({
                         onClick={() => setRevealedHints((h) => ({ ...h, complexity: !h.complexity }))}
                       >
                         <Eye size={13} aria-hidden="true" />
-                        {revealedHints.complexity ? 'Hide Complexity' : 'Hint 2: Complexity'}
+                        {revealedHints.complexity ? t.studio.rooms.hideComplexity : t.studio.rooms.hintComplexity}
                       </button>
                       {(solutionEntries.length > 0 || resourceLinks.length > 0) && (
                         <button
@@ -781,7 +781,7 @@ export function StudyRooms({
                           onClick={() => setRevealedHints((h) => ({ ...h, impl: !h.impl }))}
                         >
                           <FileCode2 size={13} aria-hidden="true" />
-                          {revealedHints.impl ? 'Hide Solutions' : 'Implementation'}
+                          {revealedHints.impl ? t.studio.rooms.hideSolutions : t.studio.rooms.implementation}
                         </button>
                       )}
                     </div>
@@ -791,15 +791,15 @@ export function StudyRooms({
                     <div className="room-hints-drawer">
                       {revealedHints.pattern && (
                         <div className="room-hint-item">
-                          <strong>Optimal Pattern</strong>
-                          <span>{activeProblem.optimal_approach || topicLabel || 'Break down by constraints & invariant'}</span>
+                          <strong>{t.studio.rooms.optimalPattern}</strong>
+                          <span>{activeProblem.optimal_approach || topicLabel || ''}</span>
                         </div>
                       )}
                       {revealedHints.complexity && (
                         <div className="room-hint-item">
-                          <strong>Target Complexity</strong>
+                          <strong>{t.studio.rooms.targetComplexity}</strong>
                           <span>
-                            Time <code>{activeProblem.time_complexity || 'O(n)'}</code> · Space <code>{activeProblem.space_complexity || 'O(n)'}</code>
+                            {t.problems.time} <code>{activeProblem.time_complexity || 'O(n)'}</code> · {t.problems.space} <code>{activeProblem.space_complexity || 'O(n)'}</code>
                           </span>
                         </div>
                       )}
@@ -807,7 +807,7 @@ export function StudyRooms({
                         <div className="room-hint-impl">
                           {solutionEntries.length > 0 && (
                             <div className="room-impl-group">
-                              <strong>Reference Code</strong>
+                              <strong>{t.studio.rooms.referenceCode}</strong>
                               <div className="room-impl-pills">
                                 {solutionEntries.map(([langId, langName]) => (
                                   <button
@@ -832,7 +832,7 @@ export function StudyRooms({
                           )}
                           {resourceLinks.length > 0 && (
                             <div className="room-impl-group">
-                              <strong>Walkthroughs & Editorials</strong>
+                              <strong>{t.studio.rooms.walkthroughsEditorials}</strong>
                               <div className="room-impl-pills">
                                 {resourceLinks.map((link) => (
                                   <button
@@ -864,9 +864,9 @@ export function StudyRooms({
             <Card variant="outlined" className="room-pad-card">
               <div className="room-pad-toolbar">
                 <div className="room-pad-heading">
-                  <span className="room-pad-label">Shared Notes</span>
+                  <span className="room-pad-label">{t.studio.rooms.sharedNotes}</span>
                   <span className="room-pad-hint">
-                    {editingNotes ? 'Esc or Ctrl+Enter to render' : 'Click note to edit'}
+                    {editingNotes ? t.studio.rooms.escToRender : t.studio.rooms.clickToEdit}
                   </span>
                 </div>
 
@@ -914,9 +914,9 @@ export function StudyRooms({
                     }}
                   >
                     {editingNotes ? (
-                      <><Check size={14} aria-hidden="true" /> Done</>
+                      <><Check size={14} aria-hidden="true" /> {t.studio.rooms.done}</>
                     ) : (
-                      <><Pencil size={14} aria-hidden="true" /> Edit</>
+                      <><Pencil size={14} aria-hidden="true" /> {t.studio.rooms.edit}</>
                     )}
                   </Button>
                 </div>
@@ -970,7 +970,7 @@ export function StudyRooms({
                   className={conductorTab === 'session' ? 'is-active' : ''}
                   onClick={() => setConductorTab('session')}
                 >
-                  Timer &amp; Stages ({completedStages}/{activeFormat.stages.length})
+                  {t.studio.rooms.timerStages} ({completedStages}/{activeFormat.stages.length})
                 </button>
                 <button
                   type="button"
@@ -979,7 +979,7 @@ export function StudyRooms({
                   className={conductorTab === 'rubric' ? 'is-active' : ''}
                   onClick={() => setConductorTab('rubric')}
                 >
-                  Rubric {avgScore ? `· ${avgScore}` : '& Debrief'}
+                  {avgScore ? `${t.studio.rooms.rubric} · ${avgScore}` : t.studio.rooms.rubricDebrief}
                 </button>
               </div>
 
@@ -988,7 +988,7 @@ export function StudyRooms({
                   <Card variant="outlined" className="room-widget-card">
                     <div className="room-widget-head">
                       <span className="room-widget-title">
-                        <Clock size={15} aria-hidden="true" /> Interview Timer
+                        <Clock size={15} aria-hidden="true" /> {t.studio.rooms.interviewTimer}
                       </span>
                       <div className="room-timer-presets">
                         {[15, 30, 45, 60].map((mins) => (
@@ -1027,7 +1027,7 @@ export function StudyRooms({
                         }))}
                       >
                         {roomState.timerRunning ? <Pause size={14} aria-hidden="true" /> : <Play size={14} aria-hidden="true" />}
-                        {roomState.timerRunning ? 'Pause' : 'Start'}
+                        {roomState.timerRunning ? t.studio.rooms.pause : t.studio.rooms.start}
                       </Button>
                       <Button
                         variant="outlined"
@@ -1039,14 +1039,14 @@ export function StudyRooms({
                           timerUpdatedAt: Date.now(),
                         }))}
                       >
-                        <RotateCcw size={14} aria-hidden="true" /> Reset
+                        <RotateCcw size={14} aria-hidden="true" /> {t.studio.rooms.reset}
                       </Button>
                     </div>
                   </Card>
 
                   <Card variant="outlined" className="room-widget-card">
                     <div className="room-widget-head">
-                      <span className="room-widget-title">Stage Checklist</span>
+                      <span className="room-widget-title">{t.studio.rooms.stageChecklist}</span>
                       <span className="room-stage-count">{completedStages}/{activeFormat.stages.length}</span>
                     </div>
                     <div className="room-progress-track" aria-hidden="true">
@@ -1077,7 +1077,7 @@ export function StudyRooms({
               {conductorTab === 'rubric' && (
                 <Card variant="outlined" className="room-widget-card">
                   <div className="room-widget-head">
-                    <span className="room-widget-title">Interviewer Rubric</span>
+                    <span className="room-widget-title">{t.studio.rooms.interviewerRubric}</span>
                     {avgScore && <span className="room-score-avg">{avgScore} / 4.0</span>}
                   </div>
 
@@ -1108,17 +1108,17 @@ export function StudyRooms({
                   </div>
 
                   <div className="room-signal-bar">
-                    <span>Signal</span>
+                    <span>{t.studio.rooms.signal}</span>
                     <strong>{hireSignal}</strong>
                   </div>
 
                   <div className="room-debrief-actions">
                     <Button variant="outlined" size="sm" onClick={() => handleExportDebrief(false)}>
                       {copiedDebrief ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-                      {copiedDebrief ? 'Copied' : 'Copy debrief'}
+                      {copiedDebrief ? t.studio.rooms.copied : t.studio.rooms.copyDebrief}
                     </Button>
                     <Button variant="solid" size="sm" onClick={() => handleExportDebrief(true)}>
-                      <Download size={14} aria-hidden="true" /> Export .md
+                      <Download size={14} aria-hidden="true" /> {t.studio.rooms.exportMd}
                     </Button>
                   </div>
                 </Card>
@@ -1166,7 +1166,7 @@ export function StudyRooms({
           <div className="legal-orbit-ring ring-2" />
           <Mascot mood="happy" size={134} label="Ember mock interview host" />
           <span className="rooms-hero-status">
-            <span className="room-live-dot" /> Live Sync · Colabs Ready
+            <span className="room-live-dot" /> {t.studio.rooms.liveSyncReady}
           </span>
         </div>
       </div>
@@ -1182,8 +1182,8 @@ export function StudyRooms({
             </div>
 
             <div className="room-step-block">
-              <span className="room-step-label">01 · Session format</span>
-              <div className="room-format-grid" role="radiogroup" aria-label="Interview format">
+              <span className="room-step-label">{t.studio.rooms.stepFormat}</span>
+              <div className="room-format-grid" role="radiogroup" aria-label={t.studio.rooms.stepFormat}>
                 {ROOM_FORMATS.map((fmt) => {
                   const Icon = FORMAT_ICONS[fmt.id] || Code2;
                   return (
@@ -1203,7 +1203,7 @@ export function StudyRooms({
                       <div className="room-format-tile-top">
                         <span className="room-format-tile-title">
                           <Icon size={15} aria-hidden="true" />
-                          <strong>{fmt.label}</strong>
+                          <strong>{t.studio.rooms.formats[fmt.id] || fmt.label}</strong>
                         </span>
                         <span>{fmt.minutes}m</span>
                       </div>
@@ -1215,10 +1215,10 @@ export function StudyRooms({
             </div>
 
             <div className="room-step-block">
-              <span className="room-step-label">02 · Your identity & role</span>
+              <span className="room-step-label">{t.studio.rooms.stepIdentity}</span>
               <div className="room-identity-row">
                 <label className="room-field-stack">
-                  <span>Display name</span>
+                  <span>{t.studio.rooms.displayName}</span>
                   <input
                     type="text"
                     value={profile.name}
@@ -1229,8 +1229,8 @@ export function StudyRooms({
                 </label>
 
                 <div className="room-field-stack">
-                  <span>Role</span>
-                  <div className="room-role-pills" role="group" aria-label="Role">
+                  <span>{t.studio.rooms.role}</span>
+                  <div className="room-role-pills" role="group" aria-label={t.studio.rooms.role}>
                     {ROOM_ROLES.map((r) => (
                       <button
                         key={r.id}
@@ -1238,7 +1238,7 @@ export function StudyRooms({
                         className={profile.role === r.id ? 'is-active' : ''}
                         onClick={() => updateProfile({ role: r.id })}
                       >
-                        {r.label}
+                        {t.studio.rooms.roles[r.id] || r.label}
                       </button>
                     ))}
                   </div>
@@ -1247,19 +1247,19 @@ export function StudyRooms({
             </div>
 
             <div className="room-step-block">
-              <span className="room-step-label">03 · Attach exercise</span>
+              <span className="room-step-label">{t.studio.rooms.stepAttach}</span>
               {setupMode === 'dsa' ? (
                 <div className="room-attach-row">
                   <div className="room-attach-select">
                     <SelectDropdown
-                      ariaLabel="Attach problem"
+                      ariaLabel={t.studio.rooms.stepAttach}
                       value={selectedSlug}
                       onChange={setSelectedSlug}
                       options={problemOptions}
                     />
                   </div>
-                  <Button variant="outlined" size="sm" onClick={pickRandomProblem} title="Pick random problem">
-                    <Shuffle size={14} aria-hidden="true" /> Random
+                  <Button variant="outlined" size="sm" onClick={pickRandomProblem} title={t.studio.rooms.random}>
+                    <Shuffle size={14} aria-hidden="true" /> {t.studio.rooms.random}
                   </Button>
                 </div>
               ) : (
@@ -1292,16 +1292,16 @@ export function StudyRooms({
           <Card variant="outlined" className="study-panel room-recent-card">
             <div className="room-widget-head">
               <div>
-                <h2>Recent sessions</h2>
-                <p className="room-recent-sub">Rejoin with your saved notes, timer, and scorecard.</p>
+                <h2>{t.studio.rooms.recentSessions}</h2>
+                <p className="room-recent-sub">{t.studio.rooms.recentSub}</p>
               </div>
               <span className="room-stage-count">{savedRooms.length}</span>
             </div>
 
             {savedRooms.length === 0 ? (
               <div className="room-recent-empty">
-                <Mascot mood="idle" size={88} label="No recent rooms yet" />
-                <p>Rooms you create or join appear here so you can pick up right where you left off.</p>
+                <Mascot mood="idle" size={88} label={t.studio.rooms.recentSessions} />
+                <p>{t.studio.rooms.recentEmpty}</p>
                 <a className="external-room" href={directory.href} target="_blank" rel="noopener noreferrer">
                   {t.rooms.openColabs} <ArrowUpRight size={15} aria-hidden="true" />
                 </a>

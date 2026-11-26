@@ -253,7 +253,7 @@ export function TracksPage({
                     <span className="allocation-fill" style={{ width: `${pct}%`, background: color }} />
                   </div>
                   <small className="allocation-mod-count">
-                    {matchCount} {matchCount === 1 ? 'module' : 'modules'}
+                    {matchCount} {matchCount === 1 ? t.studio.tracks.module : t.studio.tracks.modules}
                   </small>
                 </button>
               );
@@ -365,11 +365,11 @@ export function TracksPage({
                   </Button>
                 )}
                 <Button variant="outlined" size="sm" onClick={() => launchMockRoomForModule()}>
-                  <Users size={14} aria-hidden="true" /> Practice in Room
+                  <Users size={14} aria-hidden="true" /> {t.studio.tracks.practiceInRoom}
                 </Button>
               </div>
 
-              <div className="track-stage-tabs" role="tablist" aria-label="Module content">
+              <div className="track-stage-tabs" role="tablist" aria-label={t.tracks.learningModules}>
                 <button
                   type="button"
                   role="tab"
@@ -377,7 +377,7 @@ export function TracksPage({
                   className={activeTab === 'guide' ? 'is-active' : ''}
                   onClick={() => setActiveTab('guide')}
                 >
-                  <BookOpen size={14} aria-hidden="true" /> Study Material
+                  <BookOpen size={14} aria-hidden="true" /> {t.studio.tracks.studyMaterial}
                 </button>
                 <button
                   type="button"
@@ -386,7 +386,7 @@ export function TracksPage({
                   className={activeTab === 'questions' ? 'is-active' : ''}
                   onClick={() => setActiveTab('questions')}
                 >
-                  <HelpCircle size={14} aria-hidden="true" /> Questions ({activeQuestions.length})
+                  <HelpCircle size={14} aria-hidden="true" /> {t.studio.tracks.questions} ({activeQuestions.length})
                 </button>
                 <button
                   type="button"
@@ -395,7 +395,7 @@ export function TracksPage({
                   className={activeTab === 'videos' ? 'is-active' : ''}
                   onClick={() => setActiveTab('videos')}
                 >
-                  <Play size={14} aria-hidden="true" /> Videos ({activeVideos.length})
+                  <Play size={14} aria-hidden="true" /> {t.studio.tracks.videos} ({activeVideos.length})
                 </button>
                 <button
                   type="button"
@@ -404,7 +404,7 @@ export function TracksPage({
                   className={activeTab === 'docs' ? 'is-active' : ''}
                   onClick={() => setActiveTab('docs')}
                 >
-                  <FileText size={14} aria-hidden="true" /> Docs &amp; Repos ({activeDocs.length})
+                  <FileText size={14} aria-hidden="true" /> {t.studio.tracks.docsRepos} ({activeDocs.length})
                 </button>
               </div>
             </div>
@@ -415,7 +415,7 @@ export function TracksPage({
                   {activeMod.studyGuide ? (
                     <RichTextInterpreter content={activeMod.studyGuide} format="markdown" />
                   ) : (
-                    <p className="library-empty">Study guide coming soon.</p>
+                    <p className="library-empty">{t.studio.tracks.guideSoon}</p>
                   )}
                 </div>
               )}
@@ -442,12 +442,12 @@ export function TracksPage({
                               size="sm"
                               onClick={() => launchMockRoomForModule(item.q)}
                             >
-                              Mock Room <ArrowRight size={13} aria-hidden="true" />
+                              {t.studio.tracks.mockRoom} <ArrowRight size={13} aria-hidden="true" />
                             </Button>
                           </div>
                           <h4>{item.q}</h4>
                           <details className="track-q-answer">
-                            <summary>Key points &amp; model answer</summary>
+                            <summary>{t.studio.tracks.keyPointsAnswer}</summary>
                             <RichTextInterpreter content={item.answer} format="markdown" />
                           </details>
                         </div>
@@ -457,7 +457,7 @@ export function TracksPage({
 
                   {relatedProblemObjs.length > 0 && (
                     <div className="track-related-problems">
-                      <h4><Code2 size={15} aria-hidden="true" /> Related Coding Problems</h4>
+                      <h4><Code2 size={15} aria-hidden="true" /> {t.studio.tracks.relatedProblems}</h4>
                       <div className="track-related-grid">
                         {relatedProblemObjs.map((prob) => (
                           <button
@@ -467,7 +467,7 @@ export function TracksPage({
                             onClick={() => (onOpenProblem ? onOpenProblem(prob.slug) : onNavigate?.(`/problems?problem=${prob.slug}`))}
                           >
                             <span>{prob.leetcode_id}. {prob.translations?.[locale]?.title || prob.translations?.en?.title || prob.slug}</span>
-                            <small>{prob.difficulty}</small>
+                            <small>{t.sheets[prob.difficulty?.toLowerCase()] || prob.difficulty}</small>
                           </button>
                         ))}
                       </div>
@@ -479,12 +479,12 @@ export function TracksPage({
               {activeTab === 'videos' && (
                 <div className="track-media-grid">
                   {activeVideos.length === 0 ? (
-                    <p className="library-empty">No videos listed for this module yet.</p>
+                    <p className="library-empty">{t.studio.tracks.noVideos}</p>
                   ) : (
                     activeVideos.map((vid) => (
                       <div key={vid.url} className="track-resource-card">
                         <div className="track-resource-copy">
-                          <span className="room-format-pill">VIDEO</span>
+                          <span className="room-format-pill">{t.viewer.videoTab.toUpperCase()}</span>
                           <h4>{vid.title}</h4>
                           {vid.platform && <small>{vid.platform}</small>}
                         </div>
@@ -499,7 +499,7 @@ export function TracksPage({
                               moduleId: activeMod.id,
                             })}
                           >
-                            <Play size={14} aria-hidden="true" /> Watch in-app
+                            <Play size={14} aria-hidden="true" /> {t.studio.tracks.watchInApp}
                           </Button>
                           <Button
                             variant="quiet"
@@ -520,7 +520,7 @@ export function TracksPage({
               {activeTab === 'docs' && (
                 <div className="track-media-grid">
                   {activeDocs.length === 0 ? (
-                    <p className="library-empty">No external docs listed for this module yet.</p>
+                    <p className="library-empty">{t.studio.tracks.noDocs}</p>
                   ) : (
                     activeDocs.map((doc) => (
                       <div key={doc.url} className="track-resource-card">
@@ -540,7 +540,7 @@ export function TracksPage({
                               moduleId: activeMod.id,
                             })}
                           >
-                            <BookOpen size={14} aria-hidden="true" /> Read in-app
+                            <BookOpen size={14} aria-hidden="true" /> {t.studio.tracks.readInApp}
                           </Button>
                           <Button
                             variant="quiet"

@@ -109,9 +109,57 @@ const pathIds = ['roadmap', 'sheets', 'problems', 'tracks', 'resources', 'rooms'
 const preferenceKey = 'codegrill:study:v1';
 const pickLabel = (labels, locale) => labels[locale] ?? labels[defaultLocale];
 
+function computeStreakStats(activity = {}, previousLongest = 0) {
+  const activeDates = Object.entries(activity || {})
+    .filter(([day, count]) => /^\d{4}-\d{2}-\d{2}$/.test(day) && Number(count) > 0)
+    .map(([day]) => day)
+    .sort();
+
+  if (!activeDates.length) {
+    return { streak: 0, longestStreak: Math.max(0, Number(previousLongest) || 0) };
+  }
+
+  const activeSet = new Set(activeDates);
+  const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+  const yesterday = new Date(today);
+  yesterday.setUTCDate(today.getUTCDate() - 1);
+  const yesterdayStr = yesterday.toISOString().slice(0, 10);
+
+  let streak = 0;
+  let cursor = null;
+  if (activeSet.has(todayStr)) cursor = new Date(`${todayStr}T00:00:00Z`);
+  else if (activeSet.has(yesterdayStr)) cursor = new Date(`${yesterdayStr}T00:00:00Z`);
+
+  while (cursor) {
+    const key = cursor.toISOString().slice(0, 10);
+    if (!activeSet.has(key)) break;
+    streak += 1;
+    cursor.setUTCDate(cursor.getUTCDate() - 1);
+  }
+
+  let bestRun = 0;
+  let run = 0;
+  let prevMs = null;
+  for (const day of activeDates) {
+    const ms = Date.parse(`${day}T00:00:00Z`);
+    if (prevMs !== null && ms - prevMs === 86400000) run += 1;
+    else run = 1;
+    if (run > bestRun) bestRun = run;
+    prevMs = ms;
+  }
+
+  return {
+    streak,
+    longestStreak: Math.max(bestRun, streak, Number(previousLongest) || 0),
+  };
+}
+
 function readPreferences() {
   try {
     const saved = JSON.parse(localStorage.getItem(preferenceKey));
+    const activity = saved?.activity && typeof saved.activity === 'object' ? saved.activity : {};
+    const stats = computeStreakStats(activity, Number(saved?.longestStreak || 0));
     return {
       locale: locales.some(({ code }) => code === saved?.locale) ? saved.locale : defaultLocale,
       completed: new Set(Array.isArray(saved?.completed)
@@ -121,9 +169,9 @@ function readPreferences() {
         ? saved.bookmarked.filter((slug) => problemSlugs.has(slug))
         : []),
       notes: saved?.notes && typeof saved.notes === 'object' ? saved.notes : {},
-      activity: saved?.activity && typeof saved.activity === 'object' ? saved.activity : {},
-      streak: Number(saved?.streak || 0),
-      longestStreak: Number(saved?.longestStreak || 0),
+      activity,
+      streak: stats.streak,
+      longestStreak: stats.longestStreak,
     };
   } catch {
     return { locale: defaultLocale, completed: new Set(), bookmarked: new Set(), notes: {}, activity: {}, streak: 0, longestStreak: 0 };
@@ -226,15 +274,22 @@ function App() {
           fetchRemoteProfiles(remoteConfig.defaultProfile),
         ]);
         if (active && remote) {
-          setPreferences((prev) => ({
-            locale: locales.some(({ code }) => code === remote.locale) ? remote.locale : prev.locale,
-            completed: new Set([...prev.completed, ...(remote.completed || []).filter((s) => problemSlugs.has(s))]),
-            bookmarked: new Set([...prev.bookmarked, ...(remote.bookmarked || []).filter((s) => problemSlugs.has(s))]),
-            notes: { ...(remote.notes || {}), ...prev.notes },
-            activity: { ...(remote.activity || {}), ...prev.activity },
-            streak: Number(remote.streak || prev.streak || 0),
-            longestStreak: Number(remote.longestStreak || prev.longestStreak || 0),
-          }));
+          setPreferences((prev) => {
+            const mergedActivity = { ...(remote.activity || {}), ...prev.activity };
+            const stats = computeStreakStats(
+              mergedActivity,
+              Math.max(Number(remote.longestStreak || 0), Number(prev.longestStreak || 0)),
+            );
+            return {
+              locale: locales.some(({ code }) => code === remote.locale) ? remote.locale : prev.locale,
+              completed: new Set([...prev.completed, ...(remote.completed || []).filter((s) => problemSlugs.has(s))]),
+              bookmarked: new Set([...prev.bookmarked, ...(remote.bookmarked || []).filter((s) => problemSlugs.has(s))]),
+              notes: { ...(remote.notes || {}), ...prev.notes },
+              activity: mergedActivity,
+              streak: stats.streak,
+              longestStreak: stats.longestStreak,
+            };
+          });
         }
         if (active && remoteProfiles && Object.keys(remoteProfiles).length > 0) {
           setLinkedProfiles((prev) => ({ ...remoteProfiles, ...prev }));
@@ -327,14 +382,26 @@ function App() {
     setPreferences((current) => {
       const updated = new Set(current.completed);
       const nextActivity = { ...(current.activity || {}) };
+      const today = new Date().toISOString().slice(0, 10);
       if (updated.has(slug)) {
         updated.delete(slug);
+        if (nextActivity[today] > 1) {
+          nextActivity[today] -= 1;
+        } else {
+          delete nextActivity[today];
+        }
       } else {
         updated.add(slug);
-        const today = new Date().toISOString().slice(0, 10);
         nextActivity[today] = (nextActivity[today] || 0) + 1;
       }
-      return { ...current, completed: updated, activity: nextActivity };
+      const stats = computeStreakStats(nextActivity, current.longestStreak);
+      return {
+        ...current,
+        completed: updated,
+        activity: nextActivity,
+        streak: stats.streak,
+        longestStreak: stats.longestStreak,
+      };
     });
   }
 

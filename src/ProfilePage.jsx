@@ -113,10 +113,10 @@ export function ProfilePage({
       ? 'idle'
       : 'loading';
   const mascotCaption = streak >= 3
-    ? `On fire · ${streak}d streak`
+    ? `${t.studio.profile.onFire} · ${streak}d ${t.progress.streak}`
     : completed.size > 0
-      ? `${completed.size} solved · Keep building`
-      : 'Ready for your first solve';
+      ? `${completed.size} ${t.progress.solvedOf} · ${t.studio.profile.keepBuilding}`
+      : t.studio.profile.readyFirstSolve;
 
   return (
     <section className="page-section profile-page">
@@ -128,19 +128,19 @@ export function ProfilePage({
           <div className="profile-hero-kpis">
             <div className="profile-kpi-pill">
               <strong>{completed.size}<span>/{problems.length}</span></strong>
-              <small>Solved</small>
+              <small>{t.studio.profile.solved}</small>
             </div>
             <div className="profile-kpi-pill">
               <strong><Flame size={15} aria-hidden="true" /> {streak}d</strong>
-              <small>Best {longestStreak}d</small>
+              <small>{t.studio.profile.best} {longestStreak}d</small>
             </div>
             <div className="profile-kpi-pill">
               <strong>{totalFavorites}</strong>
-              <small>Favorites</small>
+              <small>{t.studio.profile.favorites}</small>
             </div>
             <div className="profile-kpi-pill">
               <strong>{linkedCount}</strong>
-              <small>Platforms</small>
+              <small>{t.studio.profile.platforms}</small>
             </div>
           </div>
 
@@ -223,17 +223,17 @@ export function ProfilePage({
       <Card variant="outlined" className="profile-saved-guides">
         <div className="profile-saved-head">
           <h3>
-            <Star size={16} fill="currentColor" aria-hidden="true" /> Favorites &amp; Read Again
+            <Star size={16} fill="currentColor" aria-hidden="true" /> {t.studio.profile.favoritesTitle}
           </h3>
           <span>{totalFavorites}</span>
         </div>
 
         {totalFavorites === 0 ? (
           <div className="profile-saved-empty">
-            <Mascot mood="idle" size={76} label="No favorites saved yet" />
+            <Mascot mood="idle" size={76} label={t.studio.profile.queueClear} />
             <div>
-              <strong>Your reading queue is clear</strong>
-              <p>Star any study guide, GitHub doc, notebook, or video walkthrough in the viewer to revisit it here before interviews.</p>
+              <strong>{t.studio.profile.queueClear}</strong>
+              <p>{t.studio.profile.queueClearDesc}</p>
             </div>
           </div>
         ) : (

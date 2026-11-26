@@ -212,17 +212,15 @@ export function ContentViewerBody({
         </span>
         <span className="binary-viewer-badge">.{extLabel}</span>
         <h3>{data.title || activeTitle}</h3>
-        <p>
-          This is a binary file and cannot be previewed as plain text. Download the raw file to open it in its native app.
-        </p>
+        <p>{t.studio.viewer.binaryNote}</p>
         <div className="binary-viewer-actions">
           {data.downloadUrl && (
             <Button variant="solid" size="sm" href={data.downloadUrl} target="_blank" rel="noopener noreferrer">
-              <Download size={14} aria-hidden="true" /> Download {data.title || 'file'}
+              <Download size={14} aria-hidden="true" /> {t.studio.viewer.download} {data.title || ''}
             </Button>
           )}
           <Button variant="outlined" size="sm" href={data.sourceUrl || activeUrl} target="_blank" rel="noopener noreferrer">
-            View on GitHub <ExternalLink size={14} aria-hidden="true" />
+            {t.studio.viewer.viewOnGitHub} <ExternalLink size={14} aria-hidden="true" />
           </Button>
         </div>
       </div>

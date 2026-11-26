@@ -147,7 +147,7 @@ export function SitePages({
         <section className="home-pulse-strip">
           <dl className="site-stats home-stats-grid">
             <div><dt>{t.site.statProblems}</dt><dd>{problemCount}</dd></div>
-            <div><dt>Domains</dt><dd>{ROADMAP_DOMAINS.length}</dd></div>
+            <div><dt>{t.studio.home.domainsStat}</dt><dd>{ROADMAP_DOMAINS.length}</dd></div>
             <div><dt>{t.site.statTopics}</dt><dd>{topicCount}</dd></div>
             <div><dt>{t.site.statSheets}</dt><dd>{sheetCount}</dd></div>
           </dl>
@@ -159,7 +159,7 @@ export function SitePages({
               </span>
               {solvedCount > 0 && (
                 <a href="/profile" className="home-streak-pill" onClick={navHandler(onNavigate, '/profile')}>
-                  {solvedCount} solved · {streak}d streak
+                  {solvedCount} {t.progress.solvedOf} · {streak}d {t.progress.streak}
                 </a>
               )}
             </div>
@@ -168,7 +168,7 @@ export function SitePages({
                 <div className="home-daily-info">
                   <strong>{dailyChallenge.leetcode_id}. {dailyTitle}</strong>
                   <span className="difficulty-badge" data-level={dailyChallenge.difficulty}>
-                    {dailyChallenge.difficulty}
+                    {t.sheets[dailyChallenge.difficulty?.toLowerCase()] || dailyChallenge.difficulty}
                   </span>
                 </div>
                 <Button
@@ -176,14 +176,14 @@ export function SitePages({
                   size="sm"
                   onClick={() => (onOpenDaily ? onOpenDaily(dailyChallenge.slug) : onNavigate?.(`/problems?problem=${dailyChallenge.slug}`))}
                 >
-                  Solve now <ArrowRight size={14} aria-hidden="true" />
+                  {t.studio.home.solveNow} <ArrowRight size={14} aria-hidden="true" />
                 </Button>
               </div>
             ) : (
               <div className="home-daily-row">
-                <strong>Pick a sheet or launch a timed mock room</strong>
+                <strong>{t.studio.home.dailyEmpty}</strong>
                 <Button variant="outlined" size="sm" href="/problems" onClick={navHandler(onNavigate, '/problems')}>
-                  Browse library
+                  {t.studio.home.browseLibrary}
                 </Button>
               </div>
             )}
@@ -193,11 +193,11 @@ export function SitePages({
         <section className="marketing-section">
           <div className="home-section-head">
             <div>
-              <h2>Complete Engineering Interview Atlas</h2>
-              <p>Structured prerequisite roadmaps with built-in guides, Mermaid diagrams, and curated references beyond DSA.</p>
+              <h2>{t.studio.home.atlasTitle}</h2>
+              <p>{t.studio.home.atlasDesc}</p>
             </div>
             <a className="home-section-link" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
-              Open full roadmap <ArrowRight size={14} aria-hidden="true" />
+              {t.studio.home.openFullRoadmap} <ArrowRight size={14} aria-hidden="true" />
             </a>
           </div>
           <div className="home-domain-grid">
@@ -205,6 +205,7 @@ export function SitePages({
               const meta = DOMAIN_META[dom.id] || { icon: Code2, tag: dom.id.toUpperCase(), summary: '' };
               const Icon = meta.icon;
               const label = dom.labels?.[locale] || dom.labels?.en || dom.id;
+              const summary = t.studio.home.domainSummaries?.[dom.id] || meta.summary;
               return (
                 <a
                   key={dom.id}
@@ -219,9 +220,9 @@ export function SitePages({
                     <span className="home-domain-tag">{meta.tag}</span>
                   </div>
                   <h3>{label}</h3>
-                  <p>{meta.summary}</p>
+                  <p>{summary}</p>
                   <span className="home-domain-cta">
-                    Open roadmap <ArrowRight size={13} aria-hidden="true" />
+                    {t.studio.home.openRoadmap} <ArrowRight size={13} aria-hidden="true" />
                   </span>
                 </a>
               );
@@ -232,35 +233,35 @@ export function SitePages({
         <section className="marketing-section">
           <div className="home-section-head">
             <div>
-              <h2>Built for Deep Practice</h2>
-              <p>Everything you need to read, watch, diagram, and rehearse in one keyboard-first workspace.</p>
+              <h2>{t.studio.home.superpowersTitle}</h2>
+              <p>{t.studio.home.superpowersDesc}</p>
             </div>
           </div>
           <div className="home-bento-grid">
             <Card variant="outlined" className="home-bento-card">
               <span className="home-bento-icon" aria-hidden="true"><BookOpen size={18} /></span>
-              <h3>In-App Study Viewer</h3>
-              <p>Watch walkthroughs with synchronized transcripts, browse GitHub repos, and render Markdown, KaTeX math, Mermaid diagrams, Jupyter notebooks, and Anki decks inline.</p>
+              <h3>{t.studio.home.viewerTitle}</h3>
+              <p>{t.studio.home.viewerDesc}</p>
               <a href="/resources" onClick={navHandler(onNavigate, '/resources')}>
-                Explore resources <ArrowRight size={13} aria-hidden="true" />
+                {t.studio.home.exploreResources} <ArrowRight size={13} aria-hidden="true" />
               </a>
             </Card>
 
             <Card variant="outlined" className="home-bento-card">
               <span className="home-bento-icon" aria-hidden="true"><Users size={18} /></span>
-              <h3>Mock Interview Studio</h3>
-              <p>Run timed Pair DSA, System Design, LLD, or Behavioral sessions with a shared Markdown/Mermaid scratchpad, stage checklist, interviewer rubric, and Utkristi Colabs sync.</p>
+              <h3>{t.studio.home.studioTitle}</h3>
+              <p>{t.studio.home.studioDesc}</p>
               <a href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
-                Launch a room <ArrowRight size={13} aria-hidden="true" />
+                {t.studio.home.launchRoom} <ArrowRight size={13} aria-hidden="true" />
               </a>
             </Card>
 
             <Card variant="outlined" className="home-bento-card">
               <span className="home-bento-icon" aria-hidden="true"><Trophy size={18} /></span>
-              <h3>Multi-Platform Profile</h3>
-              <p>Sync handles across LeetCode, Codeforces, AtCoder, CodeChef, GeeksforGeeks, HackerRank, and GitHub alongside your 28-day streak ledger and Favorites queue.</p>
+              <h3>{t.studio.home.profileTitle}</h3>
+              <p>{t.studio.home.profileDesc}</p>
               <a href="/profile" onClick={navHandler(onNavigate, '/profile')}>
-                Open profile <ArrowRight size={13} aria-hidden="true" />
+                {t.studio.home.openProfile} <ArrowRight size={13} aria-hidden="true" />
               </a>
             </Card>
           </div>
