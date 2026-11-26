@@ -6,7 +6,7 @@ import { ForgeAtlas } from './ForgeAtlas.jsx';
 
 export const sitePages = ['home', 'how-it-works', 'about', 'help', 'privacy', 'terms', 'copyright'];
 
-const workflowLinks = ['/sheets', '/problems', '/roadmap', '/roadmap'];
+const workflowLinks = ['/sheets', '/problems', '/roadmap', '/profile'];
 
 function navHandler(onNavigate, path) {
   return (event) => {
@@ -129,7 +129,7 @@ export function SitePages({ page, locale = 'en', topicCount, problemCount, sheet
           <Card variant="outlined">
             <h2>{t.progress.title}</h2>
             <p>{t.site.workflow[3].desc}</p>
-            <a href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>{t.site.exploreRoadmap}</a>
+            <a href="/profile" onClick={navHandler(onNavigate, '/profile')}>{t.site.workflow[3].action}</a>
           </Card>
         </div>
       </section>

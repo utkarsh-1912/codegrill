@@ -5284,3 +5284,13 @@ body,
   flex-shrink: 0;
   user-select: none;
 }
+
+
+.settings-popover-status-only {
+  justify-content: flex-end;
+}
+
+.palette-item.is-focused {
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+}
