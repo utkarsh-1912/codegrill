@@ -212,6 +212,51 @@ function isSafePublicUrl(rawUrl) {
   }
 }
 
+function isPaywalledRedirect(rawUrl, finalUrl, blocks) {
+  try {
+    const orig = new URL(rawUrl);
+    const fin = finalUrl ? new URL(finalUrl) : orig;
+    const finPath = fin.pathname.toLowerCase();
+    const origHost = orig.hostname.toLowerCase();
+    const origPath = orig.pathname.toLowerCase();
+    const redirectedToGate = /(?:^|\/)(?:login|signin|sign-in|pricing|subscribe|checkout|plans|auth|upgrade)(?:\/|$)/.test(finPath)
+      && finPath !== origPath;
+    const knownPaidCourse = (
+      (origHost.endsWith('bytebytego.com') && origPath.startsWith('/courses')) ||
+      (origHost.endsWith('educative.io') && origPath.startsWith('/courses'))
+    );
+    return redirectedToGate || (knownPaidCourse && blocks.length < 4);
+  } catch {
+    return false;
+  }
+}
+
+function buildSubscriptionNotice(rawUrl, title, siteName) {
+  const host = (() => {
+    try { return new URL(rawUrl).hostname.replace(/^www\./, ''); } catch { return siteName || 'external site'; }
+  })();
+  return {
+    plugin: 'web-article',
+    kind: 'markdown',
+    title: title || host,
+    siteName: siteName || host,
+    sourceUrl: rawUrl,
+    content: [
+      `## Subscription or Sign-In Required on ${host}`,
+      '',
+      `This URL redirects to a paid course or sign-in page on **${host}**, so Codegrill cannot extract its full text in-app.`,
+      '',
+      '### Open-Access Guides You Can Read Right Here',
+      '- [ByteByteGoHq / system-design-101 (Official Free Repo)](https://github.com/ByteByteGoHq/system-design-101)',
+      '- [donnemartin / system-design-primer](https://github.com/donnemartin/system-design-primer)',
+      '- [ashishps1 / awesome-system-design-resources](https://github.com/ashishps1/awesome-system-design-resources)',
+      '- [ashishps1 / awesome-low-level-design](https://github.com/ashishps1/awesome-low-level-design)',
+      '',
+      '> If you have an active subscription on this site, use **Open original source** below to read it directly.',
+    ].join('\n'),
+  };
+}
+
 export const articlePlugin = {
   id: 'web-article',
   name: 'Web Article & Editorial Reader',
@@ -273,6 +318,10 @@ export const articlePlugin = {
           .slice(0, 60)
           .map((text) => ({ tag: 'p', text }));
       }
+    }
+
+    if (isPaywalledRedirect(rawUrl, response.url, blocks)) {
+      return buildSubscriptionNotice(rawUrl, title, siteName);
     }
 
     return {

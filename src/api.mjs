@@ -554,6 +554,33 @@ function parseMediumUrlClient(rawUrl) {
         }
       }
     }
+    // Known paid course gates (redirect to login/pricing) — offer open-access in-app alternatives
+    if (
+      (u.hostname.endsWith('bytebytego.com') && u.pathname.toLowerCase().startsWith('/courses')) ||
+      (u.hostname.endsWith('educative.io') && u.pathname.toLowerCase().startsWith('/courses'))
+    ) {
+      const host = u.hostname.replace(/^www\./, '');
+      return {
+        plugin: 'web-article-client',
+        kind: 'markdown',
+        title: `${host} — Subscription Required`,
+        siteName: host,
+        sourceUrl: url,
+        content: [
+          `## Subscription or Sign-In Required on ${host}`,
+          '',
+          `This course page on **${host}** redirects to a paid or sign-in gate and cannot be extracted in-app.`,
+          '',
+          '### Open-Access Guides You Can Read Right Here',
+          '- [ByteByteGoHq / system-design-101 (Official Free Repo)](https://github.com/ByteByteGoHq/system-design-101)',
+          '- [donnemartin / system-design-primer](https://github.com/donnemartin/system-design-primer)',
+          '- [ashishps1 / awesome-system-design-resources](https://github.com/ashishps1/awesome-system-design-resources)',
+          '- [ashishps1 / awesome-low-level-design](https://github.com/ashishps1/awesome-low-level-design)',
+          '',
+          '> If you have an active subscription on this site, use **Open original source** below to open it directly.',
+        ].join('\n'),
+      };
+    }
   } catch {
     // Ignore fallback error
   }
