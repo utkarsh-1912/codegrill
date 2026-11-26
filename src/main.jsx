@@ -1002,6 +1002,8 @@ function ResourceLinks({ links, problemTitle, onOpenViewer }) {
   );
 }
 
+const ALLOCATION_COLORS = ['#ff693d', '#f59e0b', '#ea580c', '#fb923c', '#d97706', '#c2410c'];
+
 function InterviewTracks({ locale, title, onOpenViewer }) {
   const t = getMessages(locale);
   const [roleId, setRoleId] = useState(roles[0]?.id || '');
@@ -1009,6 +1011,8 @@ function InterviewTracks({ locale, title, onOpenViewer }) {
   const role = roles.find(({ id }) => id === roleId);
   const visible = modules.filter((item) => item.roles.includes(roleId) && item.levels.includes(levelId));
   const trackLabel = (id) => t.tracks.labels[id] ?? id.replaceAll('_', ' ');
+  const weightEntries = Object.entries(role.module_weights_by_level[levelId] || {})
+    .sort((a, b) => b[1] - a[1]);
 
   return (
     <section className="page-section">
@@ -1038,17 +1042,52 @@ function InterviewTracks({ locale, title, onOpenViewer }) {
           />
         </div>
       </div>
-      <Card variant="outlined" className="study-weights">
-        <h2>{t.tracks.suggestedTime}</h2>
-        <ul>
-          {Object.entries(role.module_weights_by_level[levelId]).map(([id, weight]) => (
-            <li key={id}>
-              <span>{trackLabel(id)}</span>
-              <strong>{Math.round(weight * 100)}%</strong>
-              <progress value={weight} max={1} aria-label={trackLabel(id)} />
-            </li>
+
+      <Card variant="outlined" className="study-allocation-card">
+        <div className="study-allocation-head">
+          <div>
+            <h2>{t.tracks.suggestedTime}</h2>
+            <p className="study-allocation-sub">
+              {pickLabel(role.labels, locale)} · {pickLabel(levels.find(({ id }) => id === levelId)?.labels || {}, locale)}
+            </p>
+          </div>
+          <span className="study-allocation-total">100%</span>
+        </div>
+
+        <div className="allocation-stacked-bar" role="img" aria-label={t.tracks.suggestedTime}>
+          {weightEntries.map(([id, weight], index) => (
+            <span
+              key={id}
+              className="allocation-segment"
+              style={{
+                width: `${Math.max(4, Math.round(weight * 100))}%`,
+                background: ALLOCATION_COLORS[index % ALLOCATION_COLORS.length],
+              }}
+              title={`${trackLabel(id)}: ${Math.round(weight * 100)}%`}
+            />
           ))}
-        </ul>
+        </div>
+
+        <div className="allocation-grid">
+          {weightEntries.map(([id, weight], index) => {
+            const pct = Math.round(weight * 100);
+            const color = ALLOCATION_COLORS[index % ALLOCATION_COLORS.length];
+            return (
+              <div key={id} className="allocation-item">
+                <div className="allocation-item-top">
+                  <span className="allocation-label">
+                    <span className="allocation-swatch" style={{ background: color }} aria-hidden="true" />
+                    <span>{trackLabel(id)}</span>
+                  </span>
+                  <strong className="allocation-pct">{pct}%</strong>
+                </div>
+                <div className="allocation-track" aria-hidden="true">
+                  <span className="allocation-fill" style={{ width: `${pct}%`, background: color }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </Card>
       <h2 className="module-title">{t.tracks.learningModules}</h2>
       <p className="result-count" role="status">{visible.length}</p>

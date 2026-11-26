@@ -13,13 +13,26 @@
   --locale-font: Inter, "Segoe UI", system-ui, sans-serif;
 }
 
-/* Warm Orange / Ember palette — zero purple */
-:root[data-theme="light"] {
+/* Warm Orange / Ember palette — zero purple, complete @utkristi/ui token coverage */
+:root[data-theme="light"],
+html[data-theme="light"] {
   --ut-bg: #faf7f4;
   --ut-bg-2: #ffffff;
   --ut-bg-3: #f5ece4;
+  --ut-raise: #ffffff;
+  --ut-pane: #ffffff;
+  --ut-pane-2: #f5ece4;
+  --ut-pane-ink: #1f1916;
+  --ut-pane-ink-2: #66574d;
+  --ut-pane-line: #eaded4;
+  --ut-code-bg: #f6efe9;
+  --ut-code-bar: #efe4da;
+  --ut-code-line: #e2d3c6;
+  --ut-tint: #fff1e8;
+  --ut-mark: #ffd9c2;
   --ut-ink: #1f1916;
   --ut-ink-2: #66574d;
+  --ut-ink-3: #8a786c;
   --ut-line: #eaded4;
   --ut-line-2: #d6c2b2;
   --ut-accent: #d94e1f;
@@ -29,18 +42,34 @@
   --ember-soft: #fff1e8;
 }
 
-:root[data-theme="dark"] {
-  --ut-bg: #151210;
+:root[data-theme="dark"],
+html[data-theme="dark"] {
+  --ut-bg: #14110f;
   --ut-bg-2: #1e1916;
-  --ut-bg-3: #2b231d;
+  --ut-bg-3: #2a221d;
+  --ut-raise: #241e1a;
+  --ut-pane: #1e1916;
+  --ut-pane-2: #2a221d;
+  --ut-pane-ink: #faf4ef;
+  --ut-pane-ink-2: #c2b3a6;
+  --ut-pane-line: #3b3028;
+  --ut-code-bg: #181310;
+  --ut-code-bar: #261f1a;
+  --ut-code-line: #3a2f27;
+  --ut-tint: #2e1d13;
+  --ut-mark: #4d2914;
   --ut-ink: #faf4ef;
-  --ut-ink-2: #c2b3a6;
-  --ut-line: #382e27;
+  --ut-ink-2: #c7b8ab;
+  --ut-ink-3: #9c8c7e;
+  --ut-line: #3b3028;
   --ut-line-2: #57463a;
   --ut-accent: #ff8547;
   --ut-on-accent: #1c1009;
   --ut-solid: #ff693d;
   --ut-on-solid: #1a100a;
+  --ut-ok: #4ade80;
+  --ut-warn: #fbbf24;
+  --ut-bad: #f87171;
   --ember-soft: #2e1d13;
 }
 
@@ -48,6 +77,7 @@ body {
   font-family: var(--locale-font);
   background: var(--ut-bg);
   color: var(--ut-ink);
+  overflow-x: clip;
 }
 
 html {
@@ -1649,7 +1679,8 @@ progress.diff-hard::-moz-progress-bar { background: #dc2626; }
 }
 
 .navbar-search input {
-  flex: 1;
+  flex: 1 1 0;
+  width: 100%;
   min-width: 0;
   border: 0;
   background: transparent;
@@ -2627,4 +2658,372 @@ progress.diff-hard::-moz-progress-bar { background: #dc2626; }
   font-size: 0.86rem;
   color: var(--muted);
   min-width: 210px;
+}
+
+
+/* Custom "Suggested study time" Allocation UI */
+.study-allocation-card {
+  padding: 20px 22px;
+  margin-top: 16px;
+  background: var(--ut-bg-2);
+  border: 1px solid var(--ut-line);
+  border-radius: 12px;
+  color: var(--ink);
+  display: grid;
+  gap: 16px;
+}
+
+.study-allocation-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.study-allocation-head h2 {
+  font-family: var(--display-font);
+  font-size: 1.35rem;
+  line-height: 1.15;
+}
+
+.study-allocation-sub {
+  margin-top: 4px;
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.study-allocation-total {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ut-accent);
+  background: var(--ember-soft);
+  padding: 4px 10px;
+  border-radius: 99px;
+  flex-shrink: 0;
+}
+
+.allocation-stacked-bar {
+  display: flex;
+  gap: 3px;
+  height: 12px;
+  padding: 2px;
+  border-radius: 99px;
+  background: var(--ut-bg-3);
+  overflow: hidden;
+}
+
+.allocation-segment {
+  height: 100%;
+  border-radius: 99px;
+  transition: width var(--dur-slow) var(--ease-out-expo);
+}
+
+.allocation-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 20px;
+}
+
+.allocation-item {
+  display: grid;
+  gap: 7px;
+  padding: 12px 14px;
+  border: 1px solid var(--ut-line);
+  border-radius: 10px;
+  background: var(--ut-bg);
+}
+
+.allocation-item-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.9rem;
+}
+
+.allocation-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: var(--ink);
+  min-width: 0;
+}
+
+.allocation-swatch {
+  width: 9px;
+  height: 9px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.allocation-pct {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.86rem;
+  color: var(--ut-accent);
+  flex-shrink: 0;
+}
+
+.allocation-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 99px;
+  background: var(--ut-bg-3);
+  overflow: hidden;
+}
+
+.allocation-fill {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  transition: width var(--dur-slow) var(--ease-out-expo);
+}
+
+/* Dark Theme Contrast & Surface Guarantees */
+:root[data-theme="dark"] .app-header,
+:root[data-theme="dark"] .app-footer,
+:root[data-theme="dark"] .progress-card,
+:root[data-theme="dark"] .site-stats,
+:root[data-theme="dark"] .ledger-card,
+:root[data-theme="dark"] .active-sheet-header,
+:root[data-theme="dark"] .study-allocation-card,
+:root[data-theme="dark"] .viewer-page-card,
+:root[data-theme="dark"] .status-card,
+:root[data-theme="dark"] .problem-card,
+:root[data-theme="dark"] .module-list > div,
+:root[data-theme="dark"] .directory-list > li > div,
+:root[data-theme="dark"] .study-panel,
+:root[data-theme="dark"] .workflow-grid li > div,
+:root[data-theme="dark"] .study-options > div {
+  background: var(--ut-bg-2);
+  color: var(--ut-ink);
+  border-color: var(--ut-line);
+}
+
+:root[data-theme="dark"] .hero {
+  background: linear-gradient(135deg, #d94e1f 0%, #9a3412 100%);
+  color: #fff7ee;
+}
+
+:root[data-theme="dark"] .hero .eyebrow,
+:root[data-theme="dark"] .hero-copy > p:nth-of-type(2) {
+  color: #fde8d8;
+}
+
+:root[data-theme="dark"] .hero .hero-copy .rooms-actions > :last-child {
+  border-color: #fde8d8;
+  color: #fff7ee;
+}
+
+:root[data-theme="dark"] input,
+:root[data-theme="dark"] textarea {
+  color: var(--ut-ink);
+}
+
+:root[data-theme="dark"] input::placeholder,
+:root[data-theme="dark"] textarea::placeholder {
+  color: var(--ut-ink-3);
+}
+
+/* Comprehensive Mobile Responsiveness (All Components & Navbar) */
+html,
+body,
+#root,
+.app-shell {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: clip;
+}
+
+@media (max-width: 960px) {
+  .app-shell > main.shell,
+  .app-footer > .shell {
+    width: 100%;
+    max-width: 100%;
+    padding-inline: 14px;
+    margin-inline: 0;
+  }
+
+  .app-header .header-inner {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 12px;
+    margin-inline: 0;
+  }
+
+  .header-left {
+    flex: 0 0 auto;
+    gap: 8px;
+  }
+
+  .header-right {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .header-inner .locale-field {
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+  }
+
+  .navbar-search-wrap {
+    flex: 1 1 0;
+    min-width: 0;
+    width: 0;
+    max-width: 280px;
+  }
+
+  .settings-anchor {
+    flex-shrink: 0;
+  }
+
+  .navbar-search-dropdown {
+    position: fixed;
+    top: 58px;
+    left: 12px;
+    right: 12px;
+    width: auto;
+    max-height: 65vh;
+  }
+
+  .settings-popover {
+    max-width: calc(100vw - 24px);
+  }
+}
+
+@media (max-width: 720px) {
+  .filters {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .filters .search-field,
+  .filters .custom-select,
+  .track-filter-field,
+  .track-filter-field .custom-select,
+  .builder-picker-bar .custom-select {
+    display: block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .filters .search-field {
+    display: flex;
+  }
+
+  .allocation-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .progress-card {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .active-sheet-meta {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .sheet-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .segmented-tabs {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .sheet-filters {
+    width: 100%;
+  }
+
+  .sheet-filters .custom-select {
+    flex: 1 1 auto;
+  }
+
+  .hero,
+  .landing-hero {
+    grid-template-columns: 1fr;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .hero .forge-atlas-canvas,
+  .landing-hero .forge-atlas-canvas {
+    height: 200px;
+  }
+
+  .viewer-page-head,
+  .viewer-page-body,
+  .viewer-header,
+  .viewer-body {
+    padding: 14px 16px;
+  }
+
+  .channel-video-grid,
+  .github-dir-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .brand-wordmark {
+    display: none;
+  }
+
+  .navbar-search-wrap {
+    max-width: none;
+  }
+
+  .site-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .site-stats > div + div {
+    border-left: 0;
+    border-top: 1px solid var(--ut-line);
+  }
+
+  .workflow-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sheet-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .practice-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-footer > .site-footer-inner {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
