@@ -9081,6 +9081,7 @@ input[type="search"]::-webkit-search-results-decoration {
 /* Footer Bottom Left/Right Split & Utkristi Ecosystem Link */
 .app-footer > .footer-bottom {
   display: flex;
+  flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
