@@ -2,9 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { Badge, Button, Card, ThemeProvider, themes, useTheme } from '@utkristi/ui';
 import {
-  BookOpen, Braces, Check, ChevronRight, Circle, ExternalLink, FileCode2,
-  GitBranch, Globe2, Layers3, ListChecks, Maximize2, Minimize2, Moon,
-  Play, Search, Star, StickyNote, Sun, Users, Video,
+  BookOpen, Check, ChevronRight, Circle, ExternalLink, FileCode2,
+  Play, Search, Star, StickyNote, Video,
 } from 'lucide-react';
 import '@utkristi/ui/css';
 import './styles.css';
@@ -20,7 +19,9 @@ import { ContentViewer } from './ContentViewer.jsx';
 import { LedgerDashboard } from './LedgerDashboard.jsx';
 import { CommandPalette } from './CommandPalette.jsx';
 import { ProblemPracticeBar } from './ProblemPracticeBar.jsx';
-import { BrandLogo } from './BrandLogo.jsx';
+import { AppHeader } from './AppHeader.jsx';
+import { ForgeAtlas } from './ForgeAtlas.jsx';
+import { ErrorBoundary, ErrorPage, NotFoundPage } from './StatusPages.jsx';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from './sheets.mjs';
 import { DEFAULT_APP_CONFIG } from './config.mjs';
 import { getMessages } from './i18n.mjs';
@@ -63,7 +64,6 @@ const modules = [...seed.system_design_modules, ...seed.ai_engineer_modules, ...
 const problemSlugs = new Set(problems.map(({ slug }) => slug));
 
 const pathIds = ['roadmap', 'sheets', 'problems', 'tracks', 'resources', 'rooms'];
-const navIcons = [GitBranch, ListChecks, Braces, Layers3, BookOpen, Users];
 const preferenceKey = 'codegrill:study:v1';
 const pickLabel = (labels, locale) => labels[locale] ?? labels[defaultLocale];
 
@@ -88,13 +88,30 @@ function readPreferences() {
   }
 }
 
+const validPages = new Set([...pathIds, ...sitePages, 'error']);
+
 function currentPage() {
-  const location = studyLocation(window.location.hash, problemSlugs);
-  const topic = new URLSearchParams(window.location.hash.split('?')[1]).get('topic');
+  // Support legacy hash URLs seamlessly by reading them if present
+  if (window.location.hash && window.location.hash.length > 1) {
+    const legacy = studyLocation(window.location.hash, problemSlugs);
+    const legacyQuery = window.location.hash.split('?')[1] || '';
+    const cleanPath = legacy.page === 'home' || !legacy.page ? '/' : `/${legacy.page}${legacyQuery ? '?' + legacyQuery : ''}`;
+    window.history.replaceState({}, '', cleanPath);
+  }
+
+  const rawPath = window.location.pathname.replace(/\/+$/, '') || '/';
+  const segment = rawPath === '/' ? 'home' : rawPath.slice(1);
+  const params = new URLSearchParams(window.location.search);
+  const problemParam = params.get('problem') || '';
+  const topicParam = params.get('topic') || '';
+  const isKnown = validPages.has(segment);
+  const page = isKnown ? segment : 'not-found';
+
   return {
-    ...location,
-    page: [...pathIds, ...sitePages].includes(location.page) ? location.page : 'home',
-    topic: location.page === 'problems' && !location.problem && categories.some(({ id }) => id === topic) ? topic : '',
+    page,
+    pathname: window.location.pathname,
+    problem: (page === 'problems' || page === 'rooms') && problemSlugs.has(problemParam) ? problemParam : '',
+    topic: page === 'problems' && !problemParam && categories.some(({ id }) => id === topicParam) ? topicParam : '',
   };
 }
 
@@ -102,7 +119,7 @@ function App() {
   const { theme, resolvedTheme, setTheme } = useTheme();
   const [preferences, setPreferences] = useState(readPreferences);
   const { locale, completed, bookmarked, notes, activity, streak, longestStreak } = preferences;
-  const [{ page, problem: sharedProblem, topic }, setLocation] = useState(currentPage);
+  const [{ page, pathname, problem: sharedProblem, topic }, setLocation] = useState(currentPage);
   const [zenMode, setZenMode] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [appConfig, setAppConfig] = useState(DEFAULT_APP_CONFIG);
@@ -169,8 +186,12 @@ function App() {
 
   useEffect(() => {
     const syncPage = () => setLocation(currentPage());
+    window.addEventListener('popstate', syncPage);
     window.addEventListener('hashchange', syncPage);
-    return () => window.removeEventListener('hashchange', syncPage);
+    return () => {
+      window.removeEventListener('popstate', syncPage);
+      window.removeEventListener('hashchange', syncPage);
+    };
   }, []);
 
   useEffect(() => {
@@ -225,12 +246,20 @@ function App() {
     }
   }, [locale, completed, bookmarked, notes, activity, backendOnline, appConfig.defaultProfile]);
 
+  function navigate(path) {
+    const target = path === '/home' ? '/' : path;
+    if (window.location.pathname + window.location.search !== target) {
+      window.history.pushState({}, '', target);
+    }
+    setLocation(currentPage());
+  }
+
   function openProblems(category = '') {
-    window.location.hash = category ? 'problems?' + new URLSearchParams({ topic: category }) : 'problems';
+    navigate(category ? '/problems?' + new URLSearchParams({ topic: category }) : '/problems');
   }
 
   function openProblemBySlug(slug) {
-    window.location.hash = 'problems?' + new URLSearchParams({ problem: slug });
+    navigate('/problems?' + new URLSearchParams({ problem: slug }));
   }
 
   function toggleComplete(slug) {
@@ -287,74 +316,41 @@ function App() {
   }
 
   return (
-    <div className={zenMode ? 'zen-mode' : ''}>
+    <div className={`app-shell ${zenMode ? 'zen-mode' : ''}`}>
       <a className="skip-link" href="#main-content" onClick={(event) => {
         event.preventDefault();
         document.querySelector('main').focus();
       }}>{t.skipToContent}</a>
 
-      <header className="app-header">
-        <div className="header-inner">
-          <a className="brand" href="#home" aria-label={appConfig.brand.name}>
-            <BrandLogo name={appConfig.brand.name} size={32} />
-          </a>
-          <nav aria-label="Study navigation">
-            {pathIds.map((id, index) => {
-              const Icon = navIcons[index];
-              return (
-                <a key={id} href={'#' + id} lang={locale} aria-label={navLabels[index]} title={navLabels[index]}
-                  aria-current={page === id ? 'page' : undefined}>
-                  <Icon size={19} aria-hidden="true" />
-                </a>
-              );
-            })}
-          </nav>
-          <div className="header-settings">
-            <span
-              className={`sync-dot ${backendOnline ? 'is-online' : ''}`}
-              title={backendOnline ? t.controls.backendOnline : t.controls.backendLocal}
-              aria-label={backendOnline ? t.controls.backendOnline : t.controls.backendLocal}
-            />
-            <button
-              type="button"
-              className="locale-field icon-only-control"
-              onClick={() => setPaletteOpen(true)}
-              aria-label={t.palette.open}
-              title={t.palette.open}
-            >
-              <Search size={18} aria-hidden="true" />
-            </button>
-            <label className="locale-field language-field" title={t.controls.language}>
-              <Globe2 size={18} aria-hidden="true" />
-              <select aria-label={t.controls.language} value={locale}
-                onChange={(event) => setPreferences((current) => ({ ...current, locale: event.target.value }))}>
-                {locales.map(({ code, native_name }) => <option key={code} value={code} lang={code}>{native_name}</option>)}
-              </select>
-            </label>
-            <button
-              type="button"
-              className="locale-field icon-only-control"
-              onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              aria-label={isDark ? t.controls.switchToLight : t.controls.switchToDark}
-              title={isDark ? t.controls.switchToLight : t.controls.switchToDark}
-            >
-              {isDark ? <Sun size={18} aria-hidden="true" /> : <Moon size={18} aria-hidden="true" />}
-            </button>
-            <button
-              type="button"
-              className={`locale-field icon-only-control ${zenMode ? 'is-active' : ''}`}
-              onClick={() => setZenMode((v) => !v)}
-              aria-pressed={zenMode}
-              aria-label={zenMode ? t.controls.zenExit : t.controls.zenEnter}
-              title={zenMode ? t.controls.zenExit : t.controls.zenEnter}
-            >
-              {zenMode ? <Minimize2 size={18} aria-hidden="true" /> : <Maximize2 size={18} aria-hidden="true" />}
-            </button>
-          </div>
-        </div>
-      </header>
+      <AppHeader
+        brandName={appConfig.brand.name}
+        page={page}
+        pathIds={pathIds}
+        navLabels={navLabels}
+        locale={locale}
+        defaultLocale={defaultLocale}
+        locales={locales}
+        isDark={isDark}
+        zenMode={zenMode}
+        backendOnline={backendOnline}
+        problems={problems}
+        categories={categories}
+        sheets={allSheets}
+        onLocaleChange={(nextLocale) => setPreferences((current) => ({ ...current, locale: nextLocale }))}
+        onToggleTheme={() => setTheme(isDark ? 'light' : 'dark')}
+        onToggleZen={() => setZenMode((v) => !v)}
+        onOpenPalette={() => setPaletteOpen(true)}
+        onNavigate={navigate}
+        onSelectSearchItem={(item) => {
+          if (item.kind === 'problem') openProblemBySlug(item.id);
+          else if (item.kind === 'topic') openProblems(item.id);
+          else if (item.kind === 'sheet') navigate('/sheets');
+        }}
+      />
 
-      <main id="main-content" className="shell" tabIndex={-1}>
+      <main id="main-content" key={page} className="shell page-enter" tabIndex={-1}>
+        {page === 'not-found' && <NotFoundPage locale={locale} pathname={pathname} onNavigate={navigate} />}
+        {page === 'error' && <ErrorPage locale={locale} onReset={() => navigate('/')} onNavigate={navigate} />}
         {sitePages.includes(page) && (
           <SitePages
             page={page}
@@ -362,6 +358,7 @@ function App() {
             topicCount={categories.length}
             problemCount={problems.length}
             sheetCount={allSheets.length}
+            onNavigate={navigate}
           />
         )}
 
@@ -376,10 +373,12 @@ function App() {
                   <Button variant="solid" onClick={() => openProblems(next?.id)}>
                     {completed.size ? t.hero.continueCta : t.hero.startCta}
                   </Button>
-                  <Button variant="outlined" href="#sheets">{t.hero.exploreSheets}</Button>
+                  <Button variant="outlined" href="/sheets" onClick={(e) => { e.preventDefault(); navigate('/sheets'); }}>
+                    {t.hero.exploreSheets}
+                  </Button>
                 </div>
               </div>
-              <img className="atlas-art" src="/atlas.svg" alt="" />
+              <ForgeAtlas variant="hero" className="atlas-art" />
             </section>
           )}
           <Card variant="outlined" className="progress-card">
@@ -413,7 +412,7 @@ function App() {
           {!zenMode && (
             <section className="marketing-section">
               <h2>{t.roadmap.howToUse}</h2>
-              <Workflow locale={locale} />
+              <Workflow locale={locale} onNavigate={navigate} />
             </section>
           )}
         </>}
@@ -436,6 +435,7 @@ function App() {
             onOpenViewer={setViewerItem}
             onCreateSheet={handleCreateSheet}
             onDeleteSheet={handleDeleteSheet}
+            onNavigate={navigate}
           />
         )}
 
@@ -454,6 +454,7 @@ function App() {
             title={t.nav.problems}
             timerMinutes={appConfig.interview.defaultTimerMinutes}
             onOpenViewer={setViewerItem}
+            onNavigate={navigate}
           />
         )}
 
@@ -466,7 +467,7 @@ function App() {
         )}
       </main>
 
-      {!zenMode && <SiteFooter locale={locale} config={appConfig} />}
+      {!zenMode && <SiteFooter locale={locale} config={appConfig} onNavigate={navigate} />}
 
       <ContentViewer
         item={viewerItem}
@@ -486,7 +487,7 @@ function App() {
         onSelect={(item) => {
           if (item.kind === 'problem') openProblemBySlug(item.id);
           else if (item.kind === 'topic') openProblems(item.id);
-          else if (item.kind === 'sheet') window.location.hash = 'sheets';
+          else if (item.kind === 'sheet') navigate('/sheets');
         }}
       />
     </div>
@@ -598,7 +599,7 @@ function Roadmap({ roadmap, next, locale, title, onOpen }) {
 
 function ProblemLibrary({
   locale, title, topic, setTopic, completed, bookmarked, notes,
-  toggleComplete, toggleBookmark, saveNote, sharedProblem, timerMinutes, onOpenViewer,
+  toggleComplete, toggleBookmark, saveNote, sharedProblem, timerMinutes, onOpenViewer, onNavigate,
 }) {
   const t = getMessages(locale);
   const [query, setQuery] = useState('');
@@ -732,7 +733,15 @@ function ProblemLibrary({
                         {t.problems.practiceLeetCode}
                       </Button>
                     )}
-                    <Button variant="outlined" href={'#rooms?' + new URLSearchParams({ problem: problem.slug })}>
+                    <Button
+                      variant="outlined"
+                      href={'/rooms?' + new URLSearchParams({ problem: problem.slug })}
+                      onClick={(e) => {
+                        if (!onNavigate || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+                        e.preventDefault();
+                        onNavigate('/rooms?' + new URLSearchParams({ problem: problem.slug }));
+                      }}
+                    >
                       {t.problems.studyColabs}
                     </Button>
                     <Button variant="quiet" onClick={() => toggleComplete(problem.slug)}>
@@ -1002,5 +1011,9 @@ function InterviewTracks({ locale, title, onOpenViewer }) {
 }
 
 createRoot(document.getElementById('root')).render(
-  <ThemeProvider defaultTheme="light" storageKey="codegrill:theme"><App /></ThemeProvider>,
+  <ThemeProvider defaultTheme="light" storageKey="codegrill:theme">
+    <ErrorBoundary>
+      <App />
+    </ErrorBoundary>
+  </ThemeProvider>,
 );

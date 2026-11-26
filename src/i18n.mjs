@@ -1208,7 +1208,12 @@ const EXTRA_SECTIONS = {
     },
     palette: {
       open: 'Quick jump (Ctrl+K)',
-      placeholder: 'Jump to a problem, topic, or sheet...',
+      placeholder: 'Search problems, topics, sheets...',
+      settings: 'Settings',
+      menu: 'Open menu',
+      theme: 'Theme',
+      zen: 'Zen mode',
+      quickSearch: 'Command palette',
     },
     practice: {
       startTimer: 'Start interview timer',
@@ -1227,6 +1232,15 @@ const EXTRA_SECTIONS = {
       ['How do progressive hints and the interview timer work?', 'Each problem starts spoiler-free: reveal target complexity first, then the optimal pattern, while practicing spoken explanations with the built-in session timer.'],
       ['Where is my progress saved?', 'Your progress, revision queue, activity ledger, notes, and custom series sync with the backend API and fall back automatically to local storage.'],
     ],
+    status: {
+      loading: 'Heating up the forge...',
+      notFoundTitle: 'This path is off the map',
+      notFoundDesc: 'Ember searched every node in the graph, but this page does not exist.',
+      errorTitle: 'Something sparked unexpectedly',
+      errorDesc: 'An unexpected runtime error occurred. Your study progress is safely preserved.',
+      goHome: 'Back to home',
+      retry: 'Try again',
+    },
   },
   ja: {
     ledger: {
@@ -1241,6 +1255,11 @@ const EXTRA_SECTIONS = {
     palette: {
       open: 'クイック検索 (Ctrl+K)',
       placeholder: '問題・トピック・シートを検索...',
+      settings: '設定',
+      menu: 'メニューを開く',
+      theme: 'テーマ',
+      zen: '集中モード',
+      quickSearch: 'コマンドパレット',
     },
     practice: {
       startTimer: 'タイマー開始',
@@ -1259,6 +1278,15 @@ const EXTRA_SECTIONS = {
       ['段階的ヒントと面接タイマーとは？', 'ネタバレを防ぎ、計算量→最適パターンの順にヒントを開きながら本番形式で練習できます。'],
       ['進捗はどこに保存されますか？', 'バックエンドAPIとブラウザのローカルストレージに自動同期されます。'],
     ],
+    status: {
+      loading: '読み込み中...',
+      notFoundTitle: 'ページが見つかりません',
+      notFoundDesc: 'グラフ全体を探索しましたが、このURLは存在しません。',
+      errorTitle: '予期しないエラーが発生しました',
+      errorDesc: 'エラーが発生しましたが、学習進捗は安全に保存されています。',
+      goHome: 'ホームへ戻る',
+      retry: '再試行',
+    },
   },
   hi: {
     ledger: {
@@ -1273,6 +1301,11 @@ const EXTRA_SECTIONS = {
     palette: {
       open: 'त्वरित खोज (Ctrl+K)',
       placeholder: 'प्रश्न, टॉपिक या शीट खोजें...',
+      settings: 'सेटिंग्स',
+      menu: 'मेनू खोलें',
+      theme: 'थीम',
+      zen: 'ज़ेन मोड',
+      quickSearch: 'कमांड पैलेट',
     },
     practice: {
       startTimer: 'टाइमर शुरू करें',
@@ -1291,6 +1324,15 @@ const EXTRA_SECTIONS = {
       ['प्रोग्रेसिव हिंट और टाइमर कैसे काम करते हैं?', 'पहले लक्ष्य जटिलता देखें, फिर पैटर्न, और इंटरव्यू टाइमर के साथ बोलकर अभ्यास करें।'],
       ['मेरी प्रगति कहाँ सुरक्षित रहती है?', 'यह बैकएंड API और ब्राउज़र स्टोरेज दोनों में सिंक होती है।'],
     ],
+    status: {
+      loading: 'लोड हो रहा है...',
+      notFoundTitle: 'यह पृष्ठ नहीं मिला',
+      notFoundDesc: 'एम्बर ने पूरा ग्राफ़ खोजा, लेकिन यह रास्ता मौजूद नहीं है।',
+      errorTitle: 'कुछ अनपेक्षित गड़बड़ी हुई',
+      errorDesc: 'एक तकनीकी त्रुटि आई है। आपकी अध्ययन प्रगति पूरी तरह सुरक्षित है।',
+      goHome: 'होम पर जाएं',
+      retry: 'पुनः प्रयास करें',
+    },
   },
   es: {
     ledger: {
@@ -1304,7 +1346,12 @@ const EXTRA_SECTIONS = {
     },
     palette: {
       open: 'Búsqueda rápida (Ctrl+K)',
-      placeholder: 'Ir a un problema, tema o serie...',
+      placeholder: 'Buscar problemas, temas o series...',
+      settings: 'Ajustes',
+      menu: 'Abrir menú',
+      theme: 'Tema',
+      zen: 'Modo Zen',
+      quickSearch: 'Paleta de comandos',
     },
     practice: {
       startTimer: 'Iniciar temporizador',
@@ -1323,6 +1370,15 @@ const EXTRA_SECTIONS = {
       ['¿Cómo funcionan las pistas progresivas?', 'Revela primero la complejidad objetivo y luego el patrón óptimo para evitar spoilers.'],
       ['¿Dónde se guarda mi progreso?', 'Se sincroniza con el backend y con el almacenamiento local del navegador.'],
     ],
+    status: {
+      loading: 'Calentando la forja...',
+      notFoundTitle: 'Esta ruta no existe',
+      notFoundDesc: 'Ember recorrió todo el grafo, pero no encontró esta página.',
+      errorTitle: 'Algo falló inesperadamente',
+      errorDesc: 'Ocurrió un error en pantalla. Tu progreso de estudio sigue a salvo.',
+      goHome: 'Volver al inicio',
+      retry: 'Reintentar',
+    },
   },
   zh: {
     ledger: {
@@ -1337,6 +1393,11 @@ const EXTRA_SECTIONS = {
     palette: {
       open: '快速跳轉 (Ctrl+K)',
       placeholder: '搜尋題目、主題或題單...',
+      settings: '設定',
+      menu: '開啟選單',
+      theme: '主題',
+      zen: '專注模式',
+      quickSearch: '指令面板',
     },
     practice: {
       startTimer: '開始計時',
@@ -1355,6 +1416,15 @@ const EXTRA_SECTIONS = {
       ['漸進式提示與計時器如何運作？', '先顯示目標複雜度、再顯示最佳模式，避免直接破梗，並搭配模擬面試計時。'],
       ['進度保存在哪裡？', '自動同步至後端 API 並備份於本機瀏覽器。'],
     ],
+    status: {
+      loading: '正在載入內容...',
+      notFoundTitle: '找不到此頁面',
+      notFoundDesc: 'Ember 搜尋了整張圖譜，但這個路徑不存在。',
+      errorTitle: '發生非預期錯誤',
+      errorDesc: '畫面執行時發生錯誤，但您的學習進度已安全保存。',
+      goHome: '返回首頁',
+      retry: '重新嘗試',
+    },
   },
   ko: {
     ledger: {
@@ -1369,6 +1439,11 @@ const EXTRA_SECTIONS = {
     palette: {
       open: '빠른 이동 (Ctrl+K)',
       placeholder: '문제, 주제 또는 시트 검색...',
+      settings: '설정',
+      menu: '메뉴 열기',
+      theme: '테마',
+      zen: '집중 모드',
+      quickSearch: '명령 팔레트',
     },
     practice: {
       startTimer: '타이머 시작',
@@ -1387,6 +1462,15 @@ const EXTRA_SECTIONS = {
       ['단계별 힌트와 타이머는 어떻게 쓰나요?', '스포일러 없이 목표 복잡도 → 최적 패턴 순으로 힌트를 열며 실전처럼 연습할 수 있습니다.'],
       ['진행 상황은 어디에 저장되나요?', '백엔드 API와 브라우저 로컬 스토리지에 자동 동기화됩니다.'],
     ],
+    status: {
+      loading: '콘텐츠를 불러오는 중...',
+      notFoundTitle: '페이지를 찾을 수 없습니다',
+      notFoundDesc: 'Ember가 모든 노드를 탐색했지만 이 경로는 존재하지 않습니다.',
+      errorTitle: '예기치 않은 오류가 발생했습니다',
+      errorDesc: '오류가 발생했지만 학습 진행 기록은 안전하게 보존되어 있습니다.',
+      goHome: '홈으로 돌아가기',
+      retry: '다시 시도',
+    },
   },
 };
 

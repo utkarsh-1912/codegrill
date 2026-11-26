@@ -3,6 +3,7 @@ import { Badge, Button } from '@utkristi/ui';
 import { Check, Copy, ExternalLink, X } from 'lucide-react';
 import { fetchPluginContent } from './api.mjs';
 import { getMessages } from './i18n.mjs';
+import { LoadingState } from './LoadingState.jsx';
 
 export function ContentViewer({ item, locale, languages, onClose }) {
   const t = getMessages(locale);
@@ -98,7 +99,7 @@ export function ContentViewer({ item, locale, languages, onClose }) {
         )}
 
         <div className="viewer-body">
-          {loading && <p className="viewer-loading">{t.viewer.loading}</p>}
+          {loading && <LoadingState locale={locale} message={t.viewer.loading} compact />}
 
           {!loading && data?.kind === 'video' && (
             <div className="video-frame-wrap">

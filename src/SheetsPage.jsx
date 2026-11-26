@@ -22,6 +22,7 @@ export function SheetsPage({
   onOpenViewer,
   onCreateSheet,
   onDeleteSheet,
+  onNavigate,
 }) {
   const t = getMessages(locale);
   const [selectedId, setSelectedId] = useState(sheets[0]?.id || '');
@@ -126,8 +127,13 @@ export function SheetsPage({
           <span className="problem-number">#{problem.leetcode_id}</span>
           <a
             className="sheet-problem-title"
-            href={`#problems?${new URLSearchParams({ problem: problem.slug })}`}
+            href={`/problems?${new URLSearchParams({ problem: problem.slug })}`}
             lang={titleLocale}
+            onClick={(e) => {
+              if (!onNavigate || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey || e.button !== 0) return;
+              e.preventDefault();
+              onNavigate(`/problems?${new URLSearchParams({ problem: problem.slug })}`);
+            }}
           >
             {name}
           </a>

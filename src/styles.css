@@ -24,7 +24,6 @@ main:focus { outline: none; }
 .header-inner { display: flex; justify-content: space-between; align-items: center; gap: 24px; min-height: 72px; }
 .brand { display: inline-flex; align-items: center; gap: 9px; text-decoration: none; font-weight: 800; font-size: 1.3rem; letter-spacing: -.06em; }
 .app-header .brand { color: var(--ink); }
-.brand > span { display: grid; place-items: center; width: 33px; height: 33px; border-radius: 9px; background: var(--green); color: var(--lime); }
 nav { display: flex; align-self: stretch; align-items: stretch; gap: 29px; }
 nav a { display: grid; place-items: center; padding: 4px 1px 1px; border-bottom: 3px solid transparent; text-align: center; text-decoration: none; font-size: .92rem; color: var(--muted); }
 nav a:hover, nav a[aria-current] { color: var(--ink); }
