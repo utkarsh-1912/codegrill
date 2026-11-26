@@ -1,5 +1,15 @@
-import React, { useMemo, useState } from 'react';
-import { Check, Copy } from 'lucide-react';
+import React, { useEffect, useId, useMemo, useState } from 'react';
+import { Check, Code2, Copy, Workflow } from 'lucide-react';
+
+let mermaidPromise = null;
+function loadMermaid() {
+  if (typeof window === 'undefined') return Promise.reject(new Error('No window'));
+  if (!mermaidPromise) {
+    const cdnUrl = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+    mermaidPromise = import(/* @vite-ignore */ cdnUrl).then((mod) => mod.default || mod);
+  }
+  return mermaidPromise;
+}
 
 function resolveResourceUrl(href, sourceUrl, forRawImage = false) {
   const clean = String(href || '').trim();
@@ -384,6 +394,116 @@ function parseRichBlocks(rawText, isPlainText = false) {
   return blocks;
 }
 
+function MermaidBlock({ content }) {
+  const reactId = useId();
+  const [svg, setSvg] = useState('');
+  const [error, setError] = useState(false);
+  const [showSource, setShowSource] = useState(false);
+  const [copied, setCopied] = useState(false);
+  const [themeKey, setThemeKey] = useState(() => (
+    typeof document !== 'undefined' ? (document.documentElement.getAttribute('data-theme') || 'light') : 'light'
+  ));
+
+  const code = useMemo(() => decodeHtmlEntities(content || '').trim(), [content]);
+
+  useEffect(() => {
+    if (typeof document === 'undefined' || typeof MutationObserver === 'undefined') return undefined;
+    const observer = new MutationObserver(() => {
+      setThemeKey(document.documentElement.getAttribute('data-theme') || 'light');
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!code || showSource) return undefined;
+    let cancelled = false;
+    setError(false);
+
+    const isDark = themeKey === 'dark';
+    const renderId = `mmd-${reactId.replace(/[^a-zA-Z0-9_-]/g, '')}-${Date.now()}`;
+
+    loadMermaid()
+      .then(async (mermaid) => {
+        if (cancelled) return;
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: 'strict',
+          theme: isDark ? 'dark' : 'base',
+          themeVariables: isDark
+            ? {
+                primaryColor: '#2e1d13',
+                primaryTextColor: '#faf4ef',
+                primaryBorderColor: '#ff8547',
+                lineColor: '#c7b8ab',
+                secondaryColor: '#241e1a',
+                tertiaryColor: '#1e1916',
+                fontFamily: 'Inter, system-ui, sans-serif',
+              }
+            : {
+                primaryColor: '#fff1e8',
+                primaryTextColor: '#1f1916',
+                primaryBorderColor: '#d94e1f',
+                lineColor: '#66574d',
+                secondaryColor: '#f5ece4',
+                tertiaryColor: '#ffffff',
+                fontFamily: 'Inter, system-ui, sans-serif',
+              },
+        });
+        const { svg: renderedSvg } = await mermaid.render(renderId, code);
+        if (!cancelled) setSvg(renderedSvg);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setError(true);
+          setSvg('');
+        }
+      });
+
+    return () => { cancelled = true; };
+  }, [code, themeKey, showSource, reactId]);
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(code);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <div className="code-viewer rt-code-block rt-mermaid-block">
+      <div className="code-toolbar">
+        <span>mermaid</span>
+        <div className="rt-mermaid-actions">
+          <button
+            type="button"
+            className={`icon-btn ${showSource ? 'is-active' : ''}`}
+            onClick={() => setShowSource((v) => !v)}
+            aria-label={showSource ? 'Show diagram' : 'Show Mermaid source'}
+            title={showSource ? 'Show diagram' : 'Show Mermaid source'}
+          >
+            {showSource ? <Workflow size={15} aria-hidden="true" /> : <Code2 size={15} aria-hidden="true" />}
+          </button>
+          <button type="button" className="icon-btn" onClick={copy} aria-label="Copy code" title="Copy code">
+            {copied ? <Check size={15} aria-hidden="true" /> : <Copy size={15} aria-hidden="true" />}
+          </button>
+        </div>
+      </div>
+
+      {showSource || error ? (
+        <pre><code>{code}</code></pre>
+      ) : svg ? (
+        <div className="rt-mermaid-canvas" dangerouslySetInnerHTML={{ __html: svg }} />
+      ) : (
+        <div className="rt-mermaid-loading">Rendering diagram...</div>
+      )}
+    </div>
+  );
+}
+
 function CodeBlock({ language, content }) {
   const [copied, setCopied] = useState(false);
   const displayContent = /^(html|xml|svg)$/i.test(language || '')
@@ -448,6 +568,9 @@ export function RichTextInterpreter({ content, format = 'markdown', sourceUrl, o
               return resolved ? <img key={key} src={resolved} alt={decodeHtmlEntities(block.alt)} className="rt-image" loading="lazy" /> : null;
             }
             if (block.type === 'code') {
+              if (/^mermaid$/i.test(block.language || '')) {
+                return <MermaidBlock key={key} content={block.content} />;
+              }
               return <CodeBlock key={key} language={block.language} content={block.content} />;
             }
             if (block.type === 'quote') {

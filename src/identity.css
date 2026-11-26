@@ -5560,3 +5560,66 @@ input[type="search"]::-webkit-search-results-decoration {
   font-size: 0.78rem;
   color: var(--muted);
 }
+
+
+/* Fullscreen Video Player Layout */
+.custom-player:fullscreen,
+.custom-player:-webkit-full-screen {
+  width: 100vw;
+  height: 100vh;
+  max-width: 100vw;
+  max-height: 100vh;
+  border-radius: 0;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.custom-player:fullscreen .video-frame-wrap,
+.custom-player:-webkit-full-screen .video-frame-wrap,
+.viewer-panel .custom-player:fullscreen .video-frame-wrap,
+.viewer-panel .custom-player:-webkit-full-screen .video-frame-wrap {
+  width: 100%;
+  height: 100%;
+  max-width: 100vw;
+  max-height: 100vh;
+  aspect-ratio: auto;
+  background: #000;
+}
+
+.custom-player:fullscreen .video-frame-wrap video,
+.custom-player:-webkit-full-screen .video-frame-wrap video {
+  object-fit: contain;
+}
+
+
+/* Mermaid Diagram Renderer */
+.rt-mermaid-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rt-mermaid-canvas {
+  padding: 18px 16px;
+  background: var(--ut-bg-2);
+  overflow-x: auto;
+  display: flex;
+  justify-content: center;
+}
+
+.rt-mermaid-canvas svg {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.rt-mermaid-loading {
+  padding: 20px 16px;
+  text-align: center;
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+  background: var(--ut-bg-2);
+}

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { FileText, Maximize, Pause, Play, RotateCcw, Search, Volume2, VolumeX } from 'lucide-react';
+import { FileText, Maximize, Minimize, Pause, Play, RotateCcw, Search, Volume2, VolumeX } from 'lucide-react';
 import { fetchVideoTranscript } from './api.mjs';
 
 const SPEEDS = [0.75, 1, 1.25, 1.5, 2];
@@ -84,6 +84,20 @@ export function CustomVideoPlayer({
   const [duration, setDuration] = useState(0);
   const [mode, setMode] = useState('forge');
   const [apiFailed, setApiFailed] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const syncFs = () => {
+      const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+      setIsFullscreen(Boolean(fsEl && wrapRef.current && (fsEl === wrapRef.current || wrapRef.current.contains(fsEl))));
+    };
+    document.addEventListener('fullscreenchange', syncFs);
+    document.addEventListener('webkitfullscreenchange', syncFs);
+    return () => {
+      document.removeEventListener('fullscreenchange', syncFs);
+      document.removeEventListener('webkitfullscreenchange', syncFs);
+    };
+  }, []);
 
   const [showScript, setShowScript] = useState(defaultShowScript);
   const [scriptQuery, setScriptQuery] = useState('');
@@ -299,8 +313,19 @@ export function CustomVideoPlayer({
   function requestFullscreen() {
     const el = wrapRef.current;
     if (!el) return;
-    if (document.fullscreenElement) document.exitFullscreen?.();
-    else el.requestFullscreen?.();
+    const fsEl = document.fullscreenElement || document.webkitFullscreenElement;
+    if (fsEl) {
+      if (document.exitFullscreen) document.exitFullscreen().catch(() => {});
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      return;
+    }
+    if (el.requestFullscreen) {
+      el.requestFullscreen().catch(() => {});
+    } else if (el.webkitRequestFullscreen) {
+      el.webkitRequestFullscreen();
+    } else if (directMedia && videoRef.current?.webkitEnterFullscreen) {
+      videoRef.current.webkitEnterFullscreen();
+    }
   }
 
   return (
@@ -391,8 +416,14 @@ export function CustomVideoPlayer({
                       {mode === 'custom' ? 'Custom' : 'Forge'}
                     </button>
                   )}
-                  <button type="button" className="player-ov-btn" onClick={requestFullscreen} aria-label="Fullscreen" title="Fullscreen">
-                    <Maximize size={16} aria-hidden="true" />
+                  <button
+                    type="button"
+                    className="player-ov-btn"
+                    onClick={requestFullscreen}
+                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                    title={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                  >
+                    {isFullscreen ? <Minimize size={16} aria-hidden="true" /> : <Maximize size={16} aria-hidden="true" />}
                   </button>
                 </div>
               </div>
