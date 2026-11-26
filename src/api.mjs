@@ -399,11 +399,22 @@ function parseMediumUrlClient(rawUrl) {
 
   const gh = toGitHubRawClient(url);
   if (gh) {
+    const lower = gh.filename.toLowerCase();
+    if (/\.(png|jpe?g|gif|webp|svg|bmp|ico|avif)$/.test(lower)) {
+      return {
+        plugin: 'github-content-client',
+        kind: 'image',
+        title: gh.filename,
+        repo: gh.repo,
+        filePath: gh.filePath,
+        imageUrl: gh.rawUrl,
+        sourceUrl: url,
+      };
+    }
     try {
       const res = await fetch(gh.rawUrl, { signal: AbortSignal.timeout(7000) });
       if (res.ok) {
         const content = await res.text();
-        const lower = gh.filename.toLowerCase();
         const kind = lower.endsWith('.md') || lower.endsWith('.markdown')
           ? 'markdown'
           : lower.endsWith('.txt')

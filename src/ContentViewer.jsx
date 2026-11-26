@@ -170,6 +170,15 @@ export function ContentViewerBody({
     );
   }
 
+  if (data?.kind === 'image' && data?.imageUrl) {
+    return (
+      <figure className="viewer-image-stage">
+        <img src={data.imageUrl} alt={data.title || activeTitle || 'Image preview'} loading="lazy" />
+        {(data.filePath || data.title) && <figcaption>{data.filePath || data.title}</figcaption>}
+      </figure>
+    );
+  }
+
   if (data?.kind === 'markdown' || data?.kind === 'text') {
     return (
       <RichTextInterpreter

@@ -5533,3 +5533,30 @@ input[type="search"]::-webkit-search-results-decoration {
 .profile-progress-btn:hover {
   background: var(--ut-bg-3);
 }
+
+
+/* In-App Image File Preview (GitHub PNG/JPG/SVG/GIF/WebP) */
+.viewer-image-stage {
+  margin: 0;
+  padding: 16px;
+  border: 1px solid var(--ut-line);
+  border-radius: 10px;
+  background: var(--ut-bg);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+
+.viewer-image-stage img {
+  max-width: 100%;
+  max-height: 70dvh;
+  height: auto;
+  border-radius: 6px;
+  display: block;
+}
+
+.viewer-image-stage figcaption {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+}

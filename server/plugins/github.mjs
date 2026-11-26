@@ -117,6 +117,20 @@ export const githubPlugin = {
     const parsed = toGitHubRawUrl(rawUrl);
     if (!parsed) throw new Error('Unsupported GitHub URL');
 
+    const filename = parsed.filePath.split('/').pop() || 'solution';
+    const ext = filename.includes('.') ? filename.split('.').pop().toLowerCase() : '';
+    if (/^(png|jpe?g|gif|webp|svg|bmp|ico|avif)$/.test(ext)) {
+      return {
+        plugin: 'github-content',
+        kind: 'image',
+        title: filename,
+        repo: `${parsed.owner}/${parsed.repo}`,
+        filePath: parsed.filePath,
+        imageUrl: parsed.rawUrl,
+        sourceUrl: rawUrl,
+      };
+    }
+
     const response = await fetch(parsed.rawUrl, {
       signal,
       headers: { 'User-Agent': 'Codegrill-Plugin/1.0' },
@@ -125,8 +139,6 @@ export const githubPlugin = {
       throw new Error(`GitHub returned HTTP ${response.status}`);
     }
     const text = await response.text();
-    const filename = parsed.filePath.split('/').pop() || 'solution';
-    const ext = filename.includes('.') ? filename.split('.').pop().toLowerCase() : '';
     const language = EXT_TO_LANG[ext] || 'text';
     const kind = language === 'markdown' ? 'markdown' : ext === 'txt' ? 'text' : 'code';
 
