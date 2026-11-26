@@ -16,19 +16,44 @@ import {
 import { getMessages } from './i18n.mjs';
 import { BrandLogo } from './BrandLogo.jsx';
 import { ForgeAtlas } from './ForgeAtlas.jsx';
+import { Mascot } from './Mascot.jsx';
 import { ROADMAP_DOMAINS } from './domainRoadmaps.mjs';
 
 export const sitePages = ['home', 'how-it-works', 'about', 'help', 'privacy', 'terms', 'copyright'];
 
 const workflowLinks = ['/sheets', '/problems', '/roadmap', '/profile'];
 
-const DOMAIN_ICONS = {
-  dsa: Code2,
-  'system-design': Network,
-  lld: Boxes,
-  sql: Database,
-  concurrency: Cpu,
-  'ai-behavioral': Sparkles,
+const DOMAIN_META = {
+  dsa: {
+    icon: Code2,
+    tag: 'DSA',
+    summary: 'Arrays, graphs, DP, trees, and 177 problems across LeetCode, Codeforces, and HackerRank.',
+  },
+  'system-design': {
+    icon: Network,
+    tag: 'HLD',
+    summary: 'Load balancers, caching, sharding, Kafka queues, and distributed scale blueprints.',
+  },
+  lld: {
+    icon: Boxes,
+    tag: 'LLD',
+    summary: 'SOLID principles, design patterns, class diagrams, and clean extensible object models.',
+  },
+  databases: {
+    icon: Database,
+    tag: 'SQL',
+    summary: 'B-Tree indexing, MVCC isolation levels, query plans, transactions, and NoSQL trade-offs.',
+  },
+  concurrency: {
+    icon: Cpu,
+    tag: 'OS',
+    summary: 'Threads, mutexes, deadlocks, lock-free queues, memory models, and async runtimes.',
+  },
+  'ai-behavioral': {
+    icon: Sparkles,
+    tag: 'AI · STAR',
+    summary: 'RAG pipelines, LLM evaluation, agent architectures, and structured leadership stories.',
+  },
 };
 
 function navHandler(onNavigate, path) {
@@ -84,7 +109,6 @@ export function SitePages({
       <div className="marketing-page home-page">
         <section className="landing-hero landing-hero-v2">
           <div className="landing-hero-copy">
-            <span className="landing-eyebrow">6 DOMAINS · 6 LANGUAGES · IN-APP VIEWERS</span>
             <h1 lang={locale}>{t.site.landingTitle}<span>.</span></h1>
             <p>{t.site.landingDesc}</p>
             <div className="rooms-actions landing-cta-row">
@@ -97,18 +121,6 @@ export function SitePages({
               <Button variant="quiet" href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
                 {t.nav.rooms}
               </Button>
-            </div>
-            <div className="landing-domain-pills" aria-label="Jump to domain roadmap">
-              {ROADMAP_DOMAINS.map((dom) => (
-                <a
-                  key={dom.id}
-                  href={`/roadmap?domain=${dom.id}`}
-                  className="landing-domain-pill"
-                  onClick={navHandler(onNavigate, `/roadmap?domain=${dom.id}`)}
-                >
-                  {dom.shortLabel}
-                </a>
-              ))}
             </div>
           </div>
           <ForgeAtlas variant="dark" className="landing-atlas" />
@@ -172,7 +184,9 @@ export function SitePages({
           </div>
           <div className="home-domain-grid">
             {ROADMAP_DOMAINS.map((dom) => {
-              const Icon = DOMAIN_ICONS[dom.id] || Code2;
+              const meta = DOMAIN_META[dom.id] || { icon: Code2, tag: dom.id.toUpperCase(), summary: '' };
+              const Icon = meta.icon;
+              const label = dom.labels?.[locale] || dom.labels?.en || dom.id;
               return (
                 <a
                   key={dom.id}
@@ -184,12 +198,12 @@ export function SitePages({
                     <span className="home-domain-icon" aria-hidden="true">
                       <Icon size={17} />
                     </span>
-                    <span className="home-domain-tag">{dom.shortLabel}</span>
+                    <span className="home-domain-tag">{meta.tag}</span>
                   </div>
-                  <h3>{dom.label}</h3>
-                  <p>{dom.subtitle}</p>
+                  <h3>{label}</h3>
+                  <p>{meta.summary}</p>
                   <span className="home-domain-cta">
-                    Explore track <ArrowRight size={13} aria-hidden="true" />
+                    Open roadmap <ArrowRight size={13} aria-hidden="true" />
                   </span>
                 </a>
               );
@@ -318,13 +332,23 @@ export function SitePages({
             <p>How {brandName} stores your study progress, notes, and embedded media preferences.</p>
           </div>
         </div>
-        <Card variant="outlined" className="legal-card">
-          <h2>Local-first storage & optional sync</h2>
-          <p>Your solved problems, revision bookmarks, personal notes, activity ledger, and custom series are stored locally in your browser via <code>localStorage</code> and optionally synced with your self-hosted or connected {brandName} backend instance.</p>
-          <h2>Privacy-enhanced embeds</h2>
-          <p>Walkthrough videos load through YouTube&apos;s privacy-enhanced domain (<code>youtube-nocookie.com</code>) or your configured custom player template. Solution code and Markdown editorials are fetched through the {brandName} plugin layer without third-party ad trackers.</p>
-          <h2>Full control & reset</h2>
-          <p>You can permanently erase all saved progress, bookmarks, notes, and streak history at any time from the Settings menu using <strong>Reset progress</strong>.</p>
+        <Card variant="outlined" className="legal-card legal-card-split">
+          <div className="legal-card-copy">
+            <h2>Local-first storage & optional sync</h2>
+            <p>Your solved problems, revision bookmarks, personal notes, activity ledger, and custom series are stored locally in your browser via <code>localStorage</code> and optionally synced with your self-hosted or connected {brandName} backend instance.</p>
+            <h2>Privacy-enhanced embeds</h2>
+            <p>Walkthrough videos load through YouTube&apos;s privacy-enhanced domain (<code>youtube-nocookie.com</code>) or your configured custom player template. Solution code and Markdown editorials are fetched through the {brandName} plugin layer without third-party ad trackers.</p>
+            <h2>Full control & reset</h2>
+            <p>You can permanently erase all saved progress, bookmarks, notes, and streak history at any time from the Settings menu using <strong>Reset progress</strong>.</p>
+          </div>
+          <div className="legal-card-art" aria-hidden="true">
+            <div className="legal-art-stage">
+              <div className="legal-orbit-ring ring-1" />
+              <div className="legal-orbit-ring ring-2" />
+              <Mascot mood="shield" size={142} label="Privacy guardian Ember" />
+            </div>
+            <span className="legal-art-caption">Local-first · Zero ad trackers</span>
+          </div>
         </Card>
       </section>
     );
@@ -339,13 +363,23 @@ export function SitePages({
             <p>Guidelines for using {brandName} and its integrated study tools.</p>
           </div>
         </div>
-        <Card variant="outlined" className="legal-card">
-          <h2>Educational & interview preparation use</h2>
-          <p>{brandName} is provided as an educational workspace to organize coding interview roadmaps, curated practice series, personal notes, and study rooms. Content is provided &ldquo;as is&rdquo; without warranty of interview outcomes.</p>
-          <h2>Third-party platforms & plugins</h2>
-          <p>Built-in plugins retrieve publicly accessible metadata, open-source code files, and official embeddable video streams from third-party platforms (such as LeetCode, YouTube, GitHub, and technical blogs). Use of external platforms remains subject to their respective terms.</p>
-          <h2>User-created series & notes</h2>
-          <p>Custom sheets and personal notes you author belong to you and are stored solely for your study workflow.</p>
+        <Card variant="outlined" className="legal-card legal-card-split">
+          <div className="legal-card-copy">
+            <h2>Educational & interview preparation use</h2>
+            <p>{brandName} is provided as an educational workspace to organize coding interview roadmaps, curated practice series, personal notes, and study rooms. Content is provided &ldquo;as is&rdquo; without warranty of interview outcomes.</p>
+            <h2>Third-party platforms & plugins</h2>
+            <p>Built-in plugins retrieve publicly accessible metadata, open-source code files, and official embeddable video streams from third-party platforms (such as LeetCode, YouTube, GitHub, and technical blogs). Use of external platforms remains subject to their respective terms.</p>
+            <h2>User-created series & notes</h2>
+            <p>Custom sheets and personal notes you author belong to you and are stored solely for your study workflow.</p>
+          </div>
+          <div className="legal-card-art" aria-hidden="true">
+            <div className="legal-art-stage">
+              <div className="legal-orbit-ring ring-1" />
+              <div className="legal-orbit-ring ring-2" />
+              <Mascot mood="idle" size={142} label="Ember workspace mascot" />
+            </div>
+            <span className="legal-art-caption">Built for transparent study</span>
+          </div>
         </Card>
       </section>
     );
@@ -360,11 +394,21 @@ export function SitePages({
             <p>© {year} {brandName} · {ecosystem}. All platform UI, plugins, and original tooling rights reserved.</p>
           </div>
         </div>
-        <Card variant="outlined" className="legal-card">
-          <h2>Open-source & community attributions</h2>
-          <p>Problem metadata, multilingual translations, and reference solution indexes incorporate open-source contributions from community repositories including <code>doocs/leetcode</code> and <code>neetcode-gh/leetcode</code> under their respective open-source licenses.</p>
-          <h2>Third-party trademarks & video creators</h2>
-          <p>LeetCode, YouTube, GitHub, takeUforward (Striver), Blind 75, and Grind 75 are trademarks or community curriculums of their respective owners. Video walkthroughs remain the intellectual property of their original creators and are played via official embeddable players with source attribution.</p>
+        <Card variant="outlined" className="legal-card legal-card-split">
+          <div className="legal-card-copy">
+            <h2>Open-source & community attributions</h2>
+            <p>Problem metadata, multilingual translations, and reference solution indexes incorporate open-source contributions from community repositories including <code>doocs/leetcode</code> and <code>neetcode-gh/leetcode</code> under their respective open-source licenses.</p>
+            <h2>Third-party trademarks & video creators</h2>
+            <p>LeetCode, Codeforces, HackerRank, YouTube, GitHub, takeUforward (Striver), Blind 75, and Grind 75 are trademarks or community curriculums of their respective owners. Video walkthroughs remain the intellectual property of their original creators and are played via official embeddable players with source attribution.</p>
+          </div>
+          <div className="legal-card-art" aria-hidden="true">
+            <div className="legal-art-stage">
+              <div className="legal-orbit-ring ring-1" />
+              <div className="legal-orbit-ring ring-2" />
+              <Mascot mood="happy" size={142} label="Ember community mascot" />
+            </div>
+            <span className="legal-art-caption">Open-source & creator attribution</span>
+          </div>
         </Card>
       </section>
     );
