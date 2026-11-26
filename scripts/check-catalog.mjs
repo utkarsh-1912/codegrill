@@ -107,6 +107,8 @@ for (const sheet of BUILTIN_SHEETS) {
   const resolved = resolveSheetProblems(sheet, allProblems);
   if (sheet.slugs !== null) {
     assert.equal(resolved.length, sheet.slugs.length, `${sheet.id} contains unknown problem slugs`);
+  } else if (sheet.platformFilter === 'leetcode') {
+    assert.equal(resolved.length, 150, `${sheet.id} must resolve to the 150 core roadmap problems`);
   } else {
     assert.equal(resolved.length, allProblems.length);
   }

@@ -443,201 +443,197 @@ export function StudyRooms({
     return (
       <section className="page-section rooms-page room-workspace">
         <div className="room-studio-hero">
-          <div className="room-studio-hero-left">
-            <Button variant="quiet" size="sm" className="room-back-btn" onClick={() => onNavigate?.('/rooms')}>
-              <ArrowLeft size={15} aria-hidden="true" /> Lobby
-            </Button>
-            <div className="room-hero-companion" aria-hidden="true">
-              <Mascot mood={roomMascotMood} size={46} label="Ember session companion" />
-            </div>
-            <div className="room-studio-identity">
-              <div className="room-studio-badges">
-                <span className="room-id-pill is-dark">
-                  <span className="room-live-dot" aria-hidden="true" />#{validActiveRoom}
-                </span>
-                <span className="room-format-pill is-dark">{activeFormat.label}</span>
-                <span className="room-presence-pill is-dark" title={participantList.join(', ')}>
-                  <Users size={13} aria-hidden="true" /> {participantList.length} active
-                </span>
-              </div>
-              <h1 className="room-studio-title">{activeExerciseTitle}</h1>
-            </div>
-          </div>
-
-          <div className="room-studio-hero-right">
-            <span className={`room-mini-clock ${isLowTime ? 'is-warning' : ''}`} title="Remaining time">
-              <Clock size={13} aria-hidden="true" /> {formatClock(roomState.timerRemainingSec)}
-            </span>
-
-            <div className="room-role-pills is-dark" role="group" aria-label="Session role">
-              {ROOM_ROLES.map((r) => (
-                <button
-                  key={r.id}
-                  type="button"
-                  className={profile.role === r.id ? 'is-active' : ''}
-                  onClick={() => updateProfile({ role: r.id })}
-                >
-                  {r.label}
-                </button>
-              ))}
-            </div>
-
-            <Button
-              variant="outlined"
-              size="sm"
-              className="room-hero-outline-btn"
-              onClick={() => copyRoomLink(validActiveRoom, roomState.mode, roomState.problemSlug)}
-            >
-              {copiedInvite ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-              {copiedInvite ? 'Copied' : 'Invite'}
-            </Button>
-
-            {colabsUrl && (
-              <Button variant="solid" size="sm" href={colabsUrl.href} target="_blank" rel="noopener noreferrer">
-                Colabs <ExternalLink size={14} aria-hidden="true" />
+          <div className="room-studio-row-top">
+            <div className="room-studio-hero-left">
+              <Button variant="quiet" size="sm" className="room-back-btn" onClick={() => onNavigate?.('/rooms')}>
+                <ArrowLeft size={15} aria-hidden="true" /> Lobby
               </Button>
-            )}
+              <span className="room-id-pill is-dark">
+                <span className="room-live-dot" aria-hidden="true" />#{validActiveRoom}
+              </span>
+              <span className="room-format-pill is-dark">{activeFormat.label}</span>
+              <span className="room-presence-pill is-dark" title={participantList.join(', ')}>
+                <Users size={13} aria-hidden="true" /> {participantList.length} active
+              </span>
+            </div>
 
-            <button
-              type="button"
-              className="icon-btn room-expand-btn"
-              onClick={() => setPadExpanded((v) => !v)}
-              aria-pressed={padExpanded}
-              aria-label={padExpanded ? 'Show conductor sidebar' : 'Expand scratchpad'}
-              title={padExpanded ? 'Show conductor sidebar' : 'Expand scratchpad'}
-            >
-              {padExpanded ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
-            </button>
+            <div className="room-studio-hero-right">
+              <span className={`room-mini-clock ${isLowTime ? 'is-warning' : ''}`} title="Remaining time">
+                <Clock size={13} aria-hidden="true" /> {formatClock(roomState.timerRemainingSec)}
+              </span>
+
+              <div className="room-role-pills is-dark" role="group" aria-label="Session role">
+                {ROOM_ROLES.map((r) => (
+                  <button
+                    key={r.id}
+                    type="button"
+                    className={profile.role === r.id ? 'is-active' : ''}
+                    onClick={() => updateProfile({ role: r.id })}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
+
+              <Button
+                variant="outlined"
+                size="sm"
+                className="room-hero-outline-btn"
+                onClick={() => copyRoomLink(validActiveRoom, roomState.mode, roomState.problemSlug)}
+              >
+                {copiedInvite ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+                {copiedInvite ? 'Copied' : 'Invite'}
+              </Button>
+
+              {colabsUrl && (
+                <Button variant="solid" size="sm" href={colabsUrl.href} target="_blank" rel="noopener noreferrer">
+                  Colabs <ExternalLink size={14} aria-hidden="true" />
+                </Button>
+              )}
+
+              <button
+                type="button"
+                className="icon-btn room-expand-btn"
+                onClick={() => setPadExpanded((v) => !v)}
+                aria-pressed={padExpanded}
+                aria-label={padExpanded ? 'Show conductor sidebar' : 'Expand scratchpad'}
+                title={padExpanded ? 'Show conductor sidebar' : 'Expand scratchpad'}
+              >
+                {padExpanded ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
+              </button>
+            </div>
           </div>
+
+          <div className="room-studio-row-exercise">
+            <div className="room-exercise-main">
+              <div className="room-exercise-copy">
+                <span className="room-exercise-eyebrow">Active Exercise · {activeFormat.short}</span>
+                <div className="room-brief-title-row">
+                  <h1 className="room-studio-title">{activeExerciseTitle}</h1>
+                  {activeProblem && (
+                    <span className="room-diff-pill" data-level={activeProblem.difficulty}>
+                      {activeProblem.difficulty}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="room-exercise-actions">
+              {activeProblem && (
+                <>
+                  {onOpenProblem && (
+                    <Button variant="outlined" size="sm" className="room-hero-outline-btn" onClick={() => onOpenProblem(activeProblem.slug)}>
+                      Open Problem
+                    </Button>
+                  )}
+                  {activeProblem.leetcode_url && (
+                    <Button
+                      variant="quiet"
+                      size="sm"
+                      className="room-back-btn"
+                      href={activeProblem.leetcode_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Practice <ArrowUpRight size={14} aria-hidden="true" />
+                    </Button>
+                  )}
+                </>
+              )}
+              <Button variant="quiet" size="sm" className="room-back-btn" onClick={() => setSwapOpen((v) => !v)}>
+                {swapOpen ? 'Done' : 'Change'}
+              </Button>
+            </div>
+          </div>
+
+          {swapOpen && (
+            <div className="room-swap-panel is-dark">
+              <div className="room-format-strip">
+                {ROOM_FORMATS.map((f) => (
+                  <button
+                    key={f.id}
+                    type="button"
+                    className={roomState.mode === f.id ? 'is-active' : ''}
+                    onClick={() => {
+                      const nextFmt = getRoomFormat(f.id);
+                      updateRoomState((prev) => ({
+                        ...prev,
+                        mode: nextFmt.id,
+                        checklist: nextFmt.stages.map(() => false),
+                        timerDurationSec: nextFmt.minutes * 60,
+                        timerRemainingSec: nextFmt.minutes * 60,
+                        timerRunning: false,
+                      }));
+                    }}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
+
+              {roomState.mode === 'dsa' ? (
+                <div className="room-swap-picker">
+                  <input
+                    type="text"
+                    value={swapQuery}
+                    onChange={(e) => setSwapQuery(e.target.value)}
+                    placeholder="Search 177 DSA problems by title or ID..."
+                  />
+                  <div className="room-swap-list">
+                    {filteredSwapProblems.map((p) => (
+                      <button
+                        key={p.slug}
+                        type="button"
+                        className={`room-swap-item ${roomState.problemSlug === p.slug ? 'is-active' : ''}`}
+                        onClick={() => {
+                          const nextTitle = getProblemTitle(p, locale, defaultLocale);
+                          updateRoomState({ problemSlug: p.slug, promptTitle: nextTitle });
+                          setSavedRooms(upsertSavedRoom({
+                            roomId: validActiveRoom,
+                            mode: 'dsa',
+                            title: nextTitle,
+                            problemSlug: p.slug,
+                          }));
+                          setSwapOpen(false);
+                        }}
+                      >
+                        <span>{p.leetcode_id}. {getProblemTitle(p, locale, defaultLocale)}</span>
+                        <small>{p.difficulty}</small>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="room-swap-list">
+                  {(ROOM_PROMPTS[roomState.mode] || []).map((pr) => (
+                    <button
+                      key={pr.id}
+                      type="button"
+                      className={`room-swap-item ${roomState.promptTitle === pr.title ? 'is-active' : ''}`}
+                      onClick={() => {
+                        updateRoomState({ problemSlug: '', promptTitle: pr.title });
+                        setSavedRooms(upsertSavedRoom({
+                          roomId: validActiveRoom,
+                          mode: roomState.mode,
+                          title: pr.title,
+                          problemSlug: '',
+                        }));
+                        setSwapOpen(false);
+                      }}
+                    >
+                      <span>{pr.title}</span>
+                      <small>{pr.tag}</small>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         <div className={`room-studio-grid ${padExpanded ? 'is-expanded' : ''}`}>
           <div className="room-main-pane">
-            <Card variant="outlined" className="room-brief-card">
-              <div className="room-brief-head">
-                <div className="room-brief-copy">
-                  <span className="eyebrow">Active Exercise · {activeFormat.short}</span>
-                  <div className="room-brief-title-row">
-                    <h2>{activeExerciseTitle}</h2>
-                    {activeProblem && (
-                      <span className="difficulty-badge" data-level={activeProblem.difficulty}>
-                        {activeProblem.difficulty}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <div className="room-brief-actions">
-                  {activeProblem && (
-                    <>
-                      {onOpenProblem && (
-                        <Button variant="outlined" size="sm" onClick={() => onOpenProblem(activeProblem.slug)}>
-                          Open Problem
-                        </Button>
-                      )}
-                      {activeProblem.leetcode_url && (
-                        <Button
-                          variant="quiet"
-                          size="sm"
-                          href={activeProblem.leetcode_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Practice <ArrowUpRight size={14} aria-hidden="true" />
-                        </Button>
-                      )}
-                    </>
-                  )}
-                  <Button variant="quiet" size="sm" onClick={() => setSwapOpen((v) => !v)}>
-                    {swapOpen ? 'Done' : 'Change'}
-                  </Button>
-                </div>
-              </div>
-
-              {swapOpen && (
-                <div className="room-swap-panel">
-                  <div className="room-format-strip">
-                    {ROOM_FORMATS.map((f) => (
-                      <button
-                        key={f.id}
-                        type="button"
-                        className={roomState.mode === f.id ? 'is-active' : ''}
-                        onClick={() => {
-                          const nextFmt = getRoomFormat(f.id);
-                          updateRoomState((prev) => ({
-                            ...prev,
-                            mode: nextFmt.id,
-                            checklist: nextFmt.stages.map(() => false),
-                            timerDurationSec: nextFmt.minutes * 60,
-                            timerRemainingSec: nextFmt.minutes * 60,
-                            timerRunning: false,
-                          }));
-                        }}
-                      >
-                        {f.label}
-                      </button>
-                    ))}
-                  </div>
-
-                  {roomState.mode === 'dsa' ? (
-                    <div className="room-swap-picker">
-                      <input
-                        type="text"
-                        value={swapQuery}
-                        onChange={(e) => setSwapQuery(e.target.value)}
-                        placeholder="Search 177 DSA problems by title or ID..."
-                      />
-                      <div className="room-swap-list">
-                        {filteredSwapProblems.map((p) => (
-                          <button
-                            key={p.slug}
-                            type="button"
-                            className={`room-swap-item ${roomState.problemSlug === p.slug ? 'is-active' : ''}`}
-                            onClick={() => {
-                              const nextTitle = getProblemTitle(p, locale, defaultLocale);
-                              updateRoomState({ problemSlug: p.slug, promptTitle: nextTitle });
-                              setSavedRooms(upsertSavedRoom({
-                                roomId: validActiveRoom,
-                                mode: 'dsa',
-                                title: nextTitle,
-                                problemSlug: p.slug,
-                              }));
-                              setSwapOpen(false);
-                            }}
-                          >
-                            <span>{p.leetcode_id}. {getProblemTitle(p, locale, defaultLocale)}</span>
-                            <small>{p.difficulty}</small>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="room-swap-list">
-                      {(ROOM_PROMPTS[roomState.mode] || []).map((pr) => (
-                        <button
-                          key={pr.id}
-                          type="button"
-                          className={`room-swap-item ${roomState.promptTitle === pr.title ? 'is-active' : ''}`}
-                          onClick={() => {
-                            updateRoomState({ problemSlug: '', promptTitle: pr.title });
-                            setSavedRooms(upsertSavedRoom({
-                              roomId: validActiveRoom,
-                              mode: roomState.mode,
-                              title: pr.title,
-                              problemSlug: '',
-                            }));
-                            setSwapOpen(false);
-                          }}
-                        >
-                          <span>{pr.title}</span>
-                          <small>{pr.tag}</small>
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </Card>
-
             <Card variant="outlined" className="room-pad-card">
               <div className="room-pad-toolbar">
                 <div className="segmented-tabs" role="group" aria-label="Scratchpad view">

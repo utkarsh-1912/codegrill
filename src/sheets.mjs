@@ -149,7 +149,8 @@ export const BUILTIN_SHEETS = [
       zh: '涵蓋 18 個核心面試主題的全部 150 道模式化題目。',
       ko: '18개 핵심 면접 주제에 걸친 150개 패턴 기반 문제 전체.',
     },
-    slugs: null, // null means all problems in catalog
+    platformFilter: 'leetcode',
+    slugs: null, // null + platformFilter='leetcode' means the 150 core roadmap problems
   },
   {
     id: 'striver-a2z-core',
@@ -316,7 +317,12 @@ export const BUILTIN_SHEETS = [
 
 export function resolveSheetProblems(sheet, allProblems) {
   if (!sheet) return [];
-  if (sheet.slugs === null) return allProblems;
+  if (sheet.slugs === null) {
+    if (sheet.platformFilter) {
+      return allProblems.filter((p) => (p.platform || 'leetcode') === sheet.platformFilter);
+    }
+    return allProblems;
+  }
   const bySlug = new Map(allProblems.map((p) => [p.slug, p]));
   return sheet.slugs.map((slug) => bySlug.get(slug)).filter(Boolean);
 }
