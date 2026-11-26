@@ -311,6 +311,42 @@ export function SitePages({
           )}
         />
         <Workflow locale={locale} onNavigate={onNavigate} />
+
+        <section className="marketing-section">
+          <div className="home-section-head">
+            <div>
+              <h2>Recommended Study Cadences</h2>
+              <p>Pick a rhythm that matches your timeline and combine solo drills with live mock sessions.</p>
+            </div>
+          </div>
+          <div className="home-bento-grid">
+            <Card variant="outlined" className="home-bento-card">
+              <span className="home-domain-tag">DAILY · 30 MIN</span>
+              <h3>Daily Warmup Habit</h3>
+              <p>Solve the Daily Challenge, revisit one starred item from your Favorites queue, and read one built-in roadmap guide.</p>
+              <a href="/profile" onClick={navHandler(onNavigate, '/profile')}>
+                Open profile ledger <ArrowRight size={13} aria-hidden="true" />
+              </a>
+            </Card>
+            <Card variant="outlined" className="home-bento-card">
+              <span className="home-domain-tag">4 WEEKS · FOCUSED</span>
+              <h3>Onsite Interview Sprint</h3>
+              <p>Complete Blind 75 or Grind 75 with the weekly planner, review 2 System Design blueprints per week, and run 1 timed mock room.</p>
+              <a href="/sheets" onClick={navHandler(onNavigate, '/sheets')}>
+                Configure weekly plan <ArrowRight size={13} aria-hidden="true" />
+              </a>
+            </Card>
+            <Card variant="outlined" className="home-bento-card">
+              <span className="home-domain-tag">8 WEEKS · FULL LOOP</span>
+              <h3>Senior & Full-Stack Mastery</h3>
+              <p>Progress through all 6 domains — DSA, HLD, LLD, SQL, Concurrency, and AI/Behavioral — and export Markdown debriefs after every mock room.</p>
+              <a href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
+                Start 6-domain atlas <ArrowRight size={13} aria-hidden="true" />
+              </a>
+            </Card>
+          </div>
+        </section>
+
         <div className="marketing-section study-options">
           <Card variant="outlined">
             <h2>{t.site.prepareRoleTitle}</h2>
@@ -347,6 +383,7 @@ export function SitePages({
             </>
           )}
         />
+
         <div className="home-bento-grid marketing-section">
           <Card variant="outlined" className="home-bento-card">
             <span className="home-bento-icon" aria-hidden="true"><BookOpen size={18} /></span>
@@ -373,6 +410,37 @@ export function SitePages({
             </a>
           </Card>
         </div>
+
+        <section className="marketing-section">
+          <div className="home-section-head">
+            <div>
+              <h2>What Powers {brandName}</h2>
+              <p>Designed as a complete engineering interview studio rather than a static problem list.</p>
+            </div>
+          </div>
+          <div className="about-feature-grid">
+            <Card variant="outlined" className="about-feature-card">
+              <span className="workflow-step-num">01</span>
+              <h3>6 Connected Domains</h3>
+              <p>Move seamlessly from DSA into System Design (HLD), Low-Level Design (LLD), SQL & Databases, Concurrency & OS, and AI Systems & Behavioral prep.</p>
+            </Card>
+            <Card variant="outlined" className="about-feature-card">
+              <span className="workflow-step-num">02</span>
+              <h3>In-App Multi-Format Viewers</h3>
+              <p>Read GitHub repositories, Markdown with KaTeX math and Mermaid diagrams, Jupyter notebooks (.ipynb), Anki decks (.apkg), and captioned video walkthroughs without leaving the app.</p>
+            </Card>
+            <Card variant="outlined" className="about-feature-card">
+              <span className="workflow-step-num">03</span>
+              <h3>7-Platform Profile Aggregation</h3>
+              <p>Connect LeetCode, Codeforces, AtCoder, CodeChef, GeeksforGeeks, HackerRank, and GitHub handles for automatic stats alongside your Favorites & Read Again list.</p>
+            </Card>
+            <Card variant="outlined" className="about-feature-card">
+              <span className="workflow-step-num">04</span>
+              <h3>Local-First & 6 Languages</h3>
+              <p>Everything saves instantly in your browser with optional backend sync, localized across English, Japanese, Hindi, Spanish, Chinese, and Korean.</p>
+            </Card>
+          </div>
+        </section>
       </section>
     );
   }
@@ -487,13 +555,64 @@ export function SitePages({
           </>
         )}
       />
-      <div className="module-list">
-        {t.faq.map(([question, answer]) => (
-          <Card key={question} variant="outlined">
-            <details><summary>{question}</summary><p>{answer}</p></details>
+
+      <section className="marketing-section">
+        <div className="home-section-head">
+          <div>
+            <h2>Keyboard Shortcuts & Power Workflows</h2>
+            <p>Navigate faster across problems, study guides, video walkthroughs, and mock rooms.</p>
+          </div>
+        </div>
+        <div className="help-shortcuts-grid">
+          <Card variant="outlined" className="help-shortcut-card">
+            <kbd className="rt-kbd">⌘K / Ctrl+K</kbd>
+            <strong>Global Search Palette</strong>
+            <p>Search all 177 problems, 6 roadmap domains, curated sheets, and interview track modules from anywhere.</p>
           </Card>
-        ))}
-      </div>
+          <Card variant="outlined" className="help-shortcut-card">
+            <kbd className="rt-kbd">★ Favorite</kbd>
+            <strong>Save Any Content</strong>
+            <p>Star any roadmap checklist guide, GitHub file, notebook, video, or article inside the viewer to revisit it on /profile.</p>
+          </Card>
+          <Card variant="outlined" className="help-shortcut-card">
+            <kbd className="rt-kbd">Split Mode</kbd>
+            <strong>Live Room Scratchpad</strong>
+            <p>Draft Markdown, $O(n \log n)$ math, and Mermaid architecture diagrams side-by-side in /rooms and export a .md debrief.</p>
+          </Card>
+        </div>
+      </section>
+
+      <section className="marketing-section">
+        <div className="home-section-head">
+          <div>
+            <h2>Supported In-App Formats</h2>
+            <p>Built-in readers automatically format content without forcing tab switches.</p>
+          </div>
+        </div>
+        <div className="help-formats-strip">
+          <span><strong>Markdown</strong> · KaTeX &amp; Mermaid</span>
+          <span><strong>Jupyter</strong> · .ipynb cells &amp; outputs</span>
+          <span><strong>Anki</strong> · .apkg interactive flashcards</span>
+          <span><strong>YouTube</strong> · Custom player &amp; transcripts</span>
+          <span><strong>GitHub</strong> · Repos, folders, code &amp; images</span>
+          <span><strong>Colabs</strong> · Shared live room links</span>
+        </div>
+      </section>
+
+      <section className="marketing-section">
+        <div className="home-section-head">
+          <div>
+            <h2>Frequently Asked Questions</h2>
+          </div>
+        </div>
+        <div className="module-list">
+          {t.faq.map(([question, answer]) => (
+            <Card key={question} variant="outlined">
+              <details><summary>{question}</summary><p>{answer}</p></details>
+            </Card>
+          ))}
+        </div>
+      </section>
     </section>
   );
 }
