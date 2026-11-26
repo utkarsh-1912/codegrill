@@ -8519,3 +8519,172 @@ input[type="search"]::-webkit-search-results-decoration {
   min-height: 500px;
   padding: 20px 24px;
 }
+
+
+/* Tracks Page Alignment & Mobile Responsive Redesign */
+.track-stage-body {
+  padding: 18px 22px;
+  min-width: 0;
+}
+
+.module-stage {
+  min-width: 0;
+}
+
+.track-filters {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.track-filter-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.track-filter-field .custom-select,
+.track-filter-field .custom-select-trigger {
+  width: 100%;
+}
+
+.allocation-filter-btn {
+  min-width: 0;
+}
+
+.allocation-label {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+  .module-studio {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  /* Compact horizontal swipeable syllabus strip on tablet/mobile so active module is immediately visible */
+  .module-syllabus {
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 8px;
+    padding: 8px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .module-syllabus .syllabus-item {
+    flex: 0 0 232px;
+    scroll-snap-align: start;
+    border: 1px solid var(--ut-line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    background: var(--ut-bg);
+  }
+
+  .module-syllabus .syllabus-item.is-selected {
+    border-color: var(--ember);
+    background: var(--ember-soft);
+    box-shadow: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .track-filters {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .study-allocation-card {
+    padding: 14px 14px;
+    gap: 12px;
+  }
+
+  .study-allocation-head {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .module-studio-header {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .module-studio-progress {
+    width: 100%;
+  }
+
+  .module-stage-top {
+    padding: 14px 14px;
+    gap: 10px;
+  }
+
+  .module-stage-meta {
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .module-stage-cta {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .module-stage-cta > button,
+  .module-stage-cta > a {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .track-stage-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .track-stage-tabs button {
+    justify-content: center;
+    padding: 8px 8px;
+    font-size: 0.78rem;
+  }
+
+  .track-stage-body {
+    padding: 14px 14px;
+  }
+
+  .track-question-card {
+    padding: 12px 12px;
+  }
+
+  .track-question-head {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .track-resource-card {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 12px;
+    gap: 10px;
+  }
+
+  .track-resource-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .track-resource-actions > button:first-child {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .track-related-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .module-stage-footer {
+    padding: 12px 14px;
+  }
+}
