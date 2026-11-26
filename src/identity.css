@@ -5623,3 +5623,295 @@ input[type="search"]::-webkit-search-results-decoration {
   color: var(--muted);
   background: var(--ut-bg-2);
 }
+
+
+/* Domain Checklist Inline Read Button */
+.domain-check-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.domain-check-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.domain-check-read-btn {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  color: var(--ut-accent);
+}
+
+/* Jupyter Notebook (.ipynb) Viewer */
+.nb-viewer {
+  display: grid;
+  gap: 14px;
+}
+
+.nb-cell {
+  display: grid;
+  gap: 8px;
+}
+
+.nb-md-cell .rt-mode-bar {
+  display: none;
+}
+
+.nb-outputs {
+  display: grid;
+  gap: 6px;
+  padding-left: 12px;
+  border-left: 2px solid var(--ut-line-2);
+}
+
+.nb-output-text,
+.nb-output-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--ut-bg);
+  border: 1px solid var(--ut-line);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.8rem;
+  overflow-x: auto;
+}
+
+.nb-output-error {
+  border-color: #dc262666;
+  color: #dc2626;
+}
+
+:root[data-theme="dark"] .nb-output-error {
+  color: #f87171;
+}
+
+.nb-output-img img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  background: #fff;
+  padding: 6px;
+}
+
+/* Anki Flashcard Deck (.apkg) Viewer */
+.apkg-shell {
+  display: grid;
+  gap: 14px;
+}
+
+.apkg-fallback {
+  padding: 20px;
+  border: 1px dashed var(--ut-line-2);
+  border-radius: 12px;
+  background: var(--ut-bg);
+  justify-items: start;
+}
+
+.apkg-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.apkg-counter {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.apkg-toolbar-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.apkg-card {
+  width: 100%;
+  min-height: 220px;
+  padding: 22px 24px;
+  border: 1px solid var(--ut-line);
+  border-radius: 14px;
+  background: var(--ut-bg);
+  color: var(--ink);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: stretch;
+  gap: 16px;
+  text-align: start;
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease-out-expo), background-color var(--dur-fast) var(--ease-out-expo);
+}
+
+.apkg-card:hover {
+  border-color: var(--ember);
+}
+
+.apkg-card.is-flipped {
+  border-color: var(--ember);
+  background: var(--ember-soft);
+}
+
+.apkg-card-side {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--ut-accent);
+}
+
+.apkg-card-body {
+  font-size: 1rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.apkg-flip-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+.apkg-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+
+/* Checklist Favorite/Read-Again Actions & Mobile Custom Series Modal Fix */
+.domain-check-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.domain-check-fav-btn {
+  width: 28px;
+  height: 28px;
+}
+
+.profile-saved-guides {
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  background: var(--ut-bg-2);
+  border-radius: 12px;
+  display: grid;
+  gap: 12px;
+}
+
+.profile-saved-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.profile-saved-head h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--display-font);
+  font-size: 1.15rem;
+  margin: 0;
+  color: var(--ink);
+}
+
+.profile-saved-head h3 svg {
+  color: var(--ember);
+}
+
+.profile-saved-head span {
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+.profile-saved-list {
+  display: grid;
+  gap: 6px;
+}
+
+.profile-saved-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--ut-line);
+  border-radius: 9px;
+  background: var(--ut-bg);
+}
+
+.profile-saved-open {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: start;
+  cursor: pointer;
+  padding: 0;
+}
+
+.profile-saved-open svg {
+  color: var(--ut-accent);
+  flex-shrink: 0;
+}
+
+.profile-saved-open strong {
+  display: block;
+  font-size: 0.88rem;
+  line-height: 1.3;
+}
+
+.profile-saved-open small {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .builder-panel {
+    max-height: 92dvh;
+  }
+
+  .builder-body {
+    padding: 14px 16px;
+    gap: 10px;
+  }
+
+  .builder-problem-list {
+    max-height: 220px;
+  }
+
+  .builder-problem-item {
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    gap: 10px;
+  }
+
+  .builder-problem-item .problem-number {
+    display: none;
+  }
+
+  .builder-problem-item > :last-child {
+    justify-self: end;
+    width: auto;
+  }
+}

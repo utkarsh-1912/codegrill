@@ -131,6 +131,18 @@ export const githubPlugin = {
       };
     }
 
+    if (ext === 'apkg') {
+      return {
+        plugin: 'github-content',
+        kind: 'apkg',
+        title: filename,
+        repo: `${parsed.owner}/${parsed.repo}`,
+        filePath: parsed.filePath,
+        downloadUrl: parsed.rawUrl,
+        sourceUrl: rawUrl,
+      };
+    }
+
     const response = await fetch(parsed.rawUrl, {
       signal,
       headers: { 'User-Agent': 'Codegrill-Plugin/1.0' },
@@ -139,6 +151,32 @@ export const githubPlugin = {
       throw new Error(`GitHub returned HTTP ${response.status}`);
     }
     const text = await response.text();
+
+    if (ext === 'ipynb') {
+      try {
+        const nb = JSON.parse(text);
+        const lang = nb?.metadata?.kernelspec?.language || nb?.metadata?.language_info?.name || 'python';
+        const cells = (Array.isArray(nb?.cells) ? nb.cells : []).slice(0, 120).map((cell) => ({
+          cell_type: cell.cell_type || 'code',
+          source: Array.isArray(cell.source) ? cell.source.join('') : String(cell.source || ''),
+          execution_count: cell.execution_count ?? null,
+          outputs: Array.isArray(cell.outputs) ? cell.outputs.slice(0, 8) : [],
+        }));
+        return {
+          plugin: 'github-content',
+          kind: 'notebook',
+          title: filename,
+          repo: `${parsed.owner}/${parsed.repo}`,
+          filePath: parsed.filePath,
+          language: lang,
+          cells,
+          sourceUrl: rawUrl,
+        };
+      } catch {
+        // Fall through to raw JSON code view if malformed notebook
+      }
+    }
+
     const language = EXT_TO_LANG[ext] || 'text';
     const kind = language === 'markdown' ? 'markdown' : ext === 'txt' ? 'text' : 'code';
 

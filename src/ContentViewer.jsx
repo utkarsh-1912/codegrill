@@ -7,6 +7,7 @@ import { LoadingState } from './LoadingState.jsx';
 import { RichTextInterpreter } from './RichTextInterpreter.jsx';
 import { CustomVideoPlayer } from './CustomVideoPlayer.jsx';
 import { Pagination } from './Pagination.jsx';
+import { AnkiDeckViewer, NotebookViewer } from './MediaViewers.jsx';
 
 export function formatViewerTitle(problemTitle, resourceTitle) {
   const cleanProb = String(problemTitle || '').trim();
@@ -170,6 +171,26 @@ export function ContentViewerBody({
     );
   }
 
+  if (data?.kind === 'notebook' && Array.isArray(data?.cells)) {
+    return (
+      <NotebookViewer
+        cells={data.cells}
+        language={data.language || 'python'}
+        sourceUrl={data.sourceUrl || activeUrl}
+        onOpenLink={(nextUrl, nextTitle) => onSelectSubUrl?.(nextUrl, nextTitle)}
+      />
+    );
+  }
+
+  if (data?.kind === 'apkg') {
+    return (
+      <AnkiDeckViewer
+        title={data.title || activeTitle}
+        downloadUrl={data.downloadUrl || activeUrl}
+      />
+    );
+  }
+
   if (data?.kind === 'image' && data?.imageUrl) {
     return (
       <figure className="viewer-image-stage">
@@ -259,12 +280,18 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
 
   useEffect(() => {
     if (!item) return;
-    setHistory([{ url: item.url, title: item.title || '' }]);
+    setHistory([{
+      url: item.url || '',
+      title: item.title || '',
+      inlineContent: item.content || '',
+      inlineKind: item.content ? (item.kind || 'markdown') : '',
+      inlineSource: item.sourceUrl || item.url || '',
+    }]);
     setHistoryIndex(0);
     setSelectedLang(item.solutionLang || '');
   }, [item]);
 
-  const currentEntry = history[historyIndex] || { url: item?.url || '', title: item?.title || '' };
+  const currentEntry = history[historyIndex] || { url: item?.url || '', title: item?.title || '', inlineContent: item?.content || '' };
   const activeUrl = currentEntry.url;
   const activeTitle = currentEntry.title;
   const canGoBack = historyIndex > 0;
@@ -272,7 +299,7 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
 
   function navigateNested(nextUrl, nextTitle) {
     if (!nextUrl || nextUrl === activeUrl) return;
-    setHistory((prev) => [...prev.slice(0, historyIndex + 1), { url: nextUrl, title: nextTitle || '' }]);
+    setHistory((prev) => [...prev.slice(0, historyIndex + 1), { url: nextUrl, title: nextTitle || '', inlineContent: '' }]);
     setHistoryIndex((idx) => idx + 1);
   }
 
@@ -285,6 +312,18 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
   }
 
   useEffect(() => {
+    if (currentEntry.inlineContent) {
+      setData({
+        plugin: 'codegrill-guide',
+        kind: currentEntry.inlineKind || 'markdown',
+        title: currentEntry.title,
+        siteName: 'Codegrill Guide',
+        content: currentEntry.inlineContent,
+        sourceUrl: currentEntry.inlineSource || '',
+      });
+      setLoading(false);
+      return undefined;
+    }
     if (!activeUrl) return undefined;
     let cancelled = false;
     setLoading(true);
@@ -296,7 +335,7 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
       }
     });
     return () => { cancelled = true; };
-  }, [activeUrl, locale]);
+  }, [activeUrl, currentEntry.inlineContent, currentEntry.inlineKind, currentEntry.inlineSource, currentEntry.title, locale]);
 
   useEffect(() => {
     if (!item) return undefined;

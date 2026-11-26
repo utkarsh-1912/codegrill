@@ -26,6 +26,7 @@ import { ErrorBoundary, ErrorPage, NotFoundPage } from './StatusPages.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
 import { BUILTIN_SHEETS, normalizeCustomSheet } from './sheets.mjs';
 import { ROADMAP_DOMAINS, buildDomainRoadmap } from './domainRoadmaps.mjs';
+import { getChecklistStudyGuide } from './studyMaterial.mjs';
 import { mergeCatalogProblems, problemPlatformBadge, problemPlatformLabel } from './externalProblems.mjs';
 import { DEFAULT_APP_CONFIG } from './config.mjs';
 import { getMessages } from './i18n.mjs';
@@ -530,6 +531,7 @@ function App() {
             defaultLocale={defaultLocale}
             onSaveProfiles={handleSaveProfiles}
             onOpenProblem={openProblemBySlug}
+            onOpenViewer={setViewerItem}
             onNavigate={navigate}
           />
         )}
@@ -660,6 +662,7 @@ function App() {
 }
 
 const DOMAIN_CHECKS_KEY = 'codegrill:domain-roadmap:v1';
+const DOMAIN_FAVS_KEY = 'codegrill:domain-favorites:v1';
 
 function Roadmap({ roadmap, next, locale, title, initialDomain = '', initialTopicId = '', onOpen, onOpenViewer, onNavigate }) {
   const t = getMessages(locale);
@@ -688,6 +691,13 @@ function Roadmap({ roadmap, next, locale, title, initialDomain = '', initialTopi
       return {};
     }
   });
+  const [domainFavs, setDomainFavs] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem(DOMAIN_FAVS_KEY) || '{}') || {};
+    } catch {
+      return {};
+    }
+  });
 
   function toggleDomainCheck(topicId, idx) {
     setDomainChecks((prev) => {
@@ -700,6 +710,32 @@ function Roadmap({ roadmap, next, locale, title, initialDomain = '', initialTopi
         // Ignore storage errors
       }
       return nextChecks;
+    });
+  }
+
+  function toggleDomainFav(topic, idx, domainId) {
+    setDomainFavs((prev) => {
+      const key = `${topic.id}:${idx}`;
+      const nextFavs = { ...prev };
+      if (nextFavs[key]) {
+        delete nextFavs[key];
+      } else {
+        nextFavs[key] = {
+          key,
+          domainId,
+          topicId: topic.id,
+          topicTitle: topic.title,
+          itemIndex: idx,
+          itemText: topic.checklist?.[idx] || topic.title,
+          sourceUrl: topic.resources?.[0]?.url || '',
+        };
+      }
+      try {
+        localStorage.setItem(DOMAIN_FAVS_KEY, JSON.stringify(nextFavs));
+      } catch {
+        // Ignore storage errors
+      }
+      return nextFavs;
     });
   }
 
@@ -822,15 +858,44 @@ function Roadmap({ roadmap, next, locale, title, initialDomain = '', initialTopi
                 <div className="domain-checklist">
                   {selected.checklist.map((itemText, idx) => {
                     const checked = Boolean(domainChecks[`${selected.id}:${idx}`]);
+                    const isFav = Boolean(domainFavs[`${selected.id}:${idx}`]);
                     return (
-                      <label key={idx} className={`domain-check-row ${checked ? 'is-checked' : ''}`}>
-                        <input
-                          type="checkbox"
-                          checked={checked}
-                          onChange={() => toggleDomainCheck(selected.id, idx)}
-                        />
-                        <span>{itemText}</span>
-                      </label>
+                      <div key={idx} className={`domain-check-row ${checked ? 'is-checked' : ''}`}>
+                        <label className="domain-check-label">
+                          <input
+                            type="checkbox"
+                            checked={checked}
+                            onChange={() => toggleDomainCheck(selected.id, idx)}
+                          />
+                          <span>{itemText}</span>
+                        </label>
+                        <div className="domain-check-actions">
+                          <button
+                            type="button"
+                            className={`icon-btn domain-check-fav-btn ${isFav ? 'is-active' : ''}`}
+                            aria-pressed={isFav}
+                            aria-label={isFav ? 'Remove from favorites / read again' : 'Mark favorite / read again'}
+                            title={isFav ? 'Saved to read again' : 'Mark favorite / read again'}
+                            onClick={() => toggleDomainFav(selected, idx, domain)}
+                          >
+                            <Star size={14} fill={isFav ? 'currentColor' : 'none'} aria-hidden="true" />
+                          </button>
+                          <button
+                            type="button"
+                            className="icon-btn domain-check-read-btn"
+                            aria-label={`Read guide: ${itemText}`}
+                            title="Read Codegrill guide"
+                            onClick={() => onOpenViewer({
+                              title: itemText,
+                              kind: 'markdown',
+                              content: getChecklistStudyGuide(selected, idx),
+                              sourceUrl: selected.resources?.[0]?.url || '',
+                            })}
+                          >
+                            <BookOpen size={14} aria-hidden="true" />
+                          </button>
+                        </div>
+                      </div>
                     );
                   })}
                 </div>

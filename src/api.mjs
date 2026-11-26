@@ -411,10 +411,45 @@ function parseMediumUrlClient(rawUrl) {
         sourceUrl: url,
       };
     }
+    if (lower.endsWith('.apkg')) {
+      return {
+        plugin: 'github-content-client',
+        kind: 'apkg',
+        title: gh.filename,
+        repo: gh.repo,
+        filePath: gh.filePath,
+        downloadUrl: gh.rawUrl,
+        sourceUrl: url,
+      };
+    }
     try {
       const res = await fetch(gh.rawUrl, { signal: AbortSignal.timeout(7000) });
       if (res.ok) {
         const content = await res.text();
+        if (lower.endsWith('.ipynb')) {
+          try {
+            const nb = JSON.parse(content);
+            const lang = nb?.metadata?.kernelspec?.language || nb?.metadata?.language_info?.name || 'python';
+            const cells = (Array.isArray(nb?.cells) ? nb.cells : []).slice(0, 120).map((cell) => ({
+              cell_type: cell.cell_type || 'code',
+              source: Array.isArray(cell.source) ? cell.source.join('') : String(cell.source || ''),
+              execution_count: cell.execution_count ?? null,
+              outputs: Array.isArray(cell.outputs) ? cell.outputs.slice(0, 8) : [],
+            }));
+            return {
+              plugin: 'github-content-client',
+              kind: 'notebook',
+              title: gh.filename,
+              repo: gh.repo,
+              filePath: gh.filePath,
+              language: lang,
+              cells,
+              sourceUrl: url,
+            };
+          } catch {
+            // Fall through to raw code view if malformed
+          }
+        }
         const kind = lower.endsWith('.md') || lower.endsWith('.markdown')
           ? 'markdown'
           : lower.endsWith('.txt')

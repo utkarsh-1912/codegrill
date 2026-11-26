@@ -1,12 +1,14 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Button, Card } from '@utkristi/ui';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, BookOpen, Star } from 'lucide-react';
 import { LedgerDashboard } from './LedgerDashboard.jsx';
 import { PlatformProfiles } from './PlatformProfiles.jsx';
-import { ROADMAP_DOMAINS, buildDomainRoadmap } from './domainRoadmaps.mjs';
+import { DOMAIN_TOPICS, ROADMAP_DOMAINS, buildDomainRoadmap } from './domainRoadmaps.mjs';
+import { getChecklistStudyGuide } from './studyMaterial.mjs';
 import { getMessages } from './i18n.mjs';
 
 const DOMAIN_CHECKS_KEY = 'codegrill:domain-roadmap:v1';
+const DOMAIN_FAVS_KEY = 'codegrill:domain-favorites:v1';
 
 export function ProfilePage({
   problems,
@@ -24,9 +26,28 @@ export function ProfilePage({
   defaultLocale,
   onSaveProfiles,
   onOpenProblem,
+  onOpenViewer,
   onNavigate,
 }) {
   const t = getMessages(locale);
+  const [savedGuides, setSavedGuides] = useState(() => {
+    try {
+      return Object.values(JSON.parse(localStorage.getItem(DOMAIN_FAVS_KEY) || '{}') || {});
+    } catch {
+      return [];
+    }
+  });
+
+  function removeSavedGuide(key) {
+    try {
+      const raw = JSON.parse(localStorage.getItem(DOMAIN_FAVS_KEY) || '{}') || {};
+      delete raw[key];
+      localStorage.setItem(DOMAIN_FAVS_KEY, JSON.stringify(raw));
+      setSavedGuides(Object.values(raw));
+    } catch {
+      // ignore storage errors
+    }
+  }
 
   const platformBreakdown = useMemo(() => {
     const buckets = [
@@ -139,6 +160,57 @@ export function ProfilePage({
           </div>
         </Card>
       </div>
+
+      {savedGuides.length > 0 && (
+        <Card variant="outlined" className="profile-saved-guides">
+          <div className="profile-saved-head">
+            <h3>
+              <Star size={16} fill="currentColor" aria-hidden="true" /> Favorites &amp; Read Again
+            </h3>
+            <span>{savedGuides.length}</span>
+          </div>
+          <div className="profile-saved-list">
+            {savedGuides.map((fav) => {
+              const topicObj = (DOMAIN_TOPICS[fav.domainId] || []).find((x) => x.id === fav.topicId);
+              return (
+                <div key={fav.key} className="profile-saved-row">
+                  <button
+                    type="button"
+                    className="profile-saved-open"
+                    onClick={() => {
+                      if (topicObj && onOpenViewer) {
+                        onOpenViewer({
+                          title: fav.itemText,
+                          kind: 'markdown',
+                          content: getChecklistStudyGuide(topicObj, fav.itemIndex),
+                          sourceUrl: fav.sourceUrl || '',
+                        });
+                      } else {
+                        onNavigate(`/roadmap?domain=${encodeURIComponent(fav.domainId)}&topic=${encodeURIComponent(fav.topicId)}`);
+                      }
+                    }}
+                  >
+                    <BookOpen size={15} aria-hidden="true" />
+                    <span>
+                      <strong>{fav.itemText}</strong>
+                      <small>{fav.topicTitle}</small>
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    className="icon-btn is-active"
+                    aria-label="Remove from read again"
+                    title="Remove from read again"
+                    onClick={() => removeSavedGuide(fav.key)}
+                  >
+                    <Star size={14} fill="currentColor" aria-hidden="true" />
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </Card>
+      )}
 
       <PlatformProfiles
         linkedProfiles={linkedProfiles}
