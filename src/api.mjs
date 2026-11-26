@@ -422,10 +422,43 @@ function parseMediumUrlClient(rawUrl) {
         sourceUrl: url,
       };
     }
+    const ext = lower.includes('.') ? lower.split('.').pop() : '';
+    if (/^(graffle|pdf|zip|tar|gz|tgz|bz2|xz|7z|rar|doc|docx|ppt|pptx|xls|xlsx|key|pages|numbers|sketch|fig|psd|ai|eps|mp4|mov|m4v|webm|avi|mkv|mp3|wav|ogg|flac|ttf|otf|woff|woff2|eot|wasm|bin|exe|dll|so|dylib|class|jar|pyc|o|a|sqlite|sqlite3|db|parquet|pickle|pkl|pt|pth|onnx|pb|h5|hdf5|dmg|iso)$/.test(ext)) {
+      return {
+        plugin: 'github-content-client',
+        kind: 'binary',
+        title: gh.filename,
+        extension: ext,
+        repo: gh.repo,
+        filePath: gh.filePath,
+        downloadUrl: gh.rawUrl,
+        sourceUrl: url,
+      };
+    }
     try {
       const res = await fetch(gh.rawUrl, { signal: AbortSignal.timeout(7000) });
       if (res.ok) {
         const content = await res.text();
+        if (!lower.endsWith('.ipynb')) {
+          const sample = content.slice(0, 2000);
+          let bad = 0;
+          for (let i = 0; i < sample.length; i += 1) {
+            const c = sample.charCodeAt(i);
+            if (c === 0 || c === 0xfffd || (c < 32 && c !== 9 && c !== 10 && c !== 13)) bad += 1;
+          }
+          if (sample.includes('\u0000') || (sample.length > 0 && bad / sample.length > 0.06)) {
+            return {
+              plugin: 'github-content-client',
+              kind: 'binary',
+              title: gh.filename,
+              extension: ext || 'bin',
+              repo: gh.repo,
+              filePath: gh.filePath,
+              downloadUrl: gh.rawUrl,
+              sourceUrl: url,
+            };
+          }
+        }
         if (lower.endsWith('.ipynb')) {
           try {
             const nb = JSON.parse(content);

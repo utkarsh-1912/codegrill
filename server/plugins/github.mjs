@@ -24,6 +24,22 @@ const EXT_TO_LANG = {
   txt: 'text',
 };
 
+const BINARY_EXT_RE = /^(graffle|pdf|zip|tar|gz|tgz|bz2|xz|7z|rar|doc|docx|ppt|pptx|xls|xlsx|key|pages|numbers|sketch|fig|psd|ai|eps|mp4|mov|m4v|webm|avi|mkv|mp3|wav|ogg|flac|ttf|otf|woff|woff2|eot|wasm|bin|exe|dll|so|dylib|class|jar|pyc|o|a|sqlite|sqlite3|db|parquet|pickle|pkl|pt|pth|onnx|pb|h5|hdf5|dmg|iso)$/;
+
+function looksBinaryText(text) {
+  if (!text) return false;
+  const sample = text.slice(0, 2000);
+  if (sample.includes('\u0000')) return true;
+  let bad = 0;
+  for (let i = 0; i < sample.length; i += 1) {
+    const code = sample.charCodeAt(i);
+    if (code === 0xfffd || (code < 32 && code !== 9 && code !== 10 && code !== 13)) {
+      bad += 1;
+    }
+  }
+  return sample.length > 0 && bad / sample.length > 0.06;
+}
+
 export function toGitHubRawUrl(rawUrl) {
   try {
     const url = new URL(rawUrl);
@@ -143,6 +159,19 @@ export const githubPlugin = {
       };
     }
 
+    if (BINARY_EXT_RE.test(ext)) {
+      return {
+        plugin: 'github-content',
+        kind: 'binary',
+        title: filename,
+        extension: ext,
+        repo: `${parsed.owner}/${parsed.repo}`,
+        filePath: parsed.filePath,
+        downloadUrl: parsed.rawUrl,
+        sourceUrl: rawUrl,
+      };
+    }
+
     const response = await fetch(parsed.rawUrl, {
       signal,
       headers: { 'User-Agent': 'Codegrill-Plugin/1.0' },
@@ -151,6 +180,19 @@ export const githubPlugin = {
       throw new Error(`GitHub returned HTTP ${response.status}`);
     }
     const text = await response.text();
+
+    if (ext !== 'ipynb' && looksBinaryText(text)) {
+      return {
+        plugin: 'github-content',
+        kind: 'binary',
+        title: filename,
+        extension: ext || 'bin',
+        repo: `${parsed.owner}/${parsed.repo}`,
+        filePath: parsed.filePath,
+        downloadUrl: parsed.rawUrl,
+        sourceUrl: rawUrl,
+      };
+    }
 
     if (ext === 'ipynb') {
       try {

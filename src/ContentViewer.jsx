@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Badge, Button } from '@utkristi/ui';
-import { ArrowLeft, ArrowRight, Check, Copy, ExternalLink, FileCode2, Folder, Maximize2, Play, Star, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, Copy, Download, ExternalLink, FileArchive, FileCode2, Folder, Maximize2, Play, Star, X } from 'lucide-react';
 import { fetchPluginContent } from './api.mjs';
 import { getMessages } from './i18n.mjs';
 import { LoadingState } from './LoadingState.jsx';
@@ -189,6 +189,32 @@ export function ContentViewerBody({
         title={data.title || activeTitle}
         downloadUrl={data.downloadUrl || activeUrl}
       />
+    );
+  }
+
+  if (data?.kind === 'binary') {
+    const extLabel = (data.extension || 'binary').toUpperCase();
+    return (
+      <div className="binary-viewer-card">
+        <span className="binary-viewer-icon" aria-hidden="true">
+          <FileArchive size={26} />
+        </span>
+        <span className="binary-viewer-badge">.{extLabel}</span>
+        <h3>{data.title || activeTitle}</h3>
+        <p>
+          This is a binary file and cannot be previewed as plain text. Download the raw file to open it in its native app.
+        </p>
+        <div className="binary-viewer-actions">
+          {data.downloadUrl && (
+            <Button variant="solid" size="sm" href={data.downloadUrl} target="_blank" rel="noopener noreferrer">
+              <Download size={14} aria-hidden="true" /> Download {data.title || 'file'}
+            </Button>
+          )}
+          <Button variant="outlined" size="sm" href={data.sourceUrl || activeUrl} target="_blank" rel="noopener noreferrer">
+            View on GitHub <ExternalLink size={14} aria-hidden="true" />
+          </Button>
+        </div>
+      </div>
     );
   }
 
