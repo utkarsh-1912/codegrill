@@ -1678,7 +1678,7 @@ progress.diff-hard::-moz-progress-bar { background: #dc2626; }
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 16px;
+  padding: 10px 14px;
   border-bottom: 1px solid var(--ut-line);
   color: var(--muted);
 }
@@ -1688,7 +1688,7 @@ progress.diff-hard::-moz-progress-bar { background: #dc2626; }
   border: 0;
   background: transparent;
   color: var(--ink);
-  font-size: 1rem;
+  font-size: 0.88rem;
   outline: none;
 }
 
@@ -1702,14 +1702,25 @@ progress.diff-hard::-moz-progress-bar { background: #dc2626; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 12px;
-  padding: 11px 16px;
+  gap: 10px;
+  padding: 9px 14px;
   border: 0;
   border-bottom: 1px solid var(--ut-line);
   background: transparent;
   color: var(--ink);
+  font-size: 0.84rem;
+  line-height: 1.35;
   text-align: start;
   cursor: pointer;
+}
+
+.palette-item strong {
+  font-size: 0.84rem;
+}
+
+.palette-item small {
+  font-size: 0.74rem;
+  color: var(--muted);
 }
 
 .palette-item:hover {
@@ -5668,12 +5679,12 @@ input[type="search"]::-webkit-search-results-decoration {
 
 .palette-scope-tab {
   flex: 0 0 auto;
-  padding: 4px 10px;
+  padding: 3px 9px;
   border: 1px solid var(--ut-line);
   border-radius: 999px;
   background: var(--ut-bg-2);
   color: var(--muted);
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -7165,7 +7176,8 @@ input[type="search"]::-webkit-search-results-decoration {
   display: grid;
   grid-template-columns: minmax(0, 1.3fr) minmax(240px, 0.7fr);
   gap: 28px;
-  align-items: center;
+  align-items: start;
+  overflow: visible;
 }
 
 .legal-card-copy {
@@ -7191,9 +7203,18 @@ input[type="search"]::-webkit-search-results-decoration {
   border-radius: 14px;
   background: radial-gradient(circle at 50% 45%, var(--ember-soft) 0%, var(--ut-bg) 72%);
   border: 1px solid var(--ut-line);
-  position: relative;
+  position: sticky;
+  top: 88px;
+  align-self: start;
   overflow: hidden;
   min-height: 250px;
+}
+
+@media (max-width: 768px) {
+  .legal-card-art {
+    position: relative;
+    top: auto;
+  }
 }
 
 .legal-art-stage {
@@ -9275,19 +9296,26 @@ input[type="search"]::-webkit-search-results-decoration {
 /* Storage Mode Backup Banner, Public Portfolio & Contest Calendar */
 .storage-mode-banner {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px 18px;
-  padding: 14px 18px;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px;
   border-radius: 14px;
   background: var(--ut-bg-2);
   border: 1px solid var(--ut-line);
 }
 
+.storage-mode-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  width: 100%;
+}
+
 .storage-mode-copy {
   display: grid;
-  gap: 4px;
+  gap: 5px;
   min-width: 0;
 }
 
@@ -9302,18 +9330,22 @@ input[type="search"]::-webkit-search-results-decoration {
   align-items: center;
   gap: 6px;
   width: fit-content;
+  max-width: 100%;
   font-family: "IBM Plex Mono", Consolas, monospace;
   font-size: 0.72rem;
   font-weight: 600;
-  padding: 3px 9px;
+  padding: 4px 10px;
   border-radius: 999px;
-  background: rgba(255, 105, 61, 0.12);
-  color: var(--ember);
+  background: var(--ut-bg-3);
+  border: 1px solid var(--ut-line);
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 .storage-mode-pill.is-cloud {
-  background: rgba(22, 163, 74, 0.14);
-  color: #15803d;
+  background: var(--ember-soft);
+  border-color: color-mix(in srgb, var(--ut-accent) 26%, var(--ut-line));
+  color: var(--ut-accent);
 }
 
 .storage-mode-actions {
@@ -9788,23 +9820,31 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 .portfolio-publish-bar {
-  grid-column: 1 / -1;
+  width: 100%;
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px 16px;
   padding-top: 14px;
-  margin-top: 2px;
-  border-top: 1px solid color-mix(in srgb, var(--ut-line) 80%, transparent);
+  border-top: 1px solid var(--ut-line);
+}
+
+.portfolio-handle-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  flex: 1 1 320px;
+  min-width: 0;
 }
 
 .portfolio-handle-field {
   display: flex;
   align-items: center;
-  flex: 1 1 240px;
-  max-width: 380px;
-  height: 38px;
+  flex: 1 1 200px;
+  max-width: 300px;
+  height: 36px;
   border: 1px solid var(--ut-line);
   border-radius: 10px;
   background: var(--ut-bg);
@@ -9916,14 +9956,14 @@ input[type="search"]::-webkit-search-results-decoration {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 32px;
-  padding: 0 11px;
+  height: 36px;
+  padding: 0 12px;
   border-radius: 999px;
-  border: 1px solid color-mix(in srgb, #16a34a 35%, var(--ut-line));
-  background: color-mix(in srgb, #16a34a 10%, var(--ut-bg));
-  color: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--ut-accent) 28%, var(--ut-line));
+  background: var(--ember-soft);
+  color: var(--ut-accent);
   font-family: "IBM Plex Mono", Consolas, monospace;
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
@@ -9931,8 +9971,17 @@ input[type="search"]::-webkit-search-results-decoration {
 }
 
 .portfolio-live-pill:hover {
-  border-color: #16a34a;
-  background: color-mix(in srgb, #16a34a 16%, var(--ut-bg));
+  border-color: var(--ut-accent);
+  background: color-mix(in srgb, var(--ut-accent) 16%, var(--ut-bg));
+}
+
+.portfolio-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--ut-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ut-accent) 22%, transparent);
+  flex-shrink: 0;
 }
 
 .portfolio-status-note {

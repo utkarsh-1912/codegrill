@@ -236,41 +236,43 @@ export function ProfilePage({
       </div>
 
       <Card variant="outlined" className="storage-mode-banner">
-        <div className="storage-mode-copy">
-          <span className={`storage-mode-pill ${authSession || backendOnline ? 'is-cloud' : 'is-local'}`}>
-            {authSession || backendOnline ? <Cloud size={13} aria-hidden="true" /> : <HardDrive size={13} aria-hidden="true" />}
-            {authSession
-              ? `${t.controls.backendOnline} · ${authSession.email}`
-              : backendOnline
-                ? t.controls.backendOnline
-                : t.studio.backup.guestLocal}
-          </span>
-          <p>{backupMsg || authError || t.studio.backup.backupHint}</p>
-        </div>
-        <div className="storage-mode-actions">
-          {firebaseEnabled && !authSession && (
-            <Button variant="solid" size="sm" onClick={() => setAuthOpen((v) => !v)}>
-              {authOpen ? t.sheets.cancel : t.studio.auth.signInToSync}
+        <div className="storage-mode-row">
+          <div className="storage-mode-copy">
+            <span className={`storage-mode-pill ${authSession || backendOnline ? 'is-cloud' : 'is-local'}`}>
+              {authSession || backendOnline ? <Cloud size={13} aria-hidden="true" /> : <HardDrive size={13} aria-hidden="true" />}
+              {authSession
+                ? `${t.controls.backendOnline} · ${authSession.email}`
+                : backendOnline
+                  ? t.controls.backendOnline
+                  : t.studio.backup.guestLocal}
+            </span>
+            <p>{backupMsg || authError || t.studio.backup.backupHint}</p>
+          </div>
+          <div className="storage-mode-actions">
+            {firebaseEnabled && !authSession && (
+              <Button variant="solid" size="sm" onClick={() => setAuthOpen((v) => !v)}>
+                {authOpen ? t.sheets.cancel : t.studio.auth.signInToSync}
+              </Button>
+            )}
+            <Button variant="outlined" size="sm" onClick={handleExportJson}>
+              <Download size={14} aria-hidden="true" /> {t.studio.backup.exportJson}
             </Button>
-          )}
-          {authSession && (
-            <Button variant="outlined" size="sm" onClick={() => onAuthSignOut?.()}>
-              {t.studio.auth.signOut}
+            <Button variant="outlined" size="sm" onClick={() => importInputRef.current?.click()}>
+              <Upload size={14} aria-hidden="true" /> {t.studio.backup.importJson}
             </Button>
-          )}
-          <Button variant="outlined" size="sm" onClick={handleExportJson}>
-            <Download size={14} aria-hidden="true" /> {t.studio.backup.exportJson}
-          </Button>
-          <Button variant="outlined" size="sm" onClick={() => importInputRef.current?.click()}>
-            <Upload size={14} aria-hidden="true" /> {t.studio.backup.importJson}
-          </Button>
-          <input
-            ref={importInputRef}
-            type="file"
-            accept="application/json,.json"
-            style={{ display: 'none' }}
-            onChange={handleImportJson}
-          />
+            {authSession && (
+              <Button variant="outlined" size="sm" onClick={() => onAuthSignOut?.()}>
+                {t.studio.auth.signOut}
+              </Button>
+            )}
+            <input
+              ref={importInputRef}
+              type="file"
+              accept="application/json,.json"
+              style={{ display: 'none' }}
+              onChange={handleImportJson}
+            />
+          </div>
         </div>
         {firebaseEnabled && !authSession && authOpen && (
           <form
@@ -386,18 +388,32 @@ export function ProfilePage({
               }
             }}
           >
-            <div className="portfolio-handle-field">
-              <span className="portfolio-handle-prefix" aria-hidden="true">
-                <Globe size={13} />
-                <span>/u/</span>
-              </span>
-              <input
-                type="text"
-                placeholder={t.studio.auth.handlePlaceholder}
-                value={pubHandle}
-                onChange={(e) => setPubHandle(e.target.value)}
-                aria-label={t.studio.auth.handlePlaceholder}
-              />
+            <div className="portfolio-handle-group">
+              <div className="portfolio-handle-field">
+                <span className="portfolio-handle-prefix" aria-hidden="true">
+                  <Globe size={13} />
+                  <span>/u/</span>
+                </span>
+                <input
+                  type="text"
+                  placeholder={t.studio.auth.handlePlaceholder}
+                  value={pubHandle}
+                  onChange={(e) => setPubHandle(e.target.value)}
+                  aria-label={t.studio.auth.handlePlaceholder}
+                />
+              </div>
+
+              {pubEnabled && pubHandle && (
+                <a
+                  className="portfolio-live-pill"
+                  href={`/u/${encodeURIComponent(pubHandle)}`}
+                  onClick={(e) => { e.preventDefault(); onNavigate(`/u/${encodeURIComponent(pubHandle)}`); }}
+                >
+                  <span className="portfolio-live-dot" aria-hidden="true" />
+                  <span>/u/{pubHandle}</span>
+                  <ExternalLink size={12} aria-hidden="true" />
+                </a>
+              )}
             </div>
 
             <div className="portfolio-publish-controls">
@@ -413,21 +429,9 @@ export function ProfilePage({
                 <span className="ember-switch-label">{t.studio.auth.publishPortfolio}</span>
               </label>
 
-              <Button variant="outlined" size="sm" type="submit" disabled={pubBusy}>
+              <Button variant="solid" size="sm" type="submit" disabled={pubBusy}>
                 {pubBusy ? '...' : t.studio.auth.savePortfolio}
               </Button>
-
-              {pubEnabled && pubHandle && (
-                <a
-                  className="portfolio-live-pill"
-                  href={`/u/${encodeURIComponent(pubHandle)}`}
-                  onClick={(e) => { e.preventDefault(); onNavigate(`/u/${encodeURIComponent(pubHandle)}`); }}
-                >
-                  <span className="sync-dot is-online" aria-hidden="true" />
-                  <span>/u/{pubHandle}</span>
-                  <ExternalLink size={12} aria-hidden="true" />
-                </a>
-              )}
 
               {pubMsg && (
                 <span className="portfolio-status-note" role="status">
