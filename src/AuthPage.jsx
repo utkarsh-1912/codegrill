@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Button, Card } from '@utkristi/ui';
-import { ArrowRight, CheckCircle2, Cloud, Lock, Mail, ShieldCheck } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Cloud, Eye, EyeOff, Globe, Lock, Mail, ShieldCheck } from 'lucide-react';
 import { BrandLogo } from './BrandLogo.jsx';
+import { Mascot } from './Mascot.jsx';
 import { isFirebaseConfigured, isGoogleAuthConfigured, signInWithEmail, signInWithGoogle, signUpWithEmail } from './firebaseAuth.mjs';
 import { getMessages } from './i18n.mjs';
 
@@ -17,10 +18,32 @@ export function AuthPage({
   const [tab, setTab] = useState(mode === 'signup' ? 'signup' : 'login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const firebaseReady = isFirebaseConfigured();
   const googleReady = isGoogleAuthConfigured();
+
+  const mascotMood = busy
+    ? 'loading'
+    : error
+      ? 'lost'
+      : passwordFocused
+        ? 'shield'
+        : tab === 'signup'
+          ? 'happy'
+          : 'idle';
+
+  const mascotCaption = busy
+    ? 'Authenticating & syncing...'
+    : error
+      ? 'Check your details and retry'
+      : passwordFocused
+        ? 'Privacy shield active'
+        : tab === 'signup'
+          ? 'Ready to sync your journey'
+          : 'Welcome back to the forge';
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -68,9 +91,14 @@ export function AuthPage({
     return (
       <section className="page-section auth-page">
         <Card variant="outlined" className="auth-card auth-signed-in-card">
-          <CheckCircle2 size={32} className="auth-success-icon" aria-hidden="true" />
+          <div className="auth-mascot-stage auth-mascot-stage-sm" aria-hidden="true">
+            <div className="legal-orbit-ring ring-1" />
+            <Mascot mood="happy" size={116} label="Signed in Ember companion" />
+          </div>
           <h1>{authSession.displayName || authSession.email}</h1>
-          <p>{t.controls.backendOnline}</p>
+          <p className="auth-signed-in-sub">
+            <span className="sync-dot is-online" aria-hidden="true" /> {t.controls.backendOnline}
+          </p>
           <div className="auth-signed-in-actions">
             <Button variant="solid" onClick={() => onNavigate?.('/profile')}>
               {t.nav.profile} <ArrowRight size={15} aria-hidden="true" />
@@ -86,38 +114,51 @@ export function AuthPage({
 
   return (
     <section className="page-section auth-page">
-      <div className="auth-shell">
-        <div className="auth-aside">
-          <a
-            href="/"
-            className="auth-brand-link"
-            onClick={(e) => { e.preventDefault(); onNavigate?.('/'); }}
-          >
-            <BrandLogo name={brandName} size={32} />
-          </a>
-          <h1 lang={locale}>
-            {tab === 'signup' ? t.studio.auth.createAccount : t.studio.auth.signIn}
-            <span>.</span>
-          </h1>
-          <p>{t.studio.backup.backupHint}</p>
+      <div className="auth-shell auth-shell-v2">
+        <div className="auth-aside auth-aside-v2">
+          <div className="auth-aside-top">
+            <a
+              href="/"
+              className="auth-brand-link"
+              onClick={(e) => { e.preventDefault(); onNavigate?.('/'); }}
+            >
+              <BrandLogo name={brandName} size={30} />
+            </a>
+            <span className="auth-badge-pill">
+              <ShieldCheck size={12} aria-hidden="true" />
+              <span>Cloud Sync</span>
+            </span>
+          </div>
 
-          <ul className="auth-feature-list">
-            <li>
-              <Cloud size={16} aria-hidden="true" />
-              <span>Real-time Neon PostgreSQL sync across all your devices</span>
-            </li>
-            <li>
-              <ShieldCheck size={16} aria-hidden="true" />
-              <span>Lossless guest progress migration with conflict-safe OCC</span>
-            </li>
-            <li>
-              <CheckCircle2 size={16} aria-hidden="true" />
-              <span>Public recruiter portfolio, custom sheets &amp; 7-platform stats</span>
-            </li>
-          </ul>
+          <div className="auth-mascot-stage" aria-hidden="true">
+            <div className="auth-mascot-glow" />
+            <div className="legal-orbit-ring ring-1" />
+            <div className="legal-orbit-ring ring-2" />
+            <Mascot mood={mascotMood} size={142} label="Ember authentication companion" />
+            <span className="marketing-hero-caption auth-mascot-caption">{mascotCaption}</span>
+          </div>
+
+          <div className="auth-aside-copy">
+            <h1 lang={locale}>
+              {tab === 'signup' ? t.studio.auth.createAccount : t.studio.auth.signIn}
+              <span>.</span>
+            </h1>
+            <p>{t.studio.backup.backupHint}</p>
+          </div>
+
+          <div className="auth-pillar-pills">
+            <span><Cloud size={13} aria-hidden="true" /> Neon Sync</span>
+            <span><ShieldCheck size={13} aria-hidden="true" /> Conflict-Safe OCC</span>
+            <span><Globe size={13} aria-hidden="true" /> 6 Languages</span>
+          </div>
         </div>
 
-        <Card variant="outlined" className="auth-card">
+        <Card variant="outlined" className="auth-card auth-card-v2">
+          <div className="auth-card-head">
+            <h2>{tab === 'signup' ? t.studio.auth.createAccount : t.studio.auth.signIn}</h2>
+            <p>{t.studio.auth.signInToSync}</p>
+          </div>
+
           <div className="auth-mode-tabs" role="tablist">
             <button
               type="button"
@@ -145,7 +186,7 @@ export function AuthPage({
             disabled={busy}
             onClick={handleGoogle}
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+            <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true">
               <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.44a5.5 5.5 0 0 1-2.39 3.61v3h3.87c2.26-2.08 3.57-5.15 3.57-8.64z" />
               <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.96H1.29v3.09A12 12 0 0 0 12 24z" />
               <path fill="#FBBC05" d="M5.28 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.38-2.28V6.63H1.29A12 12 0 0 0 0 12c0 1.94.46 3.77 1.29 5.37l3.99-3.09z" />
@@ -179,14 +220,24 @@ export function AuthPage({
               <div className="auth-input-wrap">
                 <Lock size={15} aria-hidden="true" />
                 <input
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   minLength={6}
                   autoComplete={tab === 'signup' ? 'new-password' : 'current-password'}
                   placeholder="••••••••"
                   value={password}
+                  onFocus={() => setPasswordFocused(true)}
+                  onBlur={() => setPasswordFocused(false)}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+                <button
+                  type="button"
+                  className="auth-eye-btn"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                >
+                  {showPassword ? <EyeOff size={15} aria-hidden="true" /> : <Eye size={15} aria-hidden="true" />}
+                </button>
               </div>
             </label>
 
@@ -204,14 +255,15 @@ export function AuthPage({
             </Button>
           </form>
 
-          <p className="auth-guest-footer">
+          <div className="auth-guest-footer">
             <a
               href="/roadmap"
               onClick={(e) => { e.preventDefault(); onNavigate?.('/roadmap'); }}
             >
-              Continue as guest without an account →
+              <CheckCircle2 size={13} aria-hidden="true" />
+              <span>Continue as guest without an account</span>
             </a>
-          </p>
+          </div>
         </Card>
       </div>
     </section>
