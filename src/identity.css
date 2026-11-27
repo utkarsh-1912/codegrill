@@ -10896,3 +10896,106 @@ input[type="search"]::-webkit-search-results-decoration {
   color: var(--muted);
   font-size: 0.88rem;
 }
+
+/* ==========================================================================
+   LIGHT-THEME CONTRAST GUARD FOR PERMANENTLY DARK ESPRESSO SURFACES
+   Re-scopes @utkristi/ui & app ink/border/surface tokens locally on every
+   dark hero, banner, studio header, and auth aside so buttons, badges,
+   headings, brand lockups, and pills never inherit dark light-theme ink.
+   ========================================================================== */
+
+:is(
+  .landing-hero,
+  .rooms-hero-banner,
+  .marketing-hero-banner,
+  .profile-hero-banner,
+  .room-studio-hero,
+  .page-section > .section-heading,
+  .marketing-cta-banner,
+  .contests-hero-banner,
+  .auth-aside,
+  .player-dock-controls
+) {
+  --ut-ink: #fff7ee;
+  --ut-ink-2: #e6d4c7;
+  --ut-ink-3: #c4afa0;
+  --ink: #fff7ee;
+  --muted: #e6d4c7;
+  --ut-line: rgba(255, 247, 238, 0.16);
+  --ut-line-2: rgba(255, 247, 238, 0.28);
+  --ut-bg: rgba(255, 247, 238, 0.08);
+  --ut-bg-2: rgba(255, 247, 238, 0.1);
+  --ut-bg-3: rgba(255, 247, 238, 0.15);
+  --ut-tint: rgba(255, 138, 61, 0.18);
+  --ember-soft: rgba(255, 138, 61, 0.18);
+  --ut-accent: #ff8c52;
+  --ut-on-accent: #1c1009;
+  --ut-solid: #d94e1f;
+  --ut-on-solid: #fff7ee;
+  --ut-solid-hover: #ea580c;
+  --ut-on-solid-hover: #ffffff;
+  color: #fff7ee;
+}
+
+:is(
+  .landing-hero,
+  .rooms-hero-banner,
+  .marketing-hero-banner,
+  .profile-hero-banner,
+  .room-studio-hero,
+  .page-section > .section-heading,
+  .marketing-cta-banner,
+  .contests-hero-banner,
+  .auth-aside,
+  .player-dock-controls
+) :is(.btn-ghost, .btn-plain, .btn-quiet, .profile-hero-ghost-btn) {
+  color: #fff7ee;
+}
+
+:is(
+  .landing-hero,
+  .rooms-hero-banner,
+  .marketing-hero-banner,
+  .profile-hero-banner,
+  .room-studio-hero,
+  .page-section > .section-heading,
+  .marketing-cta-banner,
+  .contests-hero-banner,
+  .auth-aside
+) :is(.btn-ghost, .profile-hero-ghost-btn) {
+  background: rgba(255, 247, 238, 0.07);
+  border-color: rgba(255, 247, 238, 0.22);
+  color: #fff7ee;
+}
+
+:is(
+  .landing-hero,
+  .rooms-hero-banner,
+  .marketing-hero-banner,
+  .profile-hero-banner,
+  .room-studio-hero,
+  .page-section > .section-heading,
+  .marketing-cta-banner,
+  .contests-hero-banner,
+  .auth-aside
+) :is(.btn-ghost, .profile-hero-ghost-btn):hover:not(:disabled, [aria-disabled="true"]) {
+  background: rgba(255, 247, 238, 0.15);
+  border-color: rgba(255, 138, 61, 0.6);
+  color: #ffffff;
+}
+
+:is(
+  .landing-hero,
+  .rooms-hero-banner,
+  .marketing-hero-banner,
+  .profile-hero-banner,
+  .room-studio-hero,
+  .page-section > .section-heading,
+  .marketing-cta-banner,
+  .contests-hero-banner,
+  .auth-aside
+) .contest-countdown-pill.is-live {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.45);
+  background: rgba(22, 163, 74, 0.2);
+}

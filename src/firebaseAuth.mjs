@@ -1,16 +1,31 @@
 const AUTH_SESSION_KEY = 'codegrill:auth-session:v1';
 let lazyFirebaseAuth = null;
 
+// Direct `import.meta.env.VITE_*` (without optional chaining) is required for Vite static replacement.
+const BUILD_FIREBASE_API_KEY = String((import.meta.env && import.meta.env.VITE_FIREBASE_API_KEY) || '').trim();
+const BUILD_FIREBASE_PROJECT_ID = String((import.meta.env && import.meta.env.VITE_FIREBASE_PROJECT_ID) || '').trim();
+const BUILD_FIREBASE_AUTH_DOMAIN = String(
+  (import.meta.env && import.meta.env.VITE_FIREBASE_AUTH_DOMAIN)
+  || (BUILD_FIREBASE_PROJECT_ID ? `${BUILD_FIREBASE_PROJECT_ID}.firebaseapp.com` : '')
+).trim();
+
+let runtimeFirebaseConfig = {
+  apiKey: BUILD_FIREBASE_API_KEY,
+  authDomain: BUILD_FIREBASE_AUTH_DOMAIN,
+  projectId: BUILD_FIREBASE_PROJECT_ID,
+};
+let runtimeConfigPromise = null;
+
 export function getFirebaseApiKey() {
-  return String(import.meta?.env?.VITE_FIREBASE_API_KEY || '').trim();
+  return runtimeFirebaseConfig.apiKey;
 }
 
 export function getFirebaseAuthDomain() {
-  return String(import.meta?.env?.VITE_FIREBASE_AUTH_DOMAIN || '').trim();
+  return runtimeFirebaseConfig.authDomain || (runtimeFirebaseConfig.projectId ? `${runtimeFirebaseConfig.projectId}.firebaseapp.com` : '');
 }
 
 export function getFirebaseProjectId() {
-  return String(import.meta?.env?.VITE_FIREBASE_PROJECT_ID || '').trim();
+  return runtimeFirebaseConfig.projectId;
 }
 
 export function isFirebaseConfigured() {
@@ -19,6 +34,32 @@ export function isFirebaseConfigured() {
 
 export function isGoogleAuthConfigured() {
   return Boolean(getFirebaseApiKey() && getFirebaseAuthDomain() && getFirebaseProjectId());
+}
+
+export async function ensureFirebaseConfig() {
+  if (isGoogleAuthConfigured()) return runtimeFirebaseConfig;
+  if (typeof fetch !== 'function') return runtimeFirebaseConfig;
+  if (!runtimeConfigPromise) {
+    runtimeConfigPromise = fetch('/api/config', { cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        const fb = data?.firebase;
+        if (fb && typeof fb === 'object') {
+          const apiKey = String(fb.apiKey || runtimeFirebaseConfig.apiKey || '').trim();
+          const projectId = String(fb.projectId || runtimeFirebaseConfig.projectId || '').trim();
+          const authDomain = String(
+            fb.authDomain || runtimeFirebaseConfig.authDomain || (projectId ? `${projectId}.firebaseapp.com` : '')
+          ).trim();
+          runtimeFirebaseConfig = { apiKey, authDomain, projectId };
+        }
+        return runtimeFirebaseConfig;
+      })
+      .catch(() => runtimeFirebaseConfig)
+      .finally(() => {
+        if (!isGoogleAuthConfigured()) runtimeConfigPromise = null;
+      });
+  }
+  return runtimeConfigPromise;
 }
 
 export function readAuthSession() {
@@ -41,6 +82,7 @@ function writeAuthSession(session) {
 }
 
 async function callIdentityToolkit(endpoint, email, password) {
+  await ensureFirebaseConfig();
   const apiKey = getFirebaseApiKey();
   if (!apiKey) throw new Error('Firebase Authentication is not configured.');
   const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:${endpoint}?key=${encodeURIComponent(apiKey)}`, {
@@ -73,6 +115,7 @@ export function signUpWithEmail(email, password) {
 }
 
 export async function signInWithGoogle() {
+  await ensureFirebaseConfig();
   const apiKey = getFirebaseApiKey();
   const authDomain = getFirebaseAuthDomain();
   const projectId = getFirebaseProjectId();

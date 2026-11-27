@@ -139,11 +139,28 @@ export function createApiHandler(configOverrides = {}) {
       }
 
       if (req.method === 'GET' && pathname === '/api/config') {
+        const firebaseApiKey = String(
+          process.env.VITE_FIREBASE_API_KEY || process.env.FIREBASE_API_KEY || process.env.NEXT_PUBLIC_FIREBASE_API_KEY || ''
+        ).trim();
+        const firebaseProjectId = String(
+          process.env.VITE_FIREBASE_PROJECT_ID || process.env.FIREBASE_PROJECT_ID || process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || ''
+        ).trim();
+        const firebaseAuthDomain = String(
+          process.env.VITE_FIREBASE_AUTH_DOMAIN
+          || process.env.FIREBASE_AUTH_DOMAIN
+          || process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN
+          || (firebaseProjectId ? `${firebaseProjectId}.firebaseapp.com` : '')
+        ).trim();
         return sendJson(req, res, 200, {
           ...getPublicConfig(config, plugins.list()),
           authEnabled: enforceAuth,
           cloudDb: store.driver === 'neon-postgresql',
           workspaceApiEnabled,
+          firebase: {
+            apiKey: firebaseApiKey,
+            authDomain: firebaseAuthDomain,
+            projectId: firebaseProjectId,
+          },
         });
       }
 

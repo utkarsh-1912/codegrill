@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Card } from '@utkristi/ui';
 import { ArrowRight, CheckCircle2, Cloud, Eye, EyeOff, Globe, Lock, Mail, ShieldCheck } from 'lucide-react';
 import { BrandLogo } from './BrandLogo.jsx';
 import { Mascot } from './Mascot.jsx';
-import { isFirebaseConfigured, isGoogleAuthConfigured, signInWithEmail, signInWithGoogle, signUpWithEmail } from './firebaseAuth.mjs';
+import { ensureFirebaseConfig, isFirebaseConfigured, isGoogleAuthConfigured, signInWithEmail, signInWithGoogle, signUpWithEmail } from './firebaseAuth.mjs';
 import { getMessages } from './i18n.mjs';
 
 export function AuthPage({
@@ -22,8 +22,18 @@ export function AuthPage({
   const [passwordFocused, setPasswordFocused] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const firebaseReady = isFirebaseConfigured();
-  const googleReady = isGoogleAuthConfigured();
+  const [firebaseReady, setFirebaseReady] = useState(() => isFirebaseConfigured());
+  const [googleReady, setGoogleReady] = useState(() => isGoogleAuthConfigured());
+
+  useEffect(() => {
+    let active = true;
+    ensureFirebaseConfig().then(() => {
+      if (!active) return;
+      setFirebaseReady(isFirebaseConfigured());
+      setGoogleReady(isGoogleAuthConfigured());
+    });
+    return () => { active = false; };
+  }, []);
 
   const mascotMood = busy
     ? 'loading'
@@ -47,13 +57,17 @@ export function AuthPage({
 
   async function handleSubmit(event) {
     event.preventDefault();
-    if (!firebaseReady) {
-      setError('Firebase Authentication is not configured yet. Add VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, and VITE_FIREBASE_PROJECT_ID in Vercel Environment Variables and redeploy.');
-      return;
-    }
     setBusy(true);
     setError('');
     try {
+      await ensureFirebaseConfig();
+      const ready = isFirebaseConfigured();
+      setFirebaseReady(ready);
+      setGoogleReady(isGoogleAuthConfigured());
+      if (!ready) {
+        setError('Firebase Authentication is not configured yet. Add VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, and VITE_FIREBASE_PROJECT_ID in Vercel Environment Variables and redeploy.');
+        return;
+      }
       const sess = tab === 'signup'
         ? await signUpWithEmail(email, password)
         : await signInWithEmail(email, password);
@@ -67,13 +81,17 @@ export function AuthPage({
   }
 
   async function handleGoogle() {
-    if (!googleReady) {
-      setError('Google sign-in requires VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, and VITE_FIREBASE_PROJECT_ID in environment variables.');
-      return;
-    }
     setBusy(true);
     setError('');
     try {
+      await ensureFirebaseConfig();
+      const ready = isGoogleAuthConfigured();
+      setFirebaseReady(isFirebaseConfigured());
+      setGoogleReady(ready);
+      if (!ready) {
+        setError('Google sign-in requires VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, and VITE_FIREBASE_PROJECT_ID in environment variables.');
+        return;
+      }
       const sess = await signInWithGoogle();
       await onAuthSignIn?.(sess);
       onNavigate?.('/profile');
