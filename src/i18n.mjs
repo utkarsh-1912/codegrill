@@ -2493,6 +2493,7 @@ const EXTRA_EXT_SECTIONS = {
       contests: 'Contests',
     },
     auth: {
+      getStarted: 'Get started',
       signInToSync: 'Sign in to Sync',
       signOut: 'Sign out',
       emailPlaceholder: 'Email',
@@ -2549,6 +2550,7 @@ const EXTRA_EXT_SECTIONS = {
       contests: 'コンテスト',
     },
     auth: {
+      getStarted: 'はじめる',
       signInToSync: 'サインインして同期',
       signOut: 'サインアウト',
       emailPlaceholder: 'メールアドレス',
@@ -2605,6 +2607,7 @@ const EXTRA_EXT_SECTIONS = {
       contests: 'कॉन्टेस्ट',
     },
     auth: {
+      getStarted: 'शुरू करें',
       signInToSync: 'सिंक के लिए साइन इन करें',
       signOut: 'साइन आउट',
       emailPlaceholder: 'ईमेल',
@@ -2661,6 +2664,7 @@ const EXTRA_EXT_SECTIONS = {
       contests: 'Concursos',
     },
     auth: {
+      getStarted: 'Comenzar',
       signInToSync: 'Inicia sesión para sincronizar',
       signOut: 'Cerrar sesión',
       emailPlaceholder: 'Correo electrónico',
@@ -2717,6 +2721,7 @@ const EXTRA_EXT_SECTIONS = {
       contests: '竞赛日历',
     },
     auth: {
+      getStarted: '立即开始',
       signInToSync: '登录以同步',
       signOut: '退出登录',
       emailPlaceholder: '电子邮箱',
@@ -2773,6 +2778,7 @@ const EXTRA_EXT_SECTIONS = {
       contests: '대회 일정',
     },
     auth: {
+      getStarted: '시작하기',
       signInToSync: '로그인하여 동기화',
       signOut: '로그아웃',
       emailPlaceholder: '이메일',

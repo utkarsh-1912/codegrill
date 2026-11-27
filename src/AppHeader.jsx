@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { Calendar, ChevronRight, Maximize2, Menu, Minimize2, Moon, RotateCcw, Search, Settings, Sun, User, X } from 'lucide-react';
+import { ArrowRight, Calendar, ChevronRight, Maximize2, Menu, Minimize2, Moon, RotateCcw, Search, Sun, User, X } from 'lucide-react';
 import { BrandLogo } from './BrandLogo.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
 import { getMessages } from './i18n.mjs';
@@ -135,21 +135,38 @@ export function AppHeader({
                 <kbd className="header-search-kbd">⌘K</kbd>
               </button>
 
+              {!authSession && (
+                <a
+                  href="/profile?auth=1"
+                  className="header-get-started-btn"
+                  onClick={linkClick('/profile?auth=1')}
+                >
+                  <span>{t.studio.auth.getStarted}</span>
+                  <ArrowRight size={13} aria-hidden="true" />
+                </a>
+              )}
+
               <div className="settings-anchor" ref={settingsRef}>
                 <button
                   type="button"
-                  className={`locale-field icon-only-control ${settingsOpen ? 'is-active' : ''}`}
+                  className={`locale-field icon-only-control header-user-btn ${settingsOpen ? 'is-active' : ''} ${authSession ? 'is-signed-in' : ''}`}
                   onClick={() => setSettingsOpen((v) => !v)}
                   aria-expanded={settingsOpen}
                   aria-haspopup="true"
-                  aria-label={t.palette.settings}
-                  title={t.palette.settings}
+                  aria-label={authSession?.displayName || authSession?.email || t.nav.profile}
+                  title={authSession?.displayName || authSession?.email || t.nav.profile}
                 >
-                  <Settings size={18} aria-hidden="true" />
+                  {authSession ? (
+                    <span className="header-user-initial" aria-hidden="true">
+                      {(authSession.displayName || authSession.email || 'U').slice(0, 1).toUpperCase()}
+                    </span>
+                  ) : (
+                    <User size={18} aria-hidden="true" />
+                  )}
                 </button>
 
                 {settingsOpen && (
-                  <div className="settings-popover settings-menu-v2" role="dialog" aria-label={t.palette.settings}>
+                  <div className="settings-popover settings-menu-v2" role="dialog" aria-label={t.nav.profile}>
                     <a
                       href="/profile"
                       className={`settings-profile-card ${page === 'profile' ? 'is-active' : ''}`}
@@ -172,6 +189,17 @@ export function AppHeader({
                       </span>
                       <ChevronRight size={15} className="settings-profile-chevron" aria-hidden="true" />
                     </a>
+
+                    {!authSession && (
+                      <a
+                        href="/profile?auth=1"
+                        className="settings-get-started-cta"
+                        onClick={linkClick('/profile?auth=1')}
+                      >
+                        <span>{t.studio.auth.getStarted} · {t.studio.auth.signIn}</span>
+                        <ArrowRight size={14} aria-hidden="true" />
+                      </a>
+                    )}
 
                     <a
                       href="/contests"
@@ -333,6 +361,17 @@ export function AppHeader({
                 </span>
                 <ChevronRight size={15} className="settings-profile-chevron" aria-hidden="true" />
               </a>
+
+              {!authSession && (
+                <a
+                  href="/profile?auth=1"
+                  className="settings-get-started-cta mobile-get-started-cta"
+                  onClick={linkClick('/profile?auth=1')}
+                >
+                  <span>{t.studio.auth.getStarted} · {t.studio.auth.signIn}</span>
+                  <ArrowRight size={14} aria-hidden="true" />
+                </a>
+              )}
 
               <nav className="mobile-sidebar-nav" aria-label="Study navigation">
                 {pathIds.map((id, index) => (

@@ -151,14 +151,14 @@ export function SitePages({
             <h1 lang={locale}>{t.site.landingTitle}<span>.</span></h1>
             <p>{t.site.landingDesc}</p>
             <div className="rooms-actions landing-cta-row">
-              <Button variant="solid" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
-                {t.site.exploreRoadmap} <ArrowRight size={15} aria-hidden="true" />
+              <Button variant="solid" href="/profile?auth=1" onClick={navHandler(onNavigate, '/profile?auth=1')}>
+                {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
+              </Button>
+              <Button variant="outlined" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
+                {t.site.exploreRoadmap}
               </Button>
               <Button variant="outlined" href="/sheets" onClick={navHandler(onNavigate, '/sheets')}>
                 {t.hero.exploreSheets}
-              </Button>
-              <Button variant="quiet" href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
-                {t.nav.rooms}
               </Button>
             </div>
           </div>
@@ -308,6 +308,22 @@ export function SitePages({
             </Card>
           </div>
         </section>
+
+        <section className="marketing-cta-banner">
+          <div className="marketing-cta-copy">
+            <span className="workflow-step-badge">{ecosystem} · {brandName}</span>
+            <h2>{t.studio.auth.signInToSync}</h2>
+            <p>{t.studio.backup.backupHint}</p>
+          </div>
+          <div className="marketing-cta-actions profile-hero-actions">
+            <Button variant="solid" href="/profile?auth=1" onClick={navHandler(onNavigate, '/profile?auth=1')}>
+              {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
+            </Button>
+            <Button variant="outlined" className="profile-hero-ghost-btn" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
+              {t.site.exploreRoadmap}
+            </Button>
+          </div>
+        </section>
       </div>
     );
   }
@@ -322,14 +338,17 @@ export function SitePages({
           mood="loading"
           caption="4-step mastery loop"
           actions={(
-            <>
-              <Button variant="solid" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
-                {t.site.exploreRoadmap} <ArrowRight size={15} aria-hidden="true" />
+            <div className="marketing-hero-actions profile-hero-actions">
+              <Button variant="solid" href="/profile?auth=1" onClick={navHandler(onNavigate, '/profile?auth=1')}>
+                {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
               </Button>
-              <Button variant="outlined" href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
+              <Button variant="outlined" className="profile-hero-ghost-btn" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
+                {t.site.exploreRoadmap}
+              </Button>
+              <Button variant="outlined" className="profile-hero-ghost-btn" href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
                 {t.site.goToRooms}
               </Button>
-            </>
+            </div>
           )}
         />
         <Workflow locale={locale} onNavigate={onNavigate} />
@@ -395,14 +414,17 @@ export function SitePages({
           mood="happy"
           caption={`${ecosystem} · ${problemCount} problems · 6 domains`}
           actions={(
-            <>
-              <Button variant="solid" href="/sheets" onClick={navHandler(onNavigate, '/sheets')}>
-                {t.hero.exploreSheets} <ArrowRight size={15} aria-hidden="true" />
+            <div className="marketing-hero-actions profile-hero-actions">
+              <Button variant="solid" href="/profile?auth=1" onClick={navHandler(onNavigate, '/profile?auth=1')}>
+                {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
               </Button>
-              <Button variant="outlined" href="/profile" onClick={navHandler(onNavigate, '/profile')}>
+              <Button variant="outlined" className="profile-hero-ghost-btn" href="/sheets" onClick={navHandler(onNavigate, '/sheets')}>
+                {t.hero.exploreSheets}
+              </Button>
+              <Button variant="outlined" className="profile-hero-ghost-btn" href="/profile" onClick={navHandler(onNavigate, '/profile')}>
                 {t.nav.profile}
               </Button>
-            </>
+            </div>
           )}
         />
 
@@ -442,24 +464,24 @@ export function SitePages({
           </div>
           <div className="about-feature-grid">
             <Card variant="outlined" className="about-feature-card">
-              <span className="workflow-step-num">01</span>
+              <span className="workflow-step-badge">01</span>
               <h3>6 Connected Domains</h3>
-              <p>Move seamlessly from DSA into System Design (HLD), Low-Level Design (LLD), SQL & Databases, Concurrency & OS, and AI Systems & Behavioral prep.</p>
+              <p>Move seamlessly from DSA into System Design (HLD), Low-Level Design (LLD), SQL &amp; Databases, Concurrency &amp; OS, and AI Systems &amp; Behavioral prep.</p>
             </Card>
             <Card variant="outlined" className="about-feature-card">
-              <span className="workflow-step-num">02</span>
+              <span className="workflow-step-badge">02</span>
               <h3>In-App Multi-Format Viewers</h3>
               <p>Read GitHub repositories, Markdown with KaTeX math and Mermaid diagrams, Jupyter notebooks (.ipynb), Anki decks (.apkg), and captioned video walkthroughs without leaving the app.</p>
             </Card>
             <Card variant="outlined" className="about-feature-card">
-              <span className="workflow-step-num">03</span>
-              <h3>7-Platform Profile Aggregation</h3>
-              <p>Connect LeetCode, Codeforces, AtCoder, CodeChef, GeeksforGeeks, HackerRank, and GitHub handles for automatic stats alongside your Favorites & Read Again list.</p>
+              <span className="workflow-step-badge">03</span>
+              <h3>7-Platform Aggregation &amp; Cloud Sync</h3>
+              <p>Connect LeetCode, Codeforces, AtCoder, CodeChef, GeeksforGeeks, HackerRank, and GitHub handles alongside optional Firebase + Neon PostgreSQL sync with conflict-safe OCC protection.</p>
             </Card>
             <Card variant="outlined" className="about-feature-card">
-              <span className="workflow-step-num">04</span>
-              <h3>Local-First & 6 Languages</h3>
-              <p>Everything saves instantly in your browser with optional backend sync, localized across English, Japanese, Hindi, Spanish, Chinese, and Korean.</p>
+              <span className="workflow-step-badge">04</span>
+              <h3>Local-First &amp; 6 Languages</h3>
+              <p>Everything saves instantly in your browser with atomic JSON backup &amp; restore, localized across English, Japanese, Hindi, Spanish, Chinese, and Korean.</p>
             </Card>
           </div>
         </section>
@@ -629,14 +651,17 @@ export function SitePages({
         mood="lost"
         caption="Quick answers & study tips"
         actions={(
-          <>
-            <Button variant="solid" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
-              {t.site.exploreRoadmap} <ArrowRight size={15} aria-hidden="true" />
+          <div className="marketing-hero-actions profile-hero-actions">
+            <Button variant="solid" href="/profile?auth=1" onClick={navHandler(onNavigate, '/profile?auth=1')}>
+              {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
             </Button>
-            <Button variant="outlined" href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
+            <Button variant="outlined" className="profile-hero-ghost-btn" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
+              {t.site.exploreRoadmap}
+            </Button>
+            <Button variant="outlined" className="profile-hero-ghost-btn" href="/rooms" onClick={navHandler(onNavigate, '/rooms')}>
               {t.site.goToRooms}
             </Button>
-          </>
+          </div>
         )}
       />
 

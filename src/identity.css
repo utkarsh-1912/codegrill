@@ -9950,3 +9950,132 @@ input[type="search"]::-webkit-search-results-decoration {
     max-width: 100%;
   }
 }
+
+
+/* ==========================================================================
+   HEADER USER ACCOUNT, GET STARTED CTA & ENTERPRISE MARKETING PAGES
+   ========================================================================== */
+
+.header-get-started-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: var(--ut-accent);
+  color: #fff7ee;
+  font-size: 0.82rem;
+  font-weight: 650;
+  text-decoration: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ut-accent) 28%, transparent);
+  transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease;
+}
+
+.header-get-started-btn:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--ut-accent) 36%, transparent);
+}
+
+.header-user-btn.is-signed-in {
+  border-color: color-mix(in srgb, var(--ember) 55%, var(--ut-line));
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+}
+
+.header-user-initial {
+  font-size: 0.84rem;
+  font-weight: 750;
+  line-height: 1;
+}
+
+.settings-get-started-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--ut-accent);
+  color: #fff7ee;
+  font-size: 0.82rem;
+  font-weight: 650;
+  text-decoration: none;
+  transition: filter 150ms ease, transform 150ms ease;
+}
+
+.settings-get-started-cta:hover {
+  filter: brightness(1.06);
+}
+
+.mobile-get-started-cta {
+  margin: 0 0 12px;
+}
+
+@media (max-width: 960px) {
+  .header-get-started-btn {
+    display: none;
+  }
+}
+
+/* Enterprise Marketing Conversion Banner */
+.marketing-cta-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 28px 32px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #1b120d 0%, #2a1810 60%, #1d120c 100%);
+  border: 1px solid rgba(255, 138, 61, 0.24);
+  color: #fff7ee;
+  box-shadow: 0 18px 44px rgba(15, 10, 6, 0.2);
+}
+
+.marketing-cta-copy {
+  display: grid;
+  gap: 8px;
+  max-width: 600px;
+}
+
+.marketing-cta-copy h2 {
+  margin: 0;
+  font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+  color: #fff7ee;
+  letter-spacing: -0.02em;
+}
+
+.marketing-cta-copy p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: rgba(246, 239, 231, 0.78);
+}
+
+.marketing-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.about-feature-card,
+.help-shortcut-card {
+  border-radius: 16px;
+  transition: transform 180ms ease, border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.about-feature-card:hover,
+.help-shortcut-card:hover {
+  transform: translateY(-2px);
+  border-color: color-mix(in srgb, var(--ember) 55%, var(--ut-line));
+}
+
+@media (max-width: 640px) {
+  .marketing-cta-banner {
+    padding: 22px 20px;
+  }
+}

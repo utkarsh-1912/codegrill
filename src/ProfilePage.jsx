@@ -44,7 +44,13 @@ export function ProfilePage({
   const t = getMessages(locale);
   const importInputRef = useRef(null);
   const [backupMsg, setBackupMsg] = useState('');
-  const [authOpen, setAuthOpen] = useState(false);
+  const [authOpen, setAuthOpen] = useState(() => {
+    try {
+      return new URLSearchParams(window.location.search).get('auth') === '1';
+    } catch {
+      return false;
+    }
+  });
   const [authEmail, setAuthEmail] = useState('');
   const [authPassword, setAuthPassword] = useState('');
   const [authBusy, setAuthBusy] = useState(false);
