@@ -443,6 +443,8 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
                     url: activeUrl,
                     title: activeTitle || data?.title || '',
                     solutionLang: selectedLang,
+                    history: history.map(({ url: u, title: ttl }) => ({ url: u, title: ttl })),
+                    historyIndex,
                   })}
                   aria-label="Expand to full page"
                   title="Expand to full page"

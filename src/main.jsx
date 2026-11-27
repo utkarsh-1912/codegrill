@@ -722,6 +722,17 @@ function App() {
         customPlayerTemplate={appConfig.player.customPlayerTemplate}
         onClose={() => setViewerItem(null)}
         onExpand={(expandedItem) => {
+          try {
+            if (Array.isArray(expandedItem?.history) && expandedItem.history.length > 0) {
+              sessionStorage.setItem('codegrill:viewer-history:v1', JSON.stringify({
+                url: expandedItem.url || '',
+                history: expandedItem.history,
+                historyIndex: Number(expandedItem.historyIndex) || 0,
+              }));
+            }
+          } catch {
+            // Ignore sessionStorage errors
+          }
           setViewerItem(null);
           navigate(buildViewerPath(expandedItem));
         }}

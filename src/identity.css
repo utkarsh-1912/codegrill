@@ -9114,3 +9114,160 @@ input[type="search"]::-webkit-search-results-decoration {
     gap: 8px;
   }
 }
+
+/* Active Room Mobile Header & Workspace Clean Rearrangement */
+.room-hero-status-group,
+.room-hero-cta-group {
+  display: contents;
+}
+
+@media (max-width: 960px) {
+  .room-expand-btn {
+    display: none !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .room-studio-hero {
+    padding: 14px 14px;
+    gap: 12px;
+    border-radius: 14px;
+  }
+
+  .room-studio-row-top {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .room-studio-hero-left {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .room-studio-hero-left .room-back-btn {
+    padding: 6px 11px;
+    font-size: 0.8rem;
+  }
+
+  .room-hero-status-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .room-id-pill.is-dark,
+  .room-format-pill.is-dark,
+  .room-presence-pill.is-dark {
+    font-size: 0.72rem;
+    padding: 4px 8px;
+  }
+
+  .room-studio-hero-right {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .room-mini-clock {
+    padding: 7px 10px;
+    font-size: 0.8rem;
+    justify-content: center;
+  }
+
+  .room-hero-cta-group {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  .room-hero-cta-group > button,
+  .room-hero-cta-group > a {
+    width: 100%;
+    justify-content: center;
+    padding-inline: 10px;
+    font-size: 0.82rem;
+    white-space: nowrap;
+  }
+
+  .room-studio-row-exercise {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    padding-top: 12px;
+  }
+
+  .room-studio-title {
+    font-size: 1.15rem;
+  }
+
+  .room-exercise-actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .room-exercise-actions > button,
+  .room-exercise-actions > a {
+    flex: 1 1 0;
+    min-width: 0;
+    justify-content: center;
+    padding: 7px 8px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .room-problem-brief-card {
+    padding: 12px 13px;
+    gap: 10px;
+  }
+
+  .room-hint-toggles {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 6px;
+  }
+
+  .room-hint-toggle {
+    justify-content: center;
+    padding: 6px 8px;
+    font-size: 0.74rem;
+  }
+
+  .room-pad-toolbar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .room-pad-hint {
+    display: none;
+  }
+
+  .room-pad-preview.is-clickable {
+    min-height: 320px;
+    padding: 14px 14px;
+  }
+
+  .room-pad-body,
+  .room-pad-textarea {
+    min-height: 320px;
+  }
+
+  .room-pad-footer {
+    flex-wrap: wrap;
+    font-size: 0.68rem;
+    padding: 8px 12px;
+  }
+}

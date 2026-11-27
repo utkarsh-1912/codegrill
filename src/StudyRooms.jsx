@@ -512,13 +512,15 @@ export function StudyRooms({
               <Button variant="quiet" size="sm" className="room-back-btn" onClick={() => onNavigate?.('/rooms')}>
                 <ArrowLeft size={15} aria-hidden="true" /> {t.studio.rooms.lobby}
               </Button>
-              <span className="room-id-pill is-dark">
-                <span className="room-live-dot" aria-hidden="true" />#{validActiveRoom}
-              </span>
-              <span className="room-format-pill is-dark">{t.studio.rooms.formats[activeFormat.id] || activeFormat.label}</span>
-              <span className="room-presence-pill is-dark" title={participantList.join(', ')}>
-                <Users size={13} aria-hidden="true" /> {participantList.length} {t.studio.rooms.active}
-              </span>
+              <div className="room-hero-status-group">
+                <span className="room-id-pill is-dark">
+                  <span className="room-live-dot" aria-hidden="true" />#{validActiveRoom}
+                </span>
+                <span className="room-format-pill is-dark">{t.studio.rooms.formats[activeFormat.id] || activeFormat.label}</span>
+                <span className="room-presence-pill is-dark" title={participantList.join(', ')}>
+                  <Users size={13} aria-hidden="true" /> {participantList.length} {t.studio.rooms.active}
+                </span>
+              </div>
             </div>
 
             <div className="room-studio-hero-right">
@@ -526,21 +528,23 @@ export function StudyRooms({
                 <Clock size={13} aria-hidden="true" /> {formatClock(roomState.timerRemainingSec)}
               </span>
 
-              <Button
-                variant="outlined"
-                size="sm"
-                className="room-hero-outline-btn"
-                onClick={() => copyRoomLink(validActiveRoom, roomState.mode, roomState.problemSlug)}
-              >
-                {copiedInvite ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
-                {copiedInvite ? t.studio.rooms.copied : t.studio.rooms.invite}
-              </Button>
-
-              {colabsUrl && (
-                <Button variant="solid" size="sm" href={colabsUrl.href} target="_blank" rel="noopener noreferrer">
-                  Colabs <ExternalLink size={14} aria-hidden="true" />
+              <div className="room-hero-cta-group">
+                <Button
+                  variant="outlined"
+                  size="sm"
+                  className="room-hero-outline-btn"
+                  onClick={() => copyRoomLink(validActiveRoom, roomState.mode, roomState.problemSlug)}
+                >
+                  {copiedInvite ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+                  {copiedInvite ? t.studio.rooms.copied : t.studio.rooms.invite}
                 </Button>
-              )}
+
+                {colabsUrl && (
+                  <Button variant="solid" size="sm" href={colabsUrl.href} target="_blank" rel="noopener noreferrer">
+                    Colabs <ExternalLink size={14} aria-hidden="true" />
+                  </Button>
+                )}
+              </div>
 
               <button
                 type="button"

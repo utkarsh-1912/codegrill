@@ -7,6 +7,43 @@ import { getMessages } from './i18n.mjs';
 import { ContentViewerBody, buildViewerPath, formatPluginBadge, formatViewerTitle } from './ContentViewer.jsx';
 import { isContentFavorited, toggleFavoriteContent } from './favorites.mjs';
 
+const VIEWER_HISTORY_KEY = 'codegrill:viewer-history:v1';
+
+function readCarriedHistory(targetUrl, fallbackTitle) {
+  try {
+    const raw = JSON.parse(sessionStorage.getItem(VIEWER_HISTORY_KEY) || 'null');
+    if (raw && Array.isArray(raw.history) && raw.history.length > 0) {
+      const idx = Math.max(0, Math.min(raw.history.length - 1, Number(raw.historyIndex) || 0));
+      if (raw.history[idx]?.url === targetUrl || raw.url === targetUrl) {
+        return { history: raw.history, historyIndex: idx };
+      }
+    }
+  } catch {
+    // Ignore storage errors
+  }
+  return { history: [{ url: targetUrl || '', title: fallbackTitle || '' }], historyIndex: 0 };
+}
+
+function getParentGitHubUrl(rawUrl) {
+  try {
+    const u = new URL(rawUrl);
+    if (u.hostname !== 'github.com' && u.hostname !== 'www.github.com') return null;
+    const parts = u.pathname.split('/').filter(Boolean);
+    if (parts.length < 5 || (parts[2] !== 'blob' && parts[2] !== 'tree')) return null;
+    const [owner, repo, , ref, ...rest] = parts;
+    const parentParts = rest.slice(0, -1);
+    const parentUrl = parentParts.length > 0
+      ? `https://github.com/${owner}/${repo}/tree/${ref}/${parentParts.join('/')}`
+      : `https://github.com/${owner}/${repo}/tree/${ref}`;
+    const parentLabel = parentParts.length > 0
+      ? `${owner}/${repo} — ${parentParts[parentParts.length - 1]}`
+      : `${owner}/${repo}`;
+    return { url: parentUrl, title: parentLabel };
+  } catch {
+    return null;
+  }
+}
+
 export function ViewerPage({
   url,
   title,
@@ -24,8 +61,9 @@ export function ViewerPage({
   onNavigate,
 }) {
   const t = getMessages(locale);
-  const [history, setHistory] = useState([{ url: url || '', title: title || '' }]);
-  const [historyIndex, setHistoryIndex] = useState(0);
+  const initialCarried = readCarriedHistory(url, title);
+  const [history, setHistory] = useState(initialCarried.history);
+  const [historyIndex, setHistoryIndex] = useState(initialCarried.historyIndex);
   const [selectedLang, setSelectedLang] = useState(initialLang || '');
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -33,16 +71,30 @@ export function ViewerPage({
   const [favorited, setFavorited] = useState(false);
 
   useEffect(() => {
-    setHistory([{ url: url || '', title: title || '' }]);
-    setHistoryIndex(0);
+    const carried = readCarriedHistory(url, title);
+    setHistory(carried.history);
+    setHistoryIndex(carried.historyIndex);
     setSelectedLang(initialLang || '');
   }, [url, title, initialLang]);
 
   const currentEntry = history[historyIndex] || { url: url || '', title: title || '' };
   const activeUrl = currentEntry.url;
   const activeTitle = currentEntry.title;
-  const canGoBack = historyIndex > 0;
+  const parentGitHub = getParentGitHubUrl(activeUrl);
+  const canGoBack = historyIndex > 0 || Boolean(parentGitHub);
   const canGoForward = historyIndex < history.length - 1;
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(VIEWER_HISTORY_KEY, JSON.stringify({
+        url: activeUrl,
+        history,
+        historyIndex,
+      }));
+    } catch {
+      // Ignore storage errors
+    }
+  }, [activeUrl, history, historyIndex]);
 
   useEffect(() => {
     setFavorited(isContentFavorited({ url: activeUrl, title: activeTitle }));
@@ -66,7 +118,14 @@ export function ViewerPage({
   }
 
   function goBackNested() {
-    if (canGoBack) setHistoryIndex((idx) => idx - 1);
+    if (historyIndex > 0) {
+      setHistoryIndex((idx) => idx - 1);
+      return;
+    }
+    if (parentGitHub && parentGitHub.url !== activeUrl) {
+      setHistory((prev) => [parentGitHub, ...prev]);
+      setHistoryIndex(0);
+    }
   }
 
   function goForwardNested() {
@@ -264,7 +323,9 @@ export function ViewerPage({
           >
             <ArrowLeft size={16} aria-hidden="true" /> {t.status.goHome}
           </Button>
-          {history.length > 1 && (
+        </div>
+        <div className="viewer-page-bar-left">
+          {(history.length > 1 || Boolean(parentGitHub)) && (
             <div className="viewer-history-nav" role="group" aria-label="Nested plugin history">
               <button
                 type="button"
@@ -272,7 +333,7 @@ export function ViewerPage({
                 disabled={!canGoBack}
                 onClick={goBackNested}
                 aria-label="Back"
-                title="Back"
+                title={historyIndex > 0 ? 'Back' : 'Parent folder'}
               >
                 <ArrowLeft size={16} aria-hidden="true" />
               </button>
@@ -289,8 +350,6 @@ export function ViewerPage({
               </button>
             </div>
           )}
-        </div>
-        <div className="viewer-page-bar-left">
           <button
             type="button"
             className={`icon-btn viewer-fav-desktop ${favorited ? 'is-active' : ''}`}
