@@ -10034,6 +10034,23 @@ input[type="search"]::-webkit-search-results-decoration {
   color: var(--ut-accent);
 }
 
+.header-user-btn.has-avatar {
+  padding: 0;
+  overflow: hidden;
+}
+
+.settings-profile-avatar {
+  overflow: hidden;
+}
+
+.header-user-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: inherit;
+}
+
 .header-user-initial {
   font-size: 0.84rem;
   font-weight: 750;

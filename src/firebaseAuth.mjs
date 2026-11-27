@@ -98,6 +98,8 @@ async function callIdentityToolkit(endpoint, email, password) {
   const session = {
     uid: data.localId,
     email: data.email || email.trim(),
+    displayName: data.displayName || '',
+    photoURL: data.profilePicture || '',
     idToken: data.idToken,
     refreshToken: data.refreshToken,
     expiresAt: Date.now() + (expiresSec - 60) * 1000,
@@ -149,6 +151,7 @@ export async function signInWithGoogle() {
     uid: user.uid,
     email: user.email || '',
     displayName: user.displayName || '',
+    photoURL: user.photoURL || '',
     provider: 'google',
     idToken: tokenResult.token,
     refreshToken: user.refreshToken || '',

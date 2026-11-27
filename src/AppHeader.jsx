@@ -45,6 +45,16 @@ export function AppHeader({
   }
 
   const settingsRef = useRef(null);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+
+  useEffect(() => {
+    setAvatarFailed(false);
+  }, [authSession?.photoURL]);
+
+  const avatarUrl = !avatarFailed && authSession?.photoURL ? authSession.photoURL : '';
+  const userInitial = authSession
+    ? (authSession.displayName || authSession.email || 'U').slice(0, 1).toUpperCase()
+    : '';
 
   useEffect(() => {
     setSidebarOpen(false);
@@ -136,16 +146,24 @@ export function AppHeader({
               <div className="settings-anchor" ref={settingsRef}>
                 <button
                   type="button"
-                  className={`locale-field icon-only-control header-user-btn ${settingsOpen ? 'is-active' : ''} ${authSession ? 'is-signed-in' : ''}`}
+                  className={`locale-field icon-only-control header-user-btn ${settingsOpen ? 'is-active' : ''} ${authSession ? 'is-signed-in' : ''} ${avatarUrl ? 'has-avatar' : ''}`}
                   onClick={() => setSettingsOpen((v) => !v)}
                   aria-expanded={settingsOpen}
                   aria-haspopup="true"
                   aria-label={authSession?.displayName || authSession?.email || t.nav.profile}
                   title={authSession?.displayName || authSession?.email || t.nav.profile}
                 >
-                  {authSession ? (
+                  {avatarUrl ? (
+                    <img
+                      className="header-user-avatar-img"
+                      src={avatarUrl}
+                      alt=""
+                      referrerPolicy="no-referrer"
+                      onError={() => setAvatarFailed(true)}
+                    />
+                  ) : authSession ? (
                     <span className="header-user-initial" aria-hidden="true">
-                      {(authSession.displayName || authSession.email || 'U').slice(0, 1).toUpperCase()}
+                      {userInitial}
                     </span>
                   ) : (
                     <User size={18} aria-hidden="true" />
@@ -161,7 +179,19 @@ export function AppHeader({
                       onClick={linkClick('/profile')}
                     >
                       <span className="settings-profile-avatar" aria-hidden="true">
-                        <User size={16} />
+                        {avatarUrl ? (
+                          <img
+                            className="header-user-avatar-img"
+                            src={avatarUrl}
+                            alt=""
+                            referrerPolicy="no-referrer"
+                            onError={() => setAvatarFailed(true)}
+                          />
+                        ) : authSession ? (
+                          <span className="header-user-initial">{userInitial}</span>
+                        ) : (
+                          <User size={16} />
+                        )}
                       </span>
                       <span className="settings-profile-copy">
                         <strong>{authSession?.displayName || authSession?.email || t.nav.profile}</strong>
@@ -337,7 +367,19 @@ export function AppHeader({
                 onClick={linkClick('/profile')}
               >
                 <span className="settings-profile-avatar" aria-hidden="true">
-                  <User size={16} />
+                  {avatarUrl ? (
+                    <img
+                      className="header-user-avatar-img"
+                      src={avatarUrl}
+                      alt=""
+                      referrerPolicy="no-referrer"
+                      onError={() => setAvatarFailed(true)}
+                    />
+                  ) : authSession ? (
+                    <span className="header-user-initial">{userInitial}</span>
+                  ) : (
+                    <User size={16} />
+                  )}
                 </span>
                 <span className="settings-profile-copy">
                   <strong>{authSession?.displayName || authSession?.email || t.nav.profile}</strong>
