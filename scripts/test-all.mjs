@@ -723,13 +723,13 @@ try {
     'ProfilePage backup restore must await onRestoreBackup instead of blindly reloading',
   );
   assert.ok(
-    profileSrc.includes('onUpdatePortfolioSettings') && profileSrc.includes('Publish portfolio'),
-    'ProfilePage must provide a public portfolio publishing control',
+    profileSrc.includes('onUpdatePortfolioSettings') && profileSrc.includes('t.studio.auth.publishPortfolio'),
+    'ProfilePage must provide a localized public portfolio publishing control',
   );
   const firebaseAuthMod = await import('../src/firebaseAuth.mjs');
   assert.equal(typeof firebaseAuthMod.signInWithGoogle, 'function', 'firebaseAuth must export signInWithGoogle');
   assert.equal(typeof firebaseAuthMod.isGoogleAuthConfigured, 'function', 'firebaseAuth must export isGoogleAuthConfigured');
-  assert.ok(profileSrc.includes('Continue with Google') && profileSrc.includes('signInWithGoogle()'), 'ProfilePage must expose Google sign-in button');
+  assert.ok(profileSrc.includes('t.studio.auth.continueWithGoogle') && profileSrc.includes('signInWithGoogle()'), 'ProfilePage must expose localized Google sign-in button');
 
   // Executable test: POST /api/progress/import retries on 409 Conflict and preserves concurrent cloud edit
   let importSaveCalls = 0;
