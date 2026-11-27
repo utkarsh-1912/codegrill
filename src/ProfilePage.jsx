@@ -244,12 +244,12 @@ export function ProfilePage({
         <div className="storage-mode-actions">
           {firebaseEnabled && !authSession && (
             <Button variant="solid" size="sm" onClick={() => setAuthOpen((v) => !v)}>
-              {authOpen ? t.sheets.cancel : 'Sign in to Sync'}
+              {authOpen ? t.sheets.cancel : t.studio.auth.signInToSync}
             </Button>
           )}
           {authSession && (
             <Button variant="outlined" size="sm" onClick={() => onAuthSignOut?.()}>
-              Sign out
+              {t.studio.auth.signOut}
             </Button>
           )}
           <Button variant="outlined" size="sm" onClick={handleExportJson}>
@@ -279,7 +279,7 @@ export function ProfilePage({
                 setAuthOpen(false);
                 setAuthPassword('');
               } catch (err) {
-                setAuthError(err?.message || 'Sign-in failed');
+                setAuthError(err?.message || t.studio.auth.signInFailed);
               } finally {
                 setAuthBusy(false);
               }
@@ -288,7 +288,7 @@ export function ProfilePage({
             <input
               type="email"
               required
-              placeholder="Email"
+              placeholder={t.studio.auth.emailPlaceholder}
               value={authEmail}
               onChange={(e) => setAuthEmail(e.target.value)}
             />
@@ -296,12 +296,12 @@ export function ProfilePage({
               type="password"
               required
               minLength={6}
-              placeholder="Password (6+ chars)"
+              placeholder={t.studio.auth.passwordPlaceholder}
               value={authPassword}
               onChange={(e) => setAuthPassword(e.target.value)}
             />
             <Button variant="solid" size="sm" type="submit" disabled={authBusy}>
-              {authBusy ? '...' : 'Sign in'}
+              {authBusy ? '...' : t.studio.auth.signIn}
             </Button>
             <Button
               variant="outlined"
@@ -317,13 +317,13 @@ export function ProfilePage({
                   setAuthOpen(false);
                   setAuthPassword('');
                 } catch (err) {
-                  setAuthError(err?.message || 'Sign-up failed');
+                  setAuthError(err?.message || t.studio.auth.signUpFailed);
                 } finally {
                   setAuthBusy(false);
                 }
               }}
             >
-              Create account
+              {t.studio.auth.createAccount}
             </Button>
             {isGoogleAuthConfigured() && (
               <Button
@@ -341,8 +341,8 @@ export function ProfilePage({
                     setAuthPassword('');
                   } catch (err) {
                     const msg = err?.code === 'auth/popup-closed-by-user'
-                      ? 'Google sign-in cancelled.'
-                      : (err?.message || 'Google sign-in failed');
+                      ? t.studio.auth.googleCancelled
+                      : (err?.message || t.studio.auth.googleFailed);
                     setAuthError(msg);
                   } finally {
                     setAuthBusy(false);
@@ -355,7 +355,7 @@ export function ProfilePage({
                   <path fill="#FBBC05" d="M5.28 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.38-2.28V6.63H1.29A12 12 0 0 0 0 12c0 1.94.46 3.77 1.29 5.37l3.99-3.09z" />
                   <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.29 6.63l3.99 3.09C6.23 6.87 8.88 4.76 12 4.76z" />
                 </svg>
-                Continue with Google
+                {t.studio.auth.continueWithGoogle}
               </Button>
             )}
           </form>
@@ -371,9 +371,9 @@ export function ProfilePage({
                 const updated = await onUpdatePortfolioSettings({ handle: pubHandle, isPublicProfile: pubEnabled });
                 setPubHandle(updated.handle || '');
                 setPubEnabled(Boolean(updated.isPublicProfile));
-                setPubMsg(updated.isPublicProfile && updated.handle ? `Published at /u/${updated.handle}` : 'Portfolio settings saved');
+                setPubMsg(updated.isPublicProfile && updated.handle ? `${t.studio.auth.publishedAt} /u/${updated.handle}` : t.studio.auth.portfolioSaved);
               } catch (err) {
-                setPubMsg(err?.message || 'Could not update portfolio settings');
+                setPubMsg(err?.message || t.studio.auth.portfolioFailed);
               } finally {
                 setPubBusy(false);
               }
@@ -381,7 +381,7 @@ export function ProfilePage({
           >
             <input
               type="text"
-              placeholder="Public handle (e.g. alex-dev)"
+              placeholder={t.studio.auth.handlePlaceholder}
               value={pubHandle}
               onChange={(e) => setPubHandle(e.target.value)}
             />
@@ -391,10 +391,10 @@ export function ProfilePage({
                 checked={pubEnabled}
                 onChange={(e) => setPubEnabled(e.target.checked)}
               />
-              Publish portfolio
+              {t.studio.auth.publishPortfolio}
             </label>
             <Button variant="outlined" size="sm" type="submit" disabled={pubBusy}>
-              {pubBusy ? '...' : 'Save portfolio'}
+              {pubBusy ? '...' : t.studio.auth.savePortfolio}
             </Button>
             {pubEnabled && pubHandle && (
               <a

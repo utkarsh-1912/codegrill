@@ -37,7 +37,7 @@ export function AppHeader({
       setConfirmReset(false);
       closePanel();
     } catch (err) {
-      setResetError(err?.message || 'Could not reset cloud progress. Please retry.');
+      setResetError(err?.message || t.studio.auth.resetFailed);
     } finally {
       setResetBusy(false);
     }
