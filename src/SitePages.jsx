@@ -316,10 +316,6 @@ export function SitePages({
               <Mascot mood="happy" size={76} label="Ember companion" />
             </div>
             <div className="marketing-cta-copy">
-              <span className="marketing-cta-eyebrow">
-                <Sparkles size={12} aria-hidden="true" />
-                {ecosystem} · {brandName}
-              </span>
               <h2>{t.studio.auth.signInToSync}<span>.</span></h2>
               <p>{t.studio.backup.backupHint}</p>
               <div className="marketing-cta-chips">
@@ -338,9 +334,6 @@ export function SitePages({
                 {t.site.exploreRoadmap}
               </Button>
             </div>
-            <a className="marketing-cta-signin-link" href="/login" onClick={navHandler(onNavigate, '/login')}>
-              {t.studio.auth.signIn} <ArrowRight size={13} aria-hidden="true" />
-            </a>
           </div>
         </section>
       </div>

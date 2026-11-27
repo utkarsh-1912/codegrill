@@ -133,17 +133,6 @@ export function AppHeader({
                 <Search size={18} aria-hidden="true" />
               </button>
 
-              {!authSession && (
-                <a
-                  href="/signup"
-                  className="header-get-started-btn"
-                  onClick={linkClick('/signup')}
-                >
-                  <span>{t.studio.auth.getStarted}</span>
-                  <ArrowRight size={13} aria-hidden="true" />
-                </a>
-              )}
-
               <div className="settings-anchor" ref={settingsRef}>
                 <button
                   type="button"
