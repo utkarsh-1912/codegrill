@@ -131,7 +131,7 @@ export function AppHeader({
                 title={`${t.palette.placeholder} (⌘K)`}
               >
                 <Search size={16} aria-hidden="true" />
-                <span className="header-search-label">{t.controls.searchPlaceholder.split(' ')[0]}</span>
+                <span className="header-search-label">{(t.palette?.placeholder || 'Search').split(' ')[0]}</span>
                 <kbd className="header-search-kbd">⌘K</kbd>
               </button>
 

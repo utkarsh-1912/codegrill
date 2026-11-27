@@ -81,8 +81,8 @@ export async function signInWithGoogle() {
   }
 
   const [{ getApps, initializeApp }, { GoogleAuthProvider, browserSessionPersistence, getAuth, setPersistence, signInWithPopup }] = await Promise.all([
-    import('firebase/app'),
-    import('firebase/auth'),
+    import('@firebase/app'),
+    import('@firebase/auth'),
   ]);
 
   const app = getApps().length

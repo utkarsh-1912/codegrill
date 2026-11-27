@@ -188,7 +188,8 @@ export function createStore(filePath, defaultProfileId = 'default') {
         : current.notes;
       const locale = typeof patch.locale === 'string' ? patch.locale : current.locale;
 
-      const nowIso = new Date().toISOString();
+      const prevUpdatedMs = current.updatedAt ? Date.parse(current.updatedAt) : 0;
+      const nowIso = new Date(Math.max(Date.now(), Number.isFinite(prevUpdatedMs) ? prevUpdatedMs + 1 : 0)).toISOString();
       const notesUpdatedAt = { ...(current.notesUpdatedAt || {}) };
       if (patch.notesUpdatedAt && typeof patch.notesUpdatedAt === 'object') {
         for (const [slug, ts] of Object.entries(patch.notesUpdatedAt)) {
@@ -261,7 +262,8 @@ export function createStore(filePath, defaultProfileId = 'default') {
       }
 
       const patch = payload.progressPatch && typeof payload.progressPatch === 'object' ? payload.progressPatch : {};
-      const nowIso = new Date().toISOString();
+      const prevUpdatedMs = current.updatedAt ? Date.parse(current.updatedAt) : 0;
+      const nowIso = new Date(Math.max(Date.now(), Number.isFinite(prevUpdatedMs) ? prevUpdatedMs + 1 : 0)).toISOString();
 
       // Pre-validate custom sheet ownership before mutating any section
       const incomingSheets = Array.isArray(payload.customSheets) ? payload.customSheets : null;
