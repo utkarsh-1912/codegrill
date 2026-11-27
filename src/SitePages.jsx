@@ -309,19 +309,38 @@ export function SitePages({
           </div>
         </section>
 
-        <section className="marketing-cta-banner">
-          <div className="marketing-cta-copy">
-            <span className="workflow-step-badge">{ecosystem} · {brandName}</span>
-            <h2>{t.studio.auth.signInToSync}</h2>
-            <p>{t.studio.backup.backupHint}</p>
+        <section className="marketing-cta-banner marketing-cta-v2">
+          <div className="marketing-cta-left">
+            <div className="marketing-cta-mascot" aria-hidden="true">
+              <div className="marketing-cta-mascot-glow" />
+              <Mascot mood="happy" size={76} label="Ember companion" />
+            </div>
+            <div className="marketing-cta-copy">
+              <span className="marketing-cta-eyebrow">
+                <Sparkles size={12} aria-hidden="true" />
+                {ecosystem} · {brandName}
+              </span>
+              <h2>{t.studio.auth.signInToSync}<span>.</span></h2>
+              <p>{t.studio.backup.backupHint}</p>
+              <div className="marketing-cta-chips">
+                <span><Database size={12} aria-hidden="true" /> Neon Cloud Sync</span>
+                <span><Flame size={12} aria-hidden="true" /> Streaks &amp; Notes</span>
+                <span><Trophy size={12} aria-hidden="true" /> 6 Languages</span>
+              </div>
+            </div>
           </div>
-          <div className="marketing-cta-actions profile-hero-actions">
-            <Button variant="solid" href="/signup" onClick={navHandler(onNavigate, '/signup')}>
-              {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
-            </Button>
-            <Button variant="outlined" className="profile-hero-ghost-btn" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
-              {t.site.exploreRoadmap}
-            </Button>
+          <div className="marketing-cta-right">
+            <div className="marketing-cta-actions profile-hero-actions">
+              <Button variant="solid" href="/signup" onClick={navHandler(onNavigate, '/signup')}>
+                {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
+              </Button>
+              <Button variant="outlined" className="profile-hero-ghost-btn" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
+                {t.site.exploreRoadmap}
+              </Button>
+            </div>
+            <a className="marketing-cta-signin-link" href="/login" onClick={navHandler(onNavigate, '/login')}>
+              {t.studio.auth.signIn} <ArrowRight size={13} aria-hidden="true" />
+            </a>
           </div>
         </section>
       </div>
