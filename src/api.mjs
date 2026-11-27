@@ -763,6 +763,7 @@ async function syncPlatformProfileBrowser(platformId, handle) {
   const profileUrl = buildProfileUrl(platformId, handle);
   if (platformId === 'leetcode') {
     const endpoints = [
+      `https://leetcode-api-pied.vercel.app/user/${encodeURIComponent(handle)}`,
       `https://leetcode-api-faisalshohag.vercel.app/${encodeURIComponent(handle)}`,
       `https://leetcode-stats-api.herokuapp.com/${encodeURIComponent(handle)}`,
     ];
@@ -772,6 +773,35 @@ async function syncPlatformProfileBrowser(platformId, handle) {
         if (!res.ok) continue;
         const data = await res.json();
         if (data?.status === 'error' || data?.errors) continue;
+        const piedAc = data?.submitStats?.acSubmissionNum;
+        if (Array.isArray(piedAc)) {
+          const byDiff = Object.fromEntries(piedAc.map((r) => [r.difficulty, Number(r.count) || 0]));
+          const total = byDiff.All ?? ((byDiff.Easy || 0) + (byDiff.Medium || 0) + (byDiff.Hard || 0));
+          return {
+            ok: true,
+            platform: platformId,
+            handle,
+            profileUrl,
+            syncedAt: new Date().toISOString(),
+            stats: {
+              platform: platformId,
+              handle,
+              profileUrl,
+              solved: total,
+              easy: byDiff.Easy ?? null,
+              medium: byDiff.Medium ?? null,
+              hard: byDiff.Hard ?? null,
+              rating: Number.isFinite(Number(data.contestRating)) ? Math.round(Number(data.contestRating)) : null,
+              rank: Number.isFinite(Number(data?.profile?.ranking)) && Number(data.profile.ranking) > 0
+                ? `#${Number(data.profile.ranking).toLocaleString()}`
+                : '',
+              globalRank: Number.isFinite(Number(data?.profile?.ranking)) && Number(data.profile.ranking) > 0
+                ? Number(data.profile.ranking)
+                : null,
+              source: 'live',
+            },
+          };
+        }
         const total = Number(data.totalSolved);
         if (!Number.isFinite(total)) continue;
         return {

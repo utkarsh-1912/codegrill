@@ -121,7 +121,7 @@ export function AppHeader({
             <div className="header-utility-group">
               <button
                 type="button"
-                className="locale-field header-search-pill"
+                className="locale-field icon-only-control"
                 onClick={() => {
                   setSettingsOpen(false);
                   setSidebarOpen(false);
@@ -130,16 +130,14 @@ export function AppHeader({
                 aria-label={t.palette.placeholder}
                 title={`${t.palette.placeholder} (⌘K)`}
               >
-                <Search size={16} aria-hidden="true" />
-                <span className="header-search-label">{(t.palette?.placeholder || 'Search').split(' ')[0]}</span>
-                <kbd className="header-search-kbd">⌘K</kbd>
+                <Search size={18} aria-hidden="true" />
               </button>
 
               {!authSession && (
                 <a
-                  href="/profile?auth=1"
+                  href="/signup"
                   className="header-get-started-btn"
-                  onClick={linkClick('/profile?auth=1')}
+                  onClick={linkClick('/signup')}
                 >
                   <span>{t.studio.auth.getStarted}</span>
                   <ArrowRight size={13} aria-hidden="true" />
@@ -192,11 +190,11 @@ export function AppHeader({
 
                     {!authSession && (
                       <a
-                        href="/profile?auth=1"
+                        href="/login"
                         className="settings-get-started-cta"
-                        onClick={linkClick('/profile?auth=1')}
+                        onClick={linkClick('/login')}
                       >
-                        <span>{t.studio.auth.getStarted} · {t.studio.auth.signIn}</span>
+                        <span>{t.studio.auth.signIn}</span>
                         <ArrowRight size={14} aria-hidden="true" />
                       </a>
                     )}
@@ -364,11 +362,11 @@ export function AppHeader({
 
               {!authSession && (
                 <a
-                  href="/profile?auth=1"
+                  href="/login"
                   className="settings-get-started-cta mobile-get-started-cta"
-                  onClick={linkClick('/profile?auth=1')}
+                  onClick={linkClick('/login')}
                 >
-                  <span>{t.studio.auth.getStarted} · {t.studio.auth.signIn}</span>
+                  <span>{t.studio.auth.signIn}</span>
                   <ArrowRight size={14} aria-hidden="true" />
                 </a>
               )}

@@ -20,6 +20,7 @@ import { SheetsPage } from './SheetsPage.jsx';
 import { ContentViewer, buildViewerPath, formatViewerTitle } from './ContentViewer.jsx';
 import { ViewerPage } from './ViewerPage.jsx';
 import { ProfilePage } from './ProfilePage.jsx';
+import { AuthPage } from './AuthPage.jsx';
 import { PublicPortfolioPage } from './PublicPortfolioPage.jsx';
 import { ContestsPage } from './ContestsPage.jsx';
 import { LanguageIcon } from './LanguageIcon.jsx';
@@ -185,7 +186,7 @@ function readPreferences(uid = '') {
   }
 }
 
-const validPages = new Set([...pathIds, ...sitePages, 'profile', 'viewer', 'contests', 'error']);
+const validPages = new Set([...pathIds, ...sitePages, 'profile', 'login', 'signup', 'viewer', 'contests', 'error']);
 
 function currentPage() {
   // Support legacy hash URLs seamlessly by reading them if present
@@ -1005,6 +1006,17 @@ function App() {
             </section>
           )}
         </>}
+
+        {(page === 'login' || page === 'signup') && (
+          <AuthPage
+            mode={page}
+            locale={locale}
+            brandName={appConfig.brand.name}
+            authSession={authSession}
+            onAuthSignIn={handleAuthSignIn}
+            onNavigate={navigate}
+          />
+        )}
 
         {page === 'profile' && (
           <ProfilePage

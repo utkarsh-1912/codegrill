@@ -151,7 +151,7 @@ export function SitePages({
             <h1 lang={locale}>{t.site.landingTitle}<span>.</span></h1>
             <p>{t.site.landingDesc}</p>
             <div className="rooms-actions landing-cta-row">
-              <Button variant="solid" href="/profile?auth=1" onClick={navHandler(onNavigate, '/profile?auth=1')}>
+              <Button variant="solid" href="/signup" onClick={navHandler(onNavigate, '/signup')}>
                 {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
               </Button>
               <Button variant="outlined" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
@@ -316,7 +316,7 @@ export function SitePages({
             <p>{t.studio.backup.backupHint}</p>
           </div>
           <div className="marketing-cta-actions profile-hero-actions">
-            <Button variant="solid" href="/profile?auth=1" onClick={navHandler(onNavigate, '/profile?auth=1')}>
+            <Button variant="solid" href="/signup" onClick={navHandler(onNavigate, '/signup')}>
               {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
             </Button>
             <Button variant="outlined" className="profile-hero-ghost-btn" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
@@ -339,7 +339,7 @@ export function SitePages({
           caption="4-step mastery loop"
           actions={(
             <div className="marketing-hero-actions profile-hero-actions">
-              <Button variant="solid" href="/profile?auth=1" onClick={navHandler(onNavigate, '/profile?auth=1')}>
+              <Button variant="solid" href="/signup" onClick={navHandler(onNavigate, '/signup')}>
                 {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
               </Button>
               <Button variant="outlined" className="profile-hero-ghost-btn" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>
@@ -415,7 +415,7 @@ export function SitePages({
           caption={`${ecosystem} · ${problemCount} problems · 6 domains`}
           actions={(
             <div className="marketing-hero-actions profile-hero-actions">
-              <Button variant="solid" href="/profile?auth=1" onClick={navHandler(onNavigate, '/profile?auth=1')}>
+              <Button variant="solid" href="/signup" onClick={navHandler(onNavigate, '/signup')}>
                 {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
               </Button>
               <Button variant="outlined" className="profile-hero-ghost-btn" href="/sheets" onClick={navHandler(onNavigate, '/sheets')}>
@@ -652,7 +652,7 @@ export function SitePages({
         caption="Quick answers & study tips"
         actions={(
           <div className="marketing-hero-actions profile-hero-actions">
-            <Button variant="solid" href="/profile?auth=1" onClick={navHandler(onNavigate, '/profile?auth=1')}>
+            <Button variant="solid" href="/signup" onClick={navHandler(onNavigate, '/signup')}>
               {t.studio.auth.getStarted} <ArrowRight size={15} aria-hidden="true" />
             </Button>
             <Button variant="outlined" className="profile-hero-ghost-btn" href="/roadmap" onClick={navHandler(onNavigate, '/roadmap')}>

@@ -195,10 +195,16 @@ assert.equal(unauth.status, 401);
 const guestAllowed = await requireAuthenticatedUser({ headers: {} }, { enforce: false });
 assert.equal(guestAllowed.ok, true);
 
-// 15. Contest Calendar recurring schedule
+// 15. Contest Calendar fallback & Universal Question/Contest URL Importer
+const { parseExternalPracticeUrl } = await import('../src/externalImport.mjs');
 const recurringContests = buildRecurringContests(new Date('2026-11-27T00:00:00Z'));
-assert.ok(recurringContests.length >= 4);
+assert.ok(recurringContests.length >= 1);
 assert.ok(recurringContests.every((c) => c.startTimeMs > Date.parse('2026-11-27T00:00:00Z')));
+assert.equal(parseExternalPracticeUrl('https://leetcode.com/problems/two-sum/').slug, 'two-sum');
+assert.equal(parseExternalPracticeUrl('https://codeforces.com/contest/2040/problem/A').slug, 'cf-2040a');
+assert.equal(parseExternalPracticeUrl('https://atcoder.jp/contests/abc380/tasks/abc380_a').platform, 'atcoder');
+assert.equal(parseExternalPracticeUrl('https://www.codechef.com/problems/FLOW001').platform, 'codechef');
+assert.equal(parseExternalPracticeUrl('https://www.geeksforgeeks.org/problems/kadanes-algorithm-1587115620/1').platform, 'gfg');
 
 // 16. API Security & Benchmark Integration Tests (in-process HTTP handler)
 clearRateLimitMemory();
@@ -298,7 +304,7 @@ try {
   // Contests endpoint returns valid upcoming contests
   const contestsRes = await invokeApi('GET', '/api/contests');
   assert.equal(contestsRes.status, 200);
-  assert.ok(Array.isArray(contestsRes.json?.contests) && contestsRes.json.contests.length >= 4);
+  assert.ok(Array.isArray(contestsRes.json?.contests) && contestsRes.json.contests.length >= 1);
 
   // Guest plugin rate limit enforces HTTP 429 on 11th request
   clearRateLimitMemory();

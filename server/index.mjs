@@ -6,6 +6,7 @@ import { dirname, join } from 'node:path';
 import { createPluginRegistry } from './plugins/registry.mjs';
 import { fetchYouTubeTranscript } from './plugins/transcript.mjs';
 import { fetchPlatformProfile } from './plugins/profiles.mjs';
+import { parseExternalPracticeUrl } from '../src/externalImport.mjs';
 import { buildAnalytics, createStore } from './store.mjs';
 import { createNeonStore } from './neonStore.mjs';
 import { getPublicConfig, loadServerConfig } from './config.mjs';
@@ -155,9 +156,78 @@ export function createApiHandler(configOverrides = {}) {
         return sendJson(req, res, 200, pickDailyProblem(allProblems));
       }
 
-      if (req.method === 'GET' && pathname === '/api/contests') {
-        const contests = await fetchUpcomingContests({ timeoutMs: config.pluginFetchTimeoutMs });
-        return sendJson(req, res, 200, { contests }, { 'Cache-Control': 'public, max-age=300, s-maxage=900' });
+      // Unified multi-platform public REST API: GET /api/platforms/:platform/user/:handle
+      const platformUserMatch = /^\/api\/platforms\/([a-z0-9_-]{2,20})\/user\/([^/]{1,80})$/i.exec(pathname);
+      if (req.method === 'GET' && platformUserMatch) {
+        const user = await verifyBearerToken(req.headers?.authorization);
+        const rl = await checkRateLimit({
+          key: user ? `sync:u:${user.uid}` : `sync:ip:${getClientIp(req)}`,
+          limit: user ? 20 : 10,
+          windowSec: 3600,
+        });
+        if (!rl.allowed) {
+          return sendJson(req, res, 429, { error: 'Profile sync rate limit exceeded', retryAfterSec: rl.resetSec }, {
+            'Retry-After': String(rl.resetSec),
+          });
+        }
+        const platform = platformUserMatch[1].toLowerCase();
+        const handle = decodeURIComponent(platformUserMatch[2]).trim();
+        const cacheKey = `${platform}:${handle.toLowerCase()}`;
+        const cached = profileSyncCache.get(cacheKey);
+        if (cached && cached.expiresAt > Date.now()) {
+          return sendJson(req, res, 200, { ...cached.payload, cached: true }, { 'Cache-Control': 'public, max-age=300' });
+        }
+        const result = await fetchPlatformProfile(platform, handle, config.pluginFetchTimeoutMs);
+        if (result?.ok) {
+          profileSyncCache.set(cacheKey, { payload: result, expiresAt: Date.now() + SYNC_CACHE_TTL_MS });
+        }
+        return sendJson(req, res, result.ok ? 200 : 404, result, { 'Cache-Control': 'public, max-age=300' });
+      }
+
+      // Universal question/contest URL importer: POST /api/platforms/import-url
+      if (req.method === 'POST' && pathname === '/api/platforms/import-url') {
+        const body = await readJsonBody(req);
+        try {
+          const item = parseExternalPracticeUrl(body?.url);
+          const imported = [item];
+          // For Codeforces contests, optionally expand problems A, B, C... from official standings API
+          if (item.platform === 'codeforces' && item.kind === 'contest' && item.contestId) {
+            try {
+              const cfRes = await fetch(
+                `https://codeforces.com/api/contest.standings?contestId=${encodeURIComponent(item.contestId)}&from=1&count=1`,
+                { signal: AbortSignal.timeout(5000) },
+              );
+              if (cfRes.ok) {
+                const cfData = await cfRes.json();
+                const probs = cfData?.result?.problems;
+                if (Array.isArray(probs) && probs.length > 0) {
+                  for (const p of probs.slice(0, 12)) {
+                    imported.push({
+                      id: `cf-p-${item.contestId}${String(p.index || '').toLowerCase()}`,
+                      platform: 'codeforces',
+                      platformLabel: 'Codeforces',
+                      kind: 'problem',
+                      slug: `cf-${item.contestId}${String(p.index || '').toLowerCase()}`,
+                      title: `${item.contestId}${p.index}. ${p.name}`,
+                      url: `https://codeforces.com/contest/${item.contestId}/problem/${p.index}`,
+                    });
+                  }
+                }
+              }
+            } catch {
+              // Keep base contest item if standings unavailable
+            }
+          }
+          return sendJson(req, res, 200, { ok: true, items: imported });
+        } catch (err) {
+          return sendJson(req, res, 400, { error: err?.message || 'Invalid problem or contest URL' });
+        }
+      }
+
+      if (req.method === 'GET' && (pathname === '/api/contests' || pathname === '/api/platforms/contests')) {
+        const forceRefresh = url.searchParams.get('refresh') === '1';
+        const contests = await fetchUpcomingContests({ timeoutMs: config.pluginFetchTimeoutMs, forceRefresh });
+        return sendJson(req, res, 200, { contests }, { 'Cache-Control': forceRefresh ? 'no-store' : 'public, max-age=300, s-maxage=900' });
       }
 
       if (req.method === 'GET' && pathname === '/api/analytics') {
