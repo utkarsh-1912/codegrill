@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CodeGrill Companion Setup</title>
+    <style>
+      body { font-family: system-ui, -apple-system, sans-serif; width: 300px; margin: 0; padding: 14px; background: #14110f; color: #f6efe7; }
+      h1 { font-size: 15px; margin: 0 0 6px; color: #ff8a3d; }
+      p { font-size: 12px; color: #b9aba0; margin: 0 0 12px; line-height: 1.4; }
+      label { display: block; font-size: 11px; font-weight: 600; margin: 8px 0 4px; color: #e5d8cc; }
+      input { width: 100%; box-sizing: border-box; padding: 7px 9px; border-radius: 7px; border: 1px solid #3c2f27; background: #1e1916; color: #fff7ee; font-size: 12px; }
+      .row { display: flex; gap: 8px; margin-top: 12px; }
+      button { flex: 1; padding: 8px 10px; border-radius: 7px; border: 0; font-size: 12px; font-weight: 600; cursor: pointer; }
+      .primary { background: #d94e1f; color: #fff7ee; }
+      .secondary { background: #2a221d; color: #f6efe7; border: 1px solid #44352c; }
+      #status { margin-top: 10px; font-size: 11px; color: #b9aba0; min-height: 16px; }
+    </style>
+  </head>
+  <body>
+    <h1>CodeGrill Companion</h1>
+    <p>Connect your CodeGrill URL and Firebase ID token to sync solved problems directly from LeetCode, Codeforces, and HackerRank.</p>
+    <label for="apiBaseUrl">CodeGrill URL</label>
+    <input id="apiBaseUrl" type="url" placeholder="https://codegrill.vercel.app" />
+    <label for="authToken">Bearer ID Token (optional)</label>
+    <input id="authToken" type="password" placeholder="Paste your Firebase ID token" />
+    <div class="row">
+      <button id="saveBtn" class="primary" type="button">Save</button>
+      <button id="testBtn" class="secondary" type="button">Test</button>
+    </div>
+    <div id="status"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>

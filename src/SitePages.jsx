@@ -451,18 +451,41 @@ export function SitePages({
       <section className="page-section marketing-page">
         <div className="section-heading">
           <div>
-            <h1>Privacy notice</h1>
-            <p>How {brandName} stores your study progress, notes, and embedded media preferences.</p>
+            <h1>Privacy Policy</h1>
+            <p>Effective Date: November 27, {year} · Data Controller: {ecosystem} ({brandName}).</p>
           </div>
         </div>
         <Card variant="outlined" className="legal-card legal-card-split">
           <div className="legal-card-copy">
-            <h2>Local-first storage & optional sync</h2>
-            <p>Your solved problems, revision bookmarks, personal notes, activity ledger, and custom series are stored locally in your browser via <code>localStorage</code> and optionally synced with your self-hosted or connected {brandName} backend instance.</p>
-            <h2>Privacy-enhanced embeds</h2>
-            <p>Walkthrough videos load through YouTube&apos;s privacy-enhanced domain (<code>youtube-nocookie.com</code>) or your configured custom player template. Solution code and Markdown editorials are fetched through the {brandName} plugin layer without third-party ad trackers.</p>
-            <h2>Full control & reset</h2>
-            <p>You can permanently erase all saved progress, bookmarks, notes, and streak history at any time from the Settings menu using <strong>Reset progress</strong>.</p>
+            <h2>1. Scope &amp; Dual-Mode Data Architecture</h2>
+            <p>{brandName} is engineered on a <strong>Guest Local-First</strong> architecture with optional <strong>Authenticated Cloud Sync</strong>. You may browse all 6 interview roadmaps, 177+ curated problems, multi-language guides, and local study rooms without creating an account or submitting personal data to our servers.</p>
+            <ul>
+              <li><strong>Guest Mode (Default):</strong> Solved problem states, revision bookmarks, personal Markdown notes, activity streaks, favorites, custom sheets, and mock room drafts are stored exclusively in your browser via <code>localStorage</code> and <code>sessionStorage</code>. This data never leaves your device unless you trigger an explicit JSON export or connect a backend instance.</li>
+              <li><strong>Authenticated Cloud Sync (Optional):</strong> Where enabled via Firebase Authentication and Neon PostgreSQL, we process your Firebase User ID (<code>uid</code>), email address, display name, preferred locale, problem progress, notes, custom sheets, and linked public handles solely to synchronize your workspace across devices and render your optional public portfolio (<code>/u/:handle</code>).</li>
+            </ul>
+
+            <h2>2. Third-Party Coding Profile Aggregation</h2>
+            <p>When you voluntarily link public handles for LeetCode, Codeforces, AtCoder, CodeChef, GeeksforGeeks, HackerRank, or GitHub, our server-side sync proxy (<code>/api/profiles/sync</code>) retrieves <strong>publicly available statistics only</strong> (such as solved counts, contest ratings, and public profile URLs). We never request, collect, or store your passwords, session cookies, or private credentials for any third-party platform. Sync responses are cached transiently (up to 30 minutes) to respect upstream rate limits.</p>
+
+            <h2>3. Embedded Media, Content Plugins &amp; Zero Ad Tracking</h2>
+            <p>We do not sell personal data, serve behavioral advertisements, or embed third-party ad-tracking pixels. Video walkthroughs load through YouTube&apos;s privacy-enhanced domain (<code>youtube-nocookie.com</code>) or a user-configured player template. External GitHub repositories, Markdown guides, and public technical articles are retrieved through our SSRF-hardened plugin layer, which strips private network targets and enforces strict size and rate limits. Interacting with embedded YouTube players or opening external links remains subject to those providers&apos; respective privacy policies.</p>
+
+            <h2>4. Browser Storage, Telemetry &amp; Cookies</h2>
+            <p>{brandName} uses browser <code>localStorage</code> and <code>sessionStorage</code> strictly for essential workspace functionality (theme preference, locale selection, problem progress, viewer navigation history, and room drafts). No third-party marketing cookies are set by {brandName}. Server endpoints log minimal operational metadata (such as transient IP hashes for sliding-window rate limiting under <code>/api/profiles/sync</code> and <code>/api/plugins/fetch</code>) strictly to prevent abuse and protect service availability.</p>
+
+            <h2>5. Data Retention, Portability &amp; Your Legal Rights</h2>
+            <p>Consistent with the <strong>EU General Data Protection Regulation (GDPR)</strong>, the <strong>California Consumer Privacy Act / CPRA</strong>, and India&apos;s <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>, you maintain full control over your data:</p>
+            <ul>
+              <li><strong>Right of Access &amp; Portability:</strong> Download a complete, machine-readable JSON copy of your entire workspace at any time from <strong>Profile → Export JSON</strong>.</li>
+              <li><strong>Right to Erasure (&ldquo;Right to be Forgotten&rdquo;):</strong> Permanently clear all saved progress, bookmarks, notes, and streak history immediately from Settings via <strong>Reset progress</strong>, or clear browser site data. For authenticated cloud accounts, deletion requests purge associated records across all database tables via cascading foreign keys.</li>
+              <li><strong>Public Portfolio Opt-In:</strong> Public recruiter portfolios (<code>/u/:handle</code>) expose only stats you explicitly choose to publish.</li>
+            </ul>
+
+            <h2>6. Security Safeguards &amp; Children&apos;s Privacy</h2>
+            <p>We implement defense-in-depth technical safeguards including HTTPS-only transport, strict CORS origin allowlisting, RS256 JWT bearer verification on authenticated mutations, CIDR/DNS SSRF filtering, and per-IP/per-user rate limiting. {brandName} is intended for students and engineering professionals aged 13 and older (or 16 in jurisdictions requiring higher digital consent age); we do not knowingly collect personal data from children under the applicable threshold.</p>
+
+            <h2>7. Policy Updates &amp; Contact</h2>
+            <p>We may update this Privacy Policy to reflect architectural or legal changes; material revisions will update the Effective Date above. For privacy inquiries, data access requests, or grievance redressal under the DPDP Act / GDPR, contact the {ecosystem} team via <a href="https://utkristi-io.netlify.app/" target="_blank" rel="noopener noreferrer">utkristi-io.netlify.app</a> or the official repository issue tracker.</p>
           </div>
           <div className="legal-card-art" aria-hidden="true">
             <div className="legal-art-stage">
@@ -470,7 +493,7 @@ export function SitePages({
               <div className="legal-orbit-ring ring-2" />
               <Mascot mood="shield" size={142} label="Privacy guardian Ember" />
             </div>
-            <span className="legal-art-caption">Local-first · Zero ad trackers</span>
+            <span className="legal-art-caption">Local-first · Zero ad trackers · GDPR &amp; DPDP ready</span>
           </div>
         </Card>
       </section>
@@ -482,18 +505,38 @@ export function SitePages({
       <section className="page-section marketing-page">
         <div className="section-heading">
           <div>
-            <h1>Terms of use</h1>
-            <p>Guidelines for using {brandName} and its integrated study tools.</p>
+            <h1>Terms of Service</h1>
+            <p>Effective Date: November 27, {year} · Governing access to {brandName} and its companion tools.</p>
           </div>
         </div>
         <Card variant="outlined" className="legal-card legal-card-split">
           <div className="legal-card-copy">
-            <h2>Educational & interview preparation use</h2>
-            <p>{brandName} is provided as an educational workspace to organize coding interview roadmaps, curated practice series, personal notes, and study rooms. Content is provided &ldquo;as is&rdquo; without warranty of interview outcomes.</p>
-            <h2>Third-party platforms & plugins</h2>
-            <p>Built-in plugins retrieve publicly accessible metadata, open-source code files, and official embeddable video streams from third-party platforms (such as LeetCode, YouTube, GitHub, and technical blogs). Use of external platforms remains subject to their respective terms.</p>
-            <h2>User-created series & notes</h2>
-            <p>Custom sheets and personal notes you author belong to you and are stored solely for your study workflow.</p>
+            <h2>1. Acceptance &amp; Eligibility</h2>
+            <p>By accessing or using {brandName} (including the web application, API endpoints, Study Rooms, and the optional CodeGrill Companion browser extension), you agree to be bound by these Terms of Service and our <a href="/privacy" onClick={navHandler(onNavigate, '/privacy')}>Privacy Policy</a>. If you use {brandName} on behalf of an organization or study cohort, you represent that you have authority to bind that entity to these Terms.</p>
+
+            <h2>2. Limited License &amp; Permitted Educational Use</h2>
+            <p>Subject to compliance with these Terms, {ecosystem} grants you a personal, non-exclusive, non-transferable, revocable license to access and use {brandName} solely for individual or peer-collaborative technical interview preparation, computer science study, and portfolio organization.</p>
+
+            <h2>3. Acceptable Use &amp; Prohibited Conduct</h2>
+            <p>You agree not to misuse {brandName} or its infrastructure. Specifically, you must not:</p>
+            <ul>
+              <li>Abuse <code>/api/profiles/sync</code>, <code>/api/plugins/fetch</code>, or <code>/api/plugins/transcript</code> as an open web scraper, proxy relay, or automated bulk-harvesting service, or attempt to circumvent rate limits, CORS restrictions, or SSRF protections.</li>
+              <li>Probe, scan, or test the vulnerability of any {brandName} server or attempt to access another user&apos;s authenticated progress or profile data without authorization.</li>
+              <li>Circumvent paywalls, authentication gates, or technical access controls on any third-party learning platform linked from {brandName}.</li>
+              <li>Upload, share, or broadcast unlawful, harassing, defamatory, or infringing content inside Study Rooms or public portfolios (<code>/u/:handle</code>).</li>
+            </ul>
+
+            <h2>4. User-Generated Content &amp; Collaborative Rooms</h2>
+            <p>You retain full ownership of the personal notes, custom problem sheets, Mermaid diagrams, and interview debriefs you author in {brandName}. Study Rooms may integrate with <a href="https://utkristi-colabs.vercel.app/" target="_blank" rel="noopener noreferrer">Utkristi CoLabs</a> and browser <code>BroadcastChannel</code> sync; anyone holding a room link or ID may join that session, so do not share proprietary employer code, NDA-protected interview prompts, or sensitive personal secrets in shared rooms.</p>
+
+            <h2>5. Third-Party Services &amp; No Affiliation</h2>
+            <p>{brandName} links to and surfaces public metadata from independent platforms—including LeetCode, Codeforces, HackerRank, AtCoder, CodeChef, GeeksforGeeks, GitHub, and YouTube. {brandName} is an independent workspace and is <strong>not affiliated with, sponsored by, or endorsed by</strong> any of those platforms. Your use of third-party websites remains governed solely by their respective terms of service.</p>
+
+            <h2>6. Disclaimers &amp; Limitation of Liability</h2>
+            <p>{brandName} and all curated roadmaps, study guides, complexity notes, and third-party links are provided strictly on an <strong>&ldquo;AS IS&rdquo; and &ldquo;AS AVAILABLE&rdquo;</strong> basis, without warranties of any kind—express or implied—including merchantability, fitness for a particular purpose, accuracy, or non-infringement. We make no guarantee of job placement, interview outcomes, or uninterrupted availability of external APIs. To the fullest extent permitted by applicable law, {ecosystem} and its contributors shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or loss of data or profits arising from your use of the service.</p>
+
+            <h2>7. Termination, Changes &amp; Governing Law</h2>
+            <p>We reserve the right to suspend or restrict API access for any IP address or account violating these Terms or threatening platform stability. We may modify these Terms periodically; continued use after the Effective Date constitutes acceptance. These Terms shall be governed by and construed in accordance with applicable laws of India, without regard to conflict-of-law principles, subject to mandatory consumer protections in your jurisdiction.</p>
           </div>
           <div className="legal-card-art" aria-hidden="true">
             <div className="legal-art-stage">
@@ -501,7 +544,7 @@ export function SitePages({
               <div className="legal-orbit-ring ring-2" />
               <Mascot mood="idle" size={142} label="Ember workspace mascot" />
             </div>
-            <span className="legal-art-caption">Built for transparent study</span>
+            <span className="legal-art-caption">Clear boundaries · Built for fair study</span>
           </div>
         </Card>
       </section>
@@ -513,16 +556,35 @@ export function SitePages({
       <section className="page-section marketing-page">
         <div className="section-heading">
           <div>
-            <h1>Copyright & attribution</h1>
-            <p>© {year} {brandName} · {ecosystem}. All platform UI, plugins, and original tooling rights reserved.</p>
+            <h1>Copyright, DMCA &amp; Attribution</h1>
+            <p>© {year} {ecosystem} / {brandName}. Intellectual property notice, open-source credits, and takedown procedure.</p>
           </div>
         </div>
         <Card variant="outlined" className="legal-card legal-card-split">
           <div className="legal-card-copy">
-            <h2>Open-source & community attributions</h2>
-            <p>Problem metadata, multilingual translations, and reference solution indexes incorporate open-source contributions from community repositories including <code>doocs/leetcode</code> and <code>neetcode-gh/leetcode</code> under their respective open-source licenses.</p>
-            <h2>Third-party trademarks & video creators</h2>
-            <p>LeetCode, Codeforces, HackerRank, YouTube, GitHub, takeUforward (Striver), Blind 75, and Grind 75 are trademarks or community curriculums of their respective owners. Video walkthroughs remain the intellectual property of their original creators and are played via official embeddable players with source attribution.</p>
+            <h2>1. Proprietary Platform Rights</h2>
+            <p>All original source code, user interface designs, mascot artwork (Ember), prerequisite roadmap DAGs, study room tooling, first-party Markdown study guides, SVG architecture diagrams, and localization strings authored for {brandName} are © {year} {ecosystem} / {brandName}. All rights reserved, as further stated in the repository&apos;s root <code>LICENSE</code> file. No portion of the proprietary platform UI or branding may be redistributed or resold without prior written permission.</p>
+
+            <h2>2. Third-Party Content, Fair Use &amp; Attribution</h2>
+            <p>{brandName} acts as an educational index and in-app study reader. We do not claim ownership over linked external problems, open-source repositories, technical articles, or creator videos:</p>
+            <ul>
+              <li><strong>Open-Source Repositories:</strong> Curated references to public GitHub repositories—including <code>doocs/leetcode</code>, <code>neetcode-gh/leetcode</code>, <code>donnemartin/system-design-primer</code>, <code>ashishps1/awesome-low-level-design</code>, <code>ashishps1/awesome-system-design-resources</code>, and <code>ByteByteGoHq/system-design-101</code>—remain governed by their respective open-source licenses and original authors, with direct source links preserved on every view.</li>
+              <li><strong>Video Walkthroughs:</strong> All YouTube videos remain the exclusive intellectual property of their respective creators and are rendered solely via official YouTube embeddable players with clear attribution and links to the original video.</li>
+              <li><strong>Trademarks:</strong> LeetCode, Codeforces, HackerRank, AtCoder, CodeChef, GeeksforGeeks, GitHub, YouTube, ByteByteGo, NeetCode, takeUforward (Striver), Blind 75, and Grind 75 are trademarks or community curriculums of their respective owners. Mention herein is purely nominative for educational identification.</li>
+            </ul>
+
+            <h2>3. Copyright &amp; DMCA Takedown Procedure</h2>
+            <p>{ecosystem} respects intellectual property rights and complies with the U.S. Digital Millennium Copyright Act (17 U.S.C. § 512) and the Indian Copyright Act, 1957. If you believe any link, embedded resource, or text indexed in {brandName} infringes your copyright, please submit a written notice containing:</p>
+            <ul>
+              <li>Identification of the copyrighted work claimed to have been infringed.</li>
+              <li>The exact URL or path within {brandName} where the disputed reference appears.</li>
+              <li>Your contact information (name, organization, and email address) and a statement of good-faith belief that the disputed use is not authorized by the copyright owner, its agent, or the law.</li>
+              <li>A statement under penalty of perjury that the information in your notice is accurate and that you are authorized to act on behalf of the rights holder.</li>
+            </ul>
+            <p>Submit notices via <a href="https://utkristi-io.netlify.app/" target="_blank" rel="noopener noreferrer">utkristi-io.netlify.app</a> or the repository&apos;s security/legal contact. Valid takedown requests are reviewed and acted upon promptly, including removing disputed links or cached excerpts where appropriate.</p>
+
+            <h2>4. Open-Source Software Dependencies</h2>
+            <p>{brandName} is built with open-source libraries including React, Vite, Lucide Icons, KaTeX, and Mermaid.js, each used in accordance with its respective MIT or open-source license.</p>
           </div>
           <div className="legal-card-art" aria-hidden="true">
             <div className="legal-art-stage">
@@ -530,7 +592,7 @@ export function SitePages({
               <div className="legal-orbit-ring ring-2" />
               <Mascot mood="happy" size={142} label="Ember community mascot" />
             </div>
-            <span className="legal-art-caption">Open-source & creator attribution</span>
+            <span className="legal-art-caption">DMCA compliant · Full creator attribution</span>
           </div>
         </Card>
       </section>
@@ -672,9 +734,9 @@ export function SiteFooter({ locale = 'en', config, onNavigate }) {
           </a>
         </span>
         <div className="footer-legal">
-          <a href="/privacy" onClick={navHandler(onNavigate, '/privacy')}>Privacy</a>
-          <a href="/terms" onClick={navHandler(onNavigate, '/terms')}>Terms</a>
-          <a href="/copyright" onClick={navHandler(onNavigate, '/copyright')}>Copyright</a>
+          <a href="/privacy" onClick={navHandler(onNavigate, '/privacy')}>{t.studio.legal.privacy}</a>
+          <a href="/terms" onClick={navHandler(onNavigate, '/terms')}>{t.studio.legal.terms}</a>
+          <a href="/copyright" onClick={navHandler(onNavigate, '/copyright')}>{t.studio.legal.copyright}</a>
         </div>
       </div>
     </footer>

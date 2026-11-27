@@ -56,6 +56,7 @@ import { resourcesFor } from './catalog.mjs';
 import { RichTextInterpreter } from './RichTextInterpreter.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
 import { Mascot } from './Mascot.jsx';
+import { LanguageIcon } from './LanguageIcon.jsx';
 import { getMessages } from './i18n.mjs';
 
 const directory = roomsDirectory(import.meta.env.VITE_COLLAB_ROOMS_URL || undefined);
@@ -815,7 +816,7 @@ export function StudyRooms({
                                       problemSlug: activeProblem.slug,
                                     })}
                                   >
-                                    <FileCode2 size={13} aria-hidden="true" /> {langName}
+                                    <LanguageIcon lang={langId} size={14} /> {langName}
                                   </button>
                                 ))}
                               </div>

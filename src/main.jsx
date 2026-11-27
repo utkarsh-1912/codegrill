@@ -20,6 +20,9 @@ import { SheetsPage } from './SheetsPage.jsx';
 import { ContentViewer, buildViewerPath, formatViewerTitle } from './ContentViewer.jsx';
 import { ViewerPage } from './ViewerPage.jsx';
 import { ProfilePage } from './ProfilePage.jsx';
+import { PublicPortfolioPage } from './PublicPortfolioPage.jsx';
+import { ContestsPage } from './ContestsPage.jsx';
+import { LanguageIcon } from './LanguageIcon.jsx';
 import { CommandPalette } from './CommandPalette.jsx';
 import { ProblemPracticeBar } from './ProblemPracticeBar.jsx';
 import { AppHeader } from './AppHeader.jsx';
@@ -32,6 +35,8 @@ import { getChecklistStudyGuide } from './studyMaterial.mjs';
 import { mergeCatalogProblems, problemPlatformBadge, problemPlatformLabel } from './externalProblems.mjs';
 import { DEFAULT_APP_CONFIG } from './config.mjs';
 import { getMessages } from './i18n.mjs';
+import { createCloudApiAdapter, importLocalWorkspaceBackup, mergeNotesByTimestamp, scopedStorageKey } from './storageAdapter.mjs';
+import { getValidIdToken, isFirebaseConfigured, readAuthSession, signOutAuth } from './firebaseAuth.mjs';
 import {
   checkBackendHealth,
   createCustomSheetApi,
@@ -47,6 +52,7 @@ import {
   saveRemoteProfiles,
   saveRemoteProgress,
   writeLocalCustomSheets,
+  writeLocalProfiles,
 } from './api.mjs';
 
 const { roadmap_categories: categories, languages } = curriculum;
@@ -155,9 +161,9 @@ function computeStreakStats(activity = {}, previousLongest = 0) {
   };
 }
 
-function readPreferences() {
+function readPreferences(uid = '') {
   try {
-    const saved = JSON.parse(localStorage.getItem(preferenceKey));
+    const saved = JSON.parse(localStorage.getItem(scopedStorageKey(preferenceKey, uid)));
     const activity = saved?.activity && typeof saved.activity === 'object' ? saved.activity : {};
     const stats = computeStreakStats(activity, Number(saved?.longestStreak || 0));
     return {
@@ -169,39 +175,44 @@ function readPreferences() {
         ? saved.bookmarked.filter((slug) => problemSlugs.has(slug))
         : []),
       notes: saved?.notes && typeof saved.notes === 'object' ? saved.notes : {},
+      notesUpdatedAt: saved?.notesUpdatedAt && typeof saved.notesUpdatedAt === 'object' ? saved.notesUpdatedAt : {},
       activity,
       streak: stats.streak,
       longestStreak: stats.longestStreak,
     };
   } catch {
-    return { locale: defaultLocale, completed: new Set(), bookmarked: new Set(), notes: {}, activity: {}, streak: 0, longestStreak: 0 };
+    return { locale: defaultLocale, completed: new Set(), bookmarked: new Set(), notes: {}, notesUpdatedAt: {}, activity: {}, streak: 0, longestStreak: 0 };
   }
 }
 
-const validPages = new Set([...pathIds, ...sitePages, 'profile', 'viewer', 'error']);
+const validPages = new Set([...pathIds, ...sitePages, 'profile', 'viewer', 'contests', 'error']);
 
 function currentPage() {
   // Support legacy hash URLs seamlessly by reading them if present
   if (window.location.hash && window.location.hash.length > 1) {
     const legacy = studyLocation(window.location.hash, problemSlugs);
     const legacyQuery = window.location.hash.split('?')[1] || '';
-    const cleanPath = legacy.page === 'home' || !legacy.page ? '/' : `/${legacy.page}${legacyQuery ? '?' + legacyQuery : ''}`;
+    const legacyPath = validPages.has(legacy.page) && legacy.page !== 'home' ? '/' + legacy.page : '/';
+    const cleanPath = legacyPath + (legacyQuery ? '?' + legacyQuery : '');
     window.history.replaceState({}, '', cleanPath);
   }
 
   const rawPath = window.location.pathname.replace(/\/+$/, '') || '/';
+  const portfolioMatch = /^\/u\/([a-zA-Z0-9._-]{1,40})$/.exec(rawPath);
   const segment = rawPath === '/' ? 'home' : rawPath.slice(1);
   const params = new URLSearchParams(window.location.search);
   const problemParam = params.get('problem') || '';
   const topicParam = params.get('topic') || '';
   const isKnown = validPages.has(segment);
-  const page = isKnown ? segment : 'not-found';
+  const page = portfolioMatch ? 'portfolio' : (isKnown ? segment : 'not-found');
+  const portfolioHandle = portfolioMatch?.[1] ?? '';
 
   const domainParam = params.get('domain') || '';
   const validDomain = ROADMAP_DOMAINS.some((d) => d.id === domainParam) ? domainParam : '';
 
   return {
     page,
+    portfolioHandle,
     pathname: window.location.pathname,
     problem: (page === 'problems' || page === 'rooms' || page === 'viewer') && problemSlugs.has(problemParam) ? problemParam : '',
     topic: page === 'problems' && !problemParam && categories.some(({ id }) => id === topicParam) ? topicParam : '',
@@ -219,18 +230,23 @@ function currentPage() {
 
 function App() {
   const { theme, resolvedTheme, setTheme } = useTheme();
-  const [preferences, setPreferences] = useState(readPreferences);
-  const { locale, completed, bookmarked, notes, activity, streak, longestStreak } = preferences;
-  const [{ page, pathname, problem: sharedProblem, topic, roadmapDomain, roadmapTopic, roomId, roomMode, viewerUrl, viewerTitle, viewerKind, viewerLang, viewerModuleId }, setLocation] = useState(currentPage);
+  const [authSession, setAuthSession] = useState(readAuthSession);
+  const [preferences, setPreferences] = useState(() => readPreferences(readAuthSession()?.uid || ''));
+  const { locale, completed, bookmarked, notes, notesUpdatedAt, activity, streak, longestStreak } = preferences;
+  const [{ page, portfolioHandle, pathname, problem: sharedProblem, topic, roadmapDomain, roadmapTopic, roomId, roomMode, viewerUrl, viewerTitle, viewerKind, viewerLang, viewerModuleId }, setLocation] = useState(currentPage);
   const [zenMode, setZenMode] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [appConfig, setAppConfig] = useState(DEFAULT_APP_CONFIG);
   const [dailyChallenge, setDailyChallenge] = useState(null);
   const [backendOnline, setBackendOnline] = useState(false);
-  const [customSheets, setCustomSheets] = useState(readLocalCustomSheets);
-  const [linkedProfiles, setLinkedProfiles] = useState(readLocalProfiles);
+  const [authEnforced, setAuthEnforced] = useState(false);
+  const [customSheets, setCustomSheets] = useState(() => readLocalCustomSheets(readAuthSession()?.uid || ''));
+  const [linkedProfiles, setLinkedProfiles] = useState(() => readLocalProfiles(readAuthSession()?.uid || ''));
+  const [portfolioSettings, setPortfolioSettings] = useState({ handle: '', isPublicProfile: false });
   const [viewerItem, setViewerItem] = useState(null);
   const hydratedRef = useRef(false);
+  const migratingRef = useRef(false);
+  const cloudRevisionRef = useRef('');
 
   const t = getMessages(locale);
   const navLabels = [t.nav.roadmap, t.nav.sheets, t.nav.problems, t.nav.tracks, t.nav.resources, t.nav.rooms];
@@ -257,45 +273,78 @@ function App() {
   useEffect(() => {
     let active = true;
     (async () => {
-      const [health, remoteConfig, daily, sheetData] = await Promise.all([
+      const [health, remoteConfig, daily] = await Promise.all([
         checkBackendHealth(),
         fetchAppConfig(),
         fetchDailyChallenge(problems),
-        fetchAllSheets(),
       ]);
       if (!active) return;
-      setBackendOnline(health.online);
+      setBackendOnline(health.workspaceAvailable);
+      setAuthEnforced(Boolean(health.authEnforced));
       setAppConfig(remoteConfig);
       setDailyChallenge(daily);
-      if (sheetData.custom) setCustomSheets(sheetData.custom);
-      if (health.online) {
-        const [remote, remoteProfiles] = await Promise.all([
-          fetchRemoteProgress(remoteConfig.defaultProfile),
-          fetchRemoteProfiles(remoteConfig.defaultProfile),
+      const startupSession = readAuthSession();
+      const startupUid = startupSession?.uid || '';
+      const canSyncNow = health.workspaceAvailable && (!health.authEnforced || Boolean(startupSession));
+      if (canSyncNow) {
+        const cloud = createCloudApiAdapter({ apiBaseUrl: remoteConfig.apiBaseUrl, getIdToken: getValidIdToken });
+        const [remote, remoteProfilesObj, remoteSheetsObj] = await Promise.all([
+          health.authEnforced ? cloud.getProgress().catch(() => null) : fetchRemoteProgress(remoteConfig.defaultProfile),
+          health.authEnforced ? cloud.getLinkedProfiles().catch(() => null) : fetchRemoteProfiles(remoteConfig.defaultProfile),
+          (health.authEnforced || startupSession)
+            ? cloud.getCustomSheets().catch(() => null)
+            : fetchAllSheets(remoteConfig.apiBaseUrl, startupUid),
         ]);
+        const remoteProfiles = remoteProfilesObj?.profiles || remoteProfilesObj;
         if (active && remote) {
+          cloudRevisionRef.current = remote.updatedAt || '';
+          setPortfolioSettings({
+            handle: remote.handle || '',
+            isPublicProfile: Boolean(remote.isPublicProfile),
+          });
           setPreferences((prev) => {
             const mergedActivity = { ...(remote.activity || {}), ...prev.activity };
+            const mergedNoteState = mergeNotesByTimestamp(
+              remote.notes,
+              remote.notesUpdatedAt,
+              prev.notes,
+              prev.notesUpdatedAt,
+              remote.updatedAt,
+              { preferRemoteDeletions: true },
+            );
             const stats = computeStreakStats(
               mergedActivity,
               Math.max(Number(remote.longestStreak || 0), Number(prev.longestStreak || 0)),
             );
             return {
               locale: locales.some(({ code }) => code === remote.locale) ? remote.locale : prev.locale,
-              completed: new Set([...prev.completed, ...(remote.completed || []).filter((s) => problemSlugs.has(s))]),
-              bookmarked: new Set([...prev.bookmarked, ...(remote.bookmarked || []).filter((s) => problemSlugs.has(s))]),
-              notes: { ...(remote.notes || {}), ...prev.notes },
+              completed: new Set((remote.completed || []).filter((s) => problemSlugs.has(s))),
+              bookmarked: new Set((remote.bookmarked || []).filter((s) => problemSlugs.has(s))),
+              notes: mergedNoteState.notes,
+              notesUpdatedAt: mergedNoteState.notesUpdatedAt,
               activity: mergedActivity,
               streak: stats.streak,
               longestStreak: stats.longestStreak,
             };
           });
+          if (remoteProfiles && Object.keys(remoteProfiles).length > 0) {
+            setLinkedProfiles((prev) => {
+              const next = { ...remoteProfiles, ...prev };
+              writeLocalProfiles(next, startupUid);
+              return next;
+            });
+          }
+          if (Array.isArray(remoteSheetsObj?.custom)) {
+            setCustomSheets(remoteSheetsObj.custom);
+            writeLocalCustomSheets(remoteSheetsObj.custom, startupUid);
+          }
+          hydratedRef.current = true;
         }
-        if (active && remoteProfiles && Object.keys(remoteProfiles).length > 0) {
-          setLinkedProfiles((prev) => ({ ...remoteProfiles, ...prev }));
-        }
+        // If remote progress read failed (remote === null), keep hydratedRef.current = false
+        // so subsequent local edits never overwrite unhydrated cloud state.
+      } else {
+        hydratedRef.current = true;
       }
-      hydratedRef.current = true;
     })();
     return () => { active = false; };
   }, []);
@@ -333,25 +382,76 @@ function App() {
     }
   }, [locale]);
 
-  // Persist to localStorage & sync to backend
+  // Persist to account-scoped localStorage & sync to backend with optimistic concurrency (expectedUpdatedAt)
   useEffect(() => {
     const payload = {
       locale,
       completed: [...completed],
       bookmarked: [...bookmarked],
       notes,
+      notesUpdatedAt,
       activity,
       streak,
       longestStreak,
     };
+    const activePrefKey = scopedStorageKey(preferenceKey, authSession?.uid || '');
     try {
-      localStorage.setItem(preferenceKey, JSON.stringify(payload));
+      localStorage.setItem(activePrefKey, JSON.stringify(payload));
     } catch {
       // Ignore storage errors
     }
-    if (backendOnline && hydratedRef.current) {
-      saveRemoteProgress(payload, appConfig.defaultProfile).then((saved) => {
-        if (saved && (saved.streak !== streak || saved.longestStreak !== longestStreak)) {
+    if (backendOnline && hydratedRef.current && !migratingRef.current && (!authEnforced || authSession)) {
+      const requestPayload = cloudRevisionRef.current
+        ? { ...payload, expectedUpdatedAt: cloudRevisionRef.current }
+        : payload;
+      const savePromise = authSession
+        ? createCloudApiAdapter({ apiBaseUrl: appConfig.apiBaseUrl, getIdToken: getValidIdToken })
+            .upsertProgress(requestPayload)
+            .catch((err) => {
+              if (err?.status === 409 && err?.progress) {
+                return { __conflict: true, progress: err.progress };
+              }
+              return null;
+            })
+        : saveRemoteProgress(requestPayload, appConfig.defaultProfile);
+      savePromise.then((saved) => {
+        if (!saved) return;
+        if (saved.__conflict && saved.progress) {
+          // Another device wrote a newer revision: adopt authoritative remote sets so deletions are never resurrected
+          const remote = saved.progress;
+          cloudRevisionRef.current = remote.updatedAt || '';
+          setPreferences((curr) => {
+            const mergedActivity = { ...(remote.activity || {}), ...curr.activity };
+            const mergedNoteState = mergeNotesByTimestamp(
+              remote.notes,
+              remote.notesUpdatedAt,
+              curr.notes,
+              curr.notesUpdatedAt,
+              remote.updatedAt,
+              { preferRemoteDeletions: true },
+            );
+            const stats = computeStreakStats(
+              mergedActivity,
+              Math.max(Number(remote.longestStreak || 0), Number(curr.longestStreak || 0)),
+            );
+            return {
+              ...curr,
+              locale: locales.some(({ code }) => code === remote.locale) ? remote.locale : curr.locale,
+              completed: new Set((remote.completed || []).filter((s) => problemSlugs.has(s))),
+              bookmarked: new Set((remote.bookmarked || []).filter((s) => problemSlugs.has(s))),
+              notes: mergedNoteState.notes,
+              notesUpdatedAt: mergedNoteState.notesUpdatedAt,
+              activity: mergedActivity,
+              streak: stats.streak,
+              longestStreak: stats.longestStreak,
+            };
+          });
+          return;
+        }
+        if (saved.updatedAt) {
+          cloudRevisionRef.current = saved.updatedAt;
+        }
+        if (saved.streak !== streak || saved.longestStreak !== longestStreak) {
           setPreferences((curr) => ({
             ...curr,
             streak: Number(saved.streak || curr.streak || 0),
@@ -360,7 +460,132 @@ function App() {
         }
       });
     }
-  }, [locale, completed, bookmarked, notes, activity, backendOnline, appConfig.defaultProfile]);
+  }, [locale, completed, bookmarked, notes, activity, backendOnline, authEnforced, authSession, appConfig.defaultProfile, appConfig.apiBaseUrl]);
+
+  async function handleAuthSignIn(session) {
+    migratingRef.current = true;
+    try {
+      const prevUid = authSession?.uid || '';
+      const isDifferentAccount = Boolean(prevUid && session?.uid && prevUid !== session.uid);
+
+      if (backendOnline) {
+        const cloud = createCloudApiAdapter({ apiBaseUrl: appConfig.apiBaseUrl, getIdToken: async () => session.idToken || getValidIdToken() });
+        if (isDifferentAccount) {
+          // Never import a previous account's workspace into a different signed-in account
+          const [remote, remoteProfilesObj, remoteSheetsObj] = await Promise.all([
+            cloud.getProgress(),
+            cloud.getLinkedProfiles().catch(() => null),
+            cloud.getCustomSheets().catch(() => null),
+          ]);
+          if (!remote || typeof remote !== 'object') {
+            throw new Error('Could not load cloud progress for the new account');
+          }
+          cloudRevisionRef.current = remote.updatedAt || '';
+          const remoteActivity = remote.activity || {};
+          const stats = computeStreakStats(remoteActivity, Number(remote.longestStreak || 0));
+          setPreferences({
+            locale: locales.some(({ code }) => code === remote.locale) ? remote.locale : locale,
+            completed: new Set((remote.completed || []).filter((s) => problemSlugs.has(s))),
+            bookmarked: new Set((remote.bookmarked || []).filter((s) => problemSlugs.has(s))),
+            notes: remote.notes || {},
+            notesUpdatedAt: remote.notesUpdatedAt || {},
+            activity: remoteActivity,
+            streak: stats.streak,
+            longestStreak: stats.longestStreak,
+          });
+          setLinkedProfiles(remoteProfilesObj?.profiles || {});
+          setCustomSheets(Array.isArray(remoteSheetsObj?.custom) ? remoteSheetsObj.custom : []);
+        } else {
+          const res = await cloud.importGuestProgress({
+            locale,
+            completed: [...completed],
+            bookmarked: [...bookmarked],
+            notes,
+            notesUpdatedAt,
+            activity,
+            linkedProfiles,
+            customSheets,
+          });
+          if (!res?.ok || !res?.progress) {
+            throw new Error('Cloud migration did not return merged progress');
+          }
+          cloudRevisionRef.current = res.progress.updatedAt || '';
+          const mergedActivity = { ...activity, ...(res.progress.activity || {}) };
+          const stats = computeStreakStats(mergedActivity, Math.max(longestStreak, Number(res.progress.longestStreak || 0)));
+          setPreferences((curr) => {
+            const mergedNoteState = mergeNotesByTimestamp(
+              res.progress.notes,
+              res.progress.notesUpdatedAt,
+              curr.notes,
+              curr.notesUpdatedAt,
+              res.progress.updatedAt,
+            );
+            return {
+              ...curr,
+              completed: new Set([...curr.completed, ...(res.progress.completed || []).filter((s) => problemSlugs.has(s))]),
+              bookmarked: new Set([...curr.bookmarked, ...(res.progress.bookmarked || []).filter((s) => problemSlugs.has(s))]),
+              notes: mergedNoteState.notes,
+              notesUpdatedAt: mergedNoteState.notesUpdatedAt,
+              activity: mergedActivity,
+              streak: stats.streak,
+              longestStreak: stats.longestStreak,
+            };
+          });
+          // Clear guest storage once imported so another tab signing into a different account won't re-import it
+          try {
+            localStorage.removeItem(preferenceKey);
+            localStorage.removeItem('codegrill:linked-profiles:v1');
+            localStorage.removeItem('codegrill:custom-sheets:v1');
+          } catch {}
+        }
+      } else if (isDifferentAccount) {
+        setPreferences(readPreferences(session?.uid || ''));
+        setLinkedProfiles({});
+        setCustomSheets([]);
+      }
+      hydratedRef.current = true;
+      setAuthSession(session);
+    } catch (err) {
+      // Do NOT activate cloud saves if guest import or account load fails — prevents unmerged local snapshot from overwriting cloud state
+      signOutAuth();
+      setAuthSession(null);
+      throw new Error(err?.message || 'Cloud sync migration failed. Your local progress is safe; please retry.');
+    } finally {
+      migratingRef.current = false;
+    }
+  }
+
+  function handleAuthSignOut() {
+    const prevUid = authSession?.uid || '';
+    signOutAuth();
+    setAuthSession(null);
+    cloudRevisionRef.current = '';
+    // Clear account-scoped private progress so a subsequent sign-in on this browser never inherits the previous user's notes/progress
+    setPreferences((curr) => ({
+      locale: curr.locale,
+      completed: new Set(),
+      bookmarked: new Set(),
+      notes: {},
+      notesUpdatedAt: {},
+      activity: {},
+      streak: 0,
+      longestStreak: 0,
+    }));
+    setLinkedProfiles({});
+    setCustomSheets([]);
+    try {
+      if (prevUid) {
+        localStorage.removeItem(scopedStorageKey(preferenceKey, prevUid));
+        localStorage.removeItem(scopedStorageKey('codegrill:custom-sheets:v1', prevUid));
+        localStorage.removeItem(scopedStorageKey('codegrill:linked-profiles:v1', prevUid));
+      }
+      localStorage.removeItem(preferenceKey);
+      localStorage.removeItem('codegrill:linked-profiles:v1');
+      localStorage.removeItem('codegrill:custom-sheets:v1');
+    } catch {
+      // Ignore storage errors
+    }
+  }
 
   function navigate(path) {
     const target = path === '/home' ? '/' : path;
@@ -417,62 +642,253 @@ function App() {
   function saveNote(slug, text) {
     setPreferences((current) => {
       const nextNotes = { ...current.notes };
-      if (text.trim()) nextNotes[slug] = text.trim();
-      else delete nextNotes[slug];
-      return { ...current, notes: nextNotes };
+      const nextNotesUpdatedAt = { ...(current.notesUpdatedAt || {}) };
+      if (text.trim()) {
+        nextNotes[slug] = text.trim();
+        nextNotesUpdatedAt[slug] = new Date().toISOString();
+      } else {
+        delete nextNotes[slug];
+        delete nextNotesUpdatedAt[slug];
+      }
+      return { ...current, notes: nextNotes, notesUpdatedAt: nextNotesUpdatedAt };
     });
   }
 
   async function handleSaveProfiles(nextProfiles) {
     setLinkedProfiles(nextProfiles);
-    const saved = await saveRemoteProfiles(nextProfiles, appConfig.defaultProfile, appConfig.apiBaseUrl);
-    if (saved) setLinkedProfiles(saved);
+    if (authSession) {
+      const uid = authSession.uid || '';
+      writeLocalProfiles(nextProfiles, uid);
+      if (backendOnline) {
+        try {
+          const cloud = createCloudApiAdapter({ apiBaseUrl: appConfig.apiBaseUrl, getIdToken: getValidIdToken });
+          const saved = await cloud.saveLinkedProfiles(nextProfiles);
+          if (saved?.profiles) {
+            setLinkedProfiles(saved.profiles);
+            writeLocalProfiles(saved.profiles, uid);
+          }
+        } catch {
+          // Keep account-scoped local cache only; never fall back to shared guest storage
+        }
+      }
+      return;
+    }
+    if (!authEnforced && backendOnline) {
+      const saved = await saveRemoteProfiles(nextProfiles, appConfig.defaultProfile, appConfig.apiBaseUrl, '');
+      if (saved) setLinkedProfiles(saved);
+    } else {
+      writeLocalProfiles(nextProfiles, '');
+    }
+  }
+
+  async function handleRestoreBackup(rawText) {
+    const parsed = typeof rawText === 'string' ? JSON.parse(rawText) : rawText;
+    if (!parsed || typeof parsed !== 'object' || !parsed.data || typeof parsed.data !== 'object') {
+      throw new Error('Invalid Codegrill backup file format');
+    }
+    const study = parsed.data['codegrill:study:v1'] || parsed.data['codegrill-preferences-v2'] || null;
+    const hasStudy = Boolean(study && typeof study === 'object');
+    const restoredProfiles = parsed.data['codegrill:linked-profiles:v1'];
+    const hasProfiles = Boolean(restoredProfiles && typeof restoredProfiles === 'object' && !Array.isArray(restoredProfiles));
+    const restoredSheets = Array.isArray(parsed.data['codegrill:custom-sheets:v1'])
+      ? parsed.data['codegrill:custom-sheets:v1'].map((s) => normalizeCustomSheet(s, problemSlugs))
+      : null;
+    const hasSheets = Boolean(restoredSheets && restoredSheets.length > 0);
+
+    if (!hasStudy && !hasProfiles && !hasSheets) {
+      throw new Error('Backup file does not contain any Codegrill progress, profiles, or sheets to restore.');
+    }
+
+    const progressPatch = {};
+    if (hasStudy) {
+      if (locales.some(({ code }) => code === study.locale)) progressPatch.locale = study.locale;
+      if (Array.isArray(study.completed)) progressPatch.completed = study.completed.filter((s) => problemSlugs.has(s));
+      if (Array.isArray(study.bookmarked)) progressPatch.bookmarked = study.bookmarked.filter((s) => problemSlugs.has(s));
+      if (study.notes && typeof study.notes === 'object' && !Array.isArray(study.notes)) progressPatch.notes = study.notes;
+      if (study.notesUpdatedAt && typeof study.notesUpdatedAt === 'object' && !Array.isArray(study.notesUpdatedAt)) {
+        progressPatch.notesUpdatedAt = study.notesUpdatedAt;
+      }
+      if (study.activity && typeof study.activity === 'object' && !Array.isArray(study.activity)) {
+        progressPatch.activity = study.activity;
+      }
+    }
+    const hasProgressPatch = Object.keys(progressPatch).length > 0;
+
+    if (authSession && backendOnline) {
+      if (!hydratedRef.current || !cloudRevisionRef.current) {
+        throw new Error('Cannot restore while cloud state is unhydrated. Refresh once online and retry.');
+      }
+      migratingRef.current = true;
+      try {
+        const cloud = createCloudApiAdapter({ apiBaseUrl: appConfig.apiBaseUrl, getIdToken: getValidIdToken });
+        const result = await cloud.restoreWorkspace({
+          progressPatch: hasProgressPatch ? progressPatch : null,
+          linkedProfiles: hasProfiles ? restoredProfiles : null,
+          customSheets: hasSheets ? restoredSheets : null,
+          expectedUpdatedAt: cloudRevisionRef.current,
+        });
+        if (!result?.ok || !result?.progress) {
+          throw new Error('Atomic cloud restore did not return saved workspace');
+        }
+        const saved = result.progress;
+        cloudRevisionRef.current = saved.updatedAt || cloudRevisionRef.current;
+        importLocalWorkspaceBackup(parsed, authSession.uid || '');
+        const nextActivity = saved.activity || {};
+        const stats = computeStreakStats(nextActivity, Number(saved.longestStreak || 0));
+        setPreferences({
+          locale: locales.some(({ code }) => code === saved.locale) ? saved.locale : locale,
+          completed: new Set((saved.completed || []).filter((s) => problemSlugs.has(s))),
+          bookmarked: new Set((saved.bookmarked || []).filter((s) => problemSlugs.has(s))),
+          notes: saved.notes || {},
+          notesUpdatedAt: saved.notesUpdatedAt || {},
+          activity: nextActivity,
+          streak: stats.streak,
+          longestStreak: stats.longestStreak,
+        });
+        if (result.profiles && typeof result.profiles === 'object') {
+          setLinkedProfiles(result.profiles);
+          writeLocalProfiles(result.profiles, authSession.uid || '');
+        }
+        if (Array.isArray(result.customSheets)) {
+          const normalized = result.customSheets.map((s) => normalizeCustomSheet(s, problemSlugs));
+          setCustomSheets(normalized);
+          writeLocalCustomSheets(normalized, authSession.uid || '');
+        }
+        return { ok: true, cloudSynced: true };
+      } finally {
+        migratingRef.current = false;
+      }
+    }
+
+    const res = importLocalWorkspaceBackup(parsed, authSession?.uid || '');
+    if (hasProgressPatch) {
+      setPreferences((curr) => {
+        const nextActivity = progressPatch.activity ?? curr.activity;
+        const stats = computeStreakStats(nextActivity, Number(study?.longestStreak || curr.longestStreak || 0));
+        return {
+          locale: progressPatch.locale ?? curr.locale,
+          completed: progressPatch.completed ? new Set(progressPatch.completed) : curr.completed,
+          bookmarked: progressPatch.bookmarked ? new Set(progressPatch.bookmarked) : curr.bookmarked,
+          notes: progressPatch.notes ?? curr.notes,
+          notesUpdatedAt: progressPatch.notesUpdatedAt ?? curr.notesUpdatedAt,
+          activity: nextActivity,
+          streak: stats.streak,
+          longestStreak: stats.longestStreak,
+        };
+      });
+    }
+    if (hasProfiles) setLinkedProfiles(restoredProfiles);
+    if (hasSheets) setCustomSheets(restoredSheets);
+    return { ok: true, cloudSynced: false, restoredKeys: res.restoredKeys };
+  }
+
+  async function handleUpdatePortfolioSettings({ handle, isPublicProfile }) {
+    const cleanHandle = String(handle || '').trim().toLowerCase().replace(/[^a-z0-9._-]/g, '').slice(0, 40);
+    if (isPublicProfile && !cleanHandle) {
+      throw new Error('Choose a public handle (letters, numbers, ".", "_", "-") before publishing.');
+    }
+    if (authSession && backendOnline) {
+      const cloud = createCloudApiAdapter({ apiBaseUrl: appConfig.apiBaseUrl, getIdToken: getValidIdToken });
+      const saved = await cloud.upsertProgress({
+        handle: cleanHandle,
+        isPublicProfile: Boolean(isPublicProfile),
+        expectedUpdatedAt: cloudRevisionRef.current || undefined,
+      });
+      if (saved?.updatedAt) cloudRevisionRef.current = saved.updatedAt;
+      const next = { handle: saved?.handle || cleanHandle, isPublicProfile: Boolean(saved?.isPublicProfile) };
+      setPortfolioSettings(next);
+      return next;
+    }
+    if (!authEnforced && backendOnline) {
+      const saved = await saveRemoteProgress({ handle: cleanHandle, isPublicProfile: Boolean(isPublicProfile) }, appConfig.defaultProfile);
+      const next = { handle: saved?.handle || cleanHandle, isPublicProfile: Boolean(saved?.isPublicProfile) };
+      setPortfolioSettings(next);
+      return next;
+    }
+    const next = { handle: cleanHandle, isPublicProfile: Boolean(isPublicProfile) };
+    setPortfolioSettings(next);
+    return next;
   }
 
   async function resetProgress() {
-    setPreferences((current) => ({
-      locale: current.locale,
-      completed: new Set(),
-      bookmarked: new Set(),
-      notes: {},
-      activity: {},
-      streak: 0,
-      longestStreak: 0,
-    }));
+    migratingRef.current = true;
     try {
-      localStorage.setItem(preferenceKey, JSON.stringify({
-        locale,
-        completed: [],
-        bookmarked: [],
+      if (backendOnline) {
+        if (authSession) {
+          // Fail closed: do not clear local state if cloud reset fails
+          const fresh = await createCloudApiAdapter({ apiBaseUrl: appConfig.apiBaseUrl, getIdToken: getValidIdToken })
+            .resetProgress();
+          if (!fresh || typeof fresh !== 'object') {
+            throw new Error('Cloud reset did not confirm cleared progress');
+          }
+          if (fresh.updatedAt) cloudRevisionRef.current = fresh.updatedAt;
+        } else if (!authEnforced) {
+          const fresh = await resetRemoteProgress(appConfig.defaultProfile);
+          if (!fresh) {
+            throw new Error('Could not reset workspace on server');
+          }
+        }
+      }
+      setPreferences((current) => ({
+        locale: current.locale,
+        completed: new Set(),
+        bookmarked: new Set(),
         notes: {},
+        notesUpdatedAt: {},
         activity: {},
         streak: 0,
         longestStreak: 0,
       }));
-    } catch {
-      // Ignore storage errors
-    }
-    if (backendOnline) {
-      await resetRemoteProgress(appConfig.defaultProfile);
+      try {
+        localStorage.setItem(scopedStorageKey(preferenceKey, authSession?.uid || ''), JSON.stringify({
+          locale,
+          completed: [],
+          bookmarked: [],
+          notes: {},
+          notesUpdatedAt: {},
+          activity: {},
+          streak: 0,
+          longestStreak: 0,
+        }));
+      } catch {
+        // Ignore storage errors
+      }
+    } finally {
+      migratingRef.current = false;
     }
   }
 
   async function handleCreateSheet(payload) {
-    const createdRemote = await createCustomSheetApi(payload);
+    let createdRemote = null;
+    if (authSession && backendOnline) {
+      createdRemote = await createCloudApiAdapter({ apiBaseUrl: appConfig.apiBaseUrl, getIdToken: getValidIdToken })
+        .saveCustomSheet(payload)
+        .catch(() => null);
+    } else if (!authEnforced) {
+      createdRemote = await createCustomSheetApi(payload);
+    }
     const sheet = createdRemote || normalizeCustomSheet(payload, problemSlugs);
+    const activeUid = authSession?.uid || '';
     setCustomSheets((prev) => {
       const next = [sheet, ...prev.filter((s) => s.id !== sheet.id)];
-      writeLocalCustomSheets(next);
+      writeLocalCustomSheets(next, activeUid);
       return next;
     });
     return sheet;
   }
 
   async function handleDeleteSheet(id) {
-    await deleteCustomSheetApi(id);
+    if (authSession && backendOnline) {
+      await createCloudApiAdapter({ apiBaseUrl: appConfig.apiBaseUrl, getIdToken: getValidIdToken })
+        .deleteCustomSheet(id)
+        .catch(() => null);
+    } else if (!authEnforced) {
+      await deleteCustomSheetApi(id);
+    }
+    const activeUid = authSession?.uid || '';
     setCustomSheets((prev) => {
       const next = prev.filter((s) => s.id !== id);
-      writeLocalCustomSheets(next);
+      writeLocalCustomSheets(next, activeUid);
       return next;
     });
   }
@@ -602,12 +1018,42 @@ function App() {
             activityDays={appConfig.interview.activityDays}
             linkedProfiles={linkedProfiles}
             apiBaseUrl={appConfig.apiBaseUrl}
+            backendOnline={backendOnline}
+            authSession={authSession}
+            firebaseEnabled={isFirebaseConfigured()}
+            onAuthSignIn={handleAuthSignIn}
+            onAuthSignOut={handleAuthSignOut}
+            onRestoreBackup={handleRestoreBackup}
+            portfolioSettings={portfolioSettings}
+            onUpdatePortfolioSettings={handleUpdatePortfolioSettings}
             locale={locale}
             defaultLocale={defaultLocale}
             onSaveProfiles={handleSaveProfiles}
             onOpenProblem={openProblemBySlug}
             onOpenViewer={setViewerItem}
             onNavigate={navigate}
+          />
+        )}
+
+        {page === 'portfolio' && (
+          <PublicPortfolioPage
+            handle={portfolioHandle}
+            problems={problems}
+            completed={completed}
+            activity={activity}
+            streak={streak}
+            longestStreak={longestStreak}
+            linkedProfiles={linkedProfiles}
+            apiBaseUrl={appConfig.apiBaseUrl}
+            locale={locale}
+            onNavigate={navigate}
+          />
+        )}
+
+        {page === 'contests' && (
+          <ContestsPage
+            apiBaseUrl={appConfig.apiBaseUrl}
+            locale={locale}
           />
         )}
 
@@ -945,7 +1391,6 @@ function Roadmap({ roadmap, next, locale, title, initialDomain = '', initialTopi
                       </strong>
                       <small>{topic.done}/{topic.total} {t.progress.solvedOf} · {status(topic)}</small>
                     </span>
-                    <ChevronRight size={16} aria-hidden="true" />
                   </button>
                 ))}
               </div>
@@ -1391,7 +1836,7 @@ function SolutionFiles({ solutions, problemTitle, problemSlug, locale, onOpenVie
               problemSlug,
             })}
           >
-            <FileCode2 size={14} aria-hidden="true" /> {name}
+            <LanguageIcon lang={id} size={14} /> {name}
           </button>
         ))}
       </div>

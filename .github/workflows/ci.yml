@@ -69,4 +69,4 @@ jobs:
           fi
 
       - name: Dependency vulnerability audit
-        run: npm audit --audit-level=high || true
+        run: npm audit --audit-level=high

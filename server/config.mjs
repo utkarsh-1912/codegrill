@@ -18,8 +18,8 @@ export function loadServerConfig() {
 
   return {
     port: envInt('PORT', 4000, 1, 65535),
-    host: process.env.HOST || '0.0.0.0',
-    corsOrigin: process.env.CORS_ORIGIN || '*',
+    host: process.env.HOST || '127.0.0.1',
+    corsOrigin: process.env.CORS_ORIGIN || '',
     storePath,
     defaultProfile: (process.env.DEFAULT_PROFILE_ID || 'default').replace(/[^a-zA-Z0-9_-]/g, '') || 'default',
     pluginCacheTtlMs: envInt('PLUGIN_CACHE_TTL_MS', 10 * 60 * 1000, 1000, 24 * 60 * 60 * 1000),

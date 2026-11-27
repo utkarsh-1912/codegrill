@@ -135,11 +135,17 @@ function parseGitHubTreeClient(rawUrl) {
 export async function checkBackendHealth(baseUrl) {
   try {
     const res = await fetch(apiUrl('/api/health', baseUrl), { signal: AbortSignal.timeout(2500) });
-    if (!res.ok) return { online: false, plugins: [] };
+    if (!res.ok) return { online: false, workspaceAvailable: false, authEnforced: false, cloudDb: false, plugins: [] };
     const data = await res.json();
-    return { online: Boolean(data?.ok), plugins: data?.plugins || [] };
+    return {
+      online: Boolean(data?.ok),
+      workspaceAvailable: Boolean(data?.ok && data.workspaceApiEnabled !== false),
+      authEnforced: Boolean(data?.authEnforced),
+      cloudDb: Boolean(data?.cloudDb),
+      plugins: data?.plugins || [],
+    };
   } catch {
-    return { online: false, plugins: [] };
+    return { online: false, workspaceAvailable: false, authEnforced: false, cloudDb: false, plugins: [] };
   }
 }
 
@@ -219,36 +225,41 @@ export async function resetRemoteProgress(profile = DEFAULT_APP_CONFIG.defaultPr
   }
 }
 
-export function readLocalCustomSheets() {
+function customSheetsStorageKey(uid = '') {
+  const cleanUid = String(uid || '').trim();
+  return cleanUid ? `${CUSTOM_SHEETS_KEY}:uid:${cleanUid}` : CUSTOM_SHEETS_KEY;
+}
+
+export function readLocalCustomSheets(uid = '') {
   try {
-    const raw = JSON.parse(localStorage.getItem(CUSTOM_SHEETS_KEY));
+    const raw = JSON.parse(localStorage.getItem(customSheetsStorageKey(uid)));
     return Array.isArray(raw) ? raw : [];
   } catch {
     return [];
   }
 }
 
-export function writeLocalCustomSheets(sheets) {
+export function writeLocalCustomSheets(sheets, uid = '') {
   try {
-    localStorage.setItem(CUSTOM_SHEETS_KEY, JSON.stringify(sheets));
+    localStorage.setItem(customSheetsStorageKey(uid), JSON.stringify(sheets));
   } catch {
     // Ignore storage quota errors
   }
 }
 
-export async function fetchAllSheets(baseUrl) {
+export async function fetchAllSheets(baseUrl, uid = '') {
   try {
     const res = await fetch(apiUrl('/api/sheets', baseUrl), { signal: AbortSignal.timeout(3000) });
     if (res.ok) {
       const data = await res.json();
       const custom = Array.isArray(data.custom) ? data.custom : [];
-      writeLocalCustomSheets(custom);
+      writeLocalCustomSheets(custom, uid);
       return { builtin: data.builtin || BUILTIN_SHEETS, custom, online: true };
     }
   } catch {
     // Fall back to local storage
   }
-  return { builtin: BUILTIN_SHEETS, custom: readLocalCustomSheets(), online: false };
+  return { builtin: BUILTIN_SHEETS, custom: readLocalCustomSheets(uid), online: false };
 }
 
 export async function createCustomSheetApi(payload, baseUrl) {
@@ -692,19 +703,24 @@ function parseMediumUrlClient(rawUrl) {
   };
 }
 
-export function readLocalProfiles() {
+function profilesStorageKey(uid = '') {
+  const cleanUid = String(uid || '').trim();
+  return cleanUid ? `${LINKED_PROFILES_KEY}:uid:${cleanUid}` : LINKED_PROFILES_KEY;
+}
+
+export function readLocalProfiles(uid = '') {
   try {
-    const raw = JSON.parse(localStorage.getItem(LINKED_PROFILES_KEY) || '{}');
+    const raw = JSON.parse(localStorage.getItem(profilesStorageKey(uid)) || '{}');
     return normalizeLinkedProfiles(raw);
   } catch {
     return {};
   }
 }
 
-export function writeLocalProfiles(profiles) {
+export function writeLocalProfiles(profiles, uid = '') {
   const clean = normalizeLinkedProfiles(profiles);
   try {
-    localStorage.setItem(LINKED_PROFILES_KEY, JSON.stringify(clean));
+    localStorage.setItem(profilesStorageKey(uid), JSON.stringify(clean));
   } catch {
     // Ignore storage quota errors
   }
@@ -724,8 +740,8 @@ export async function fetchRemoteProfiles(profile = DEFAULT_APP_CONFIG.defaultPr
   }
 }
 
-export async function saveRemoteProfiles(profiles, profile = DEFAULT_APP_CONFIG.defaultProfile, baseUrl) {
-  const clean = writeLocalProfiles(profiles);
+export async function saveRemoteProfiles(profiles, profile = DEFAULT_APP_CONFIG.defaultProfile, baseUrl, uid = '') {
+  const clean = writeLocalProfiles(profiles, uid);
   try {
     const res = await fetch(apiUrl(`/api/profiles?profile=${encodeURIComponent(profile)}`, baseUrl), {
       method: 'PUT',

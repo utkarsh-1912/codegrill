@@ -1,0 +1,153 @@
+const AUTH_SESSION_KEY = 'codegrill:auth-session:v1';
+let lazyFirebaseAuth = null;
+
+export function getFirebaseApiKey() {
+  return String(import.meta?.env?.VITE_FIREBASE_API_KEY || '').trim();
+}
+
+export function getFirebaseAuthDomain() {
+  return String(import.meta?.env?.VITE_FIREBASE_AUTH_DOMAIN || '').trim();
+}
+
+export function getFirebaseProjectId() {
+  return String(import.meta?.env?.VITE_FIREBASE_PROJECT_ID || '').trim();
+}
+
+export function isFirebaseConfigured() {
+  return Boolean(getFirebaseApiKey());
+}
+
+export function isGoogleAuthConfigured() {
+  return Boolean(getFirebaseApiKey() && getFirebaseAuthDomain() && getFirebaseProjectId());
+}
+
+export function readAuthSession() {
+  try {
+    const raw = JSON.parse(sessionStorage.getItem(AUTH_SESSION_KEY) || 'null');
+    if (raw && raw.uid && raw.idToken) return raw;
+  } catch {
+    // Ignore storage errors
+  }
+  return null;
+}
+
+function writeAuthSession(session) {
+  try {
+    if (session) sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+    else sessionStorage.removeItem(AUTH_SESSION_KEY);
+  } catch {
+    // Ignore storage errors
+  }
+}
+
+async function callIdentityToolkit(endpoint, email, password) {
+  const apiKey = getFirebaseApiKey();
+  if (!apiKey) throw new Error('Firebase Authentication is not configured.');
+  const res = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:${endpoint}?key=${encodeURIComponent(apiKey)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email.trim(), password, returnSecureToken: true }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data?.error?.message?.replace(/_/g, ' ') || 'Authentication failed');
+  }
+  const expiresSec = Math.max(300, Number(data.expiresIn) || 3600);
+  const session = {
+    uid: data.localId,
+    email: data.email || email.trim(),
+    idToken: data.idToken,
+    refreshToken: data.refreshToken,
+    expiresAt: Date.now() + (expiresSec - 60) * 1000,
+  };
+  writeAuthSession(session);
+  return session;
+}
+
+export function signInWithEmail(email, password) {
+  return callIdentityToolkit('signInWithPassword', email, password);
+}
+
+export function signUpWithEmail(email, password) {
+  return callIdentityToolkit('signUp', email, password);
+}
+
+export async function signInWithGoogle() {
+  const apiKey = getFirebaseApiKey();
+  const authDomain = getFirebaseAuthDomain();
+  const projectId = getFirebaseProjectId();
+  if (!apiKey || !authDomain || !projectId) {
+    throw new Error('Google sign-in requires VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, and VITE_FIREBASE_PROJECT_ID.');
+  }
+
+  const [{ getApps, initializeApp }, { GoogleAuthProvider, browserSessionPersistence, getAuth, setPersistence, signInWithPopup }] = await Promise.all([
+    import('firebase/app'),
+    import('firebase/auth'),
+  ]);
+
+  const app = getApps().length
+    ? getApps()[0]
+    : initializeApp({ apiKey, authDomain, projectId });
+  const auth = getAuth(app);
+  lazyFirebaseAuth = auth;
+  await setPersistence(auth, browserSessionPersistence);
+
+  const provider = new GoogleAuthProvider();
+  provider.setCustomParameters({ prompt: 'select_account' });
+
+  const result = await signInWithPopup(auth, provider);
+  const user = result.user;
+  const tokenResult = await user.getIdTokenResult(true);
+  const expiresAt = tokenResult.expirationTime
+    ? Math.max(Date.now() + 60_000, Date.parse(tokenResult.expirationTime) - 60_000)
+    : Date.now() + 55 * 60_000;
+
+  const session = {
+    uid: user.uid,
+    email: user.email || '',
+    displayName: user.displayName || '',
+    provider: 'google',
+    idToken: tokenResult.token,
+    refreshToken: user.refreshToken || '',
+    expiresAt,
+  };
+  writeAuthSession(session);
+  return session;
+}
+
+export function signOutAuth() {
+  writeAuthSession(null);
+  if (lazyFirebaseAuth) {
+    lazyFirebaseAuth.signOut().catch(() => {});
+  }
+}
+
+export async function getValidIdToken() {
+  const session = readAuthSession();
+  if (!session) return '';
+  if (session.expiresAt > Date.now()) return session.idToken;
+
+  const apiKey = getFirebaseApiKey();
+  if (!apiKey || !session.refreshToken) return session.idToken || '';
+
+  try {
+    const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${encodeURIComponent(apiKey)}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(session.refreshToken)}`,
+    });
+    if (!res.ok) return '';
+    const data = await res.json();
+    const expiresSec = Math.max(300, Number(data.expires_in) || 3600);
+    const refreshed = {
+      ...session,
+      idToken: data.id_token,
+      refreshToken: data.refresh_token || session.refreshToken,
+      expiresAt: Date.now() + (expiresSec - 60) * 1000,
+    };
+    writeAuthSession(refreshed);
+    return refreshed.idToken;
+  } catch {
+    return '';
+  }
+}

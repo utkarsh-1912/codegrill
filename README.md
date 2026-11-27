@@ -103,6 +103,8 @@ Optionally run the full Node.js backend API in a second terminal:
 npm run server
 ```
 
+Guest progress, notes, and custom sheets stay in browser storage by default. The Node API requires a Firebase ID token for private workspace routes. The Vercel build can serve public catalog, contest, and content routes. Hosted workspace storage requires a database adapter and client sign-in integration. Public portfolios require an explicit publishing flow.
+
 ### Verification & Build
 
 ```bash

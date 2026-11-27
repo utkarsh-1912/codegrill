@@ -510,7 +510,7 @@ progress::-moz-progress-bar { background: linear-gradient(90deg, #ff693d, #f59e0
 .map-topic.map-topic-text-only {
   width: 100%;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr);
   align-items: center;
   gap: 10px;
   text-align: start;
@@ -9270,4 +9270,211 @@ input[type="search"]::-webkit-search-results-decoration {
     font-size: 0.68rem;
     padding: 8px 12px;
   }
+}
+
+/* Storage Mode Backup Banner, Public Portfolio & Contest Calendar */
+.storage-mode-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: var(--ut-bg-2);
+  border: 1px solid var(--ut-line);
+}
+
+.storage-mode-copy {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.storage-mode-copy p {
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.storage-mode-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: rgba(255, 105, 61, 0.12);
+  color: var(--ember);
+}
+
+.storage-mode-pill.is-cloud {
+  background: rgba(22, 163, 74, 0.14);
+  color: #15803d;
+}
+
+.storage-mode-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.portfolio-platform-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+}
+
+.portfolio-platform-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 11px;
+  border: 1px solid var(--ut-line);
+  background: var(--ut-bg);
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 140ms ease;
+}
+
+.portfolio-platform-card:hover {
+  border-color: var(--ember);
+}
+
+.portfolio-platform-card small {
+  display: block;
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.contest-list-grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.contest-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 18px;
+  padding: 16px 18px;
+  border-radius: 14px;
+}
+
+.contest-card-copy {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  flex: 1 1 260px;
+}
+
+.contest-card-copy h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.contest-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.contest-countdown {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--ember);
+}
+
+.contest-time-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.84rem;
+  color: var(--muted);
+}
+
+.contest-card-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .storage-mode-actions,
+  .contest-card-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Legal Page Typography & Lists */
+.legal-card-copy ul {
+  margin: 6px 0 14px;
+  padding-left: 20px;
+  display: grid;
+  gap: 6px;
+}
+
+.legal-card-copy li {
+  color: var(--ut-ink-2);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.legal-card-copy a {
+  color: var(--ember);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* Coding Language Icon Alignment in Tabs & Code Toolbar */
+.code-toolbar-lang {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.viewer-lang-tabs button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Cloud Auth Sign-In Form inside Storage Banner */
+.cloud-auth-form {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--ut-line);
+}
+
+.cloud-auth-form input {
+  flex: 1 1 170px;
+  min-width: 0;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--ut-line);
+  background: var(--ut-bg);
+  color: var(--ink);
+  font-size: 0.84rem;
 }

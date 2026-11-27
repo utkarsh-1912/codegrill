@@ -5,6 +5,7 @@ import { fetchPluginContent } from './api.mjs';
 import { resourcesFor } from './catalog.mjs';
 import { getMessages } from './i18n.mjs';
 import { ContentViewerBody, buildViewerPath, formatPluginBadge, formatViewerTitle } from './ContentViewer.jsx';
+import { LanguageIcon } from './LanguageIcon.jsx';
 import { isContentFavorited, toggleFavoriteContent } from './favorites.mjs';
 
 const VIEWER_HISTORY_KEY = 'codegrill:viewer-history:v1';
@@ -407,7 +408,7 @@ export function ViewerPage({
                       navigateNested(problem.solutions[langId], `${problemTitle} — ${langName}`);
                     }}
                   >
-                    {langName}
+                    <LanguageIcon lang={langId} size={14} /> {langName}
                   </button>
                 ))}
               </div>

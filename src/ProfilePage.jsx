@@ -1,12 +1,14 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card } from '@utkristi/ui';
-import { ArrowRight, BookOpen, Flame, Star, Users } from 'lucide-react';
+import { ArrowRight, BookOpen, Calendar, Cloud, Download, Flame, HardDrive, Star, Upload, Users } from 'lucide-react';
 import { LedgerDashboard } from './LedgerDashboard.jsx';
 import { PlatformProfiles } from './PlatformProfiles.jsx';
 import { Mascot } from './Mascot.jsx';
 import { DOMAIN_TOPICS, ROADMAP_DOMAINS, buildDomainRoadmap } from './domainRoadmaps.mjs';
 import { getChecklistStudyGuide } from './studyMaterial.mjs';
 import { readFavoriteContent, toggleFavoriteContent } from './favorites.mjs';
+import { exportLocalWorkspaceBackup, importLocalWorkspaceBackup } from './storageAdapter.mjs';
+import { isGoogleAuthConfigured, signInWithEmail, signInWithGoogle, signUpWithEmail } from './firebaseAuth.mjs';
 import { getMessages } from './i18n.mjs';
 
 const DOMAIN_CHECKS_KEY = 'codegrill:domain-roadmap:v1';
@@ -24,6 +26,14 @@ export function ProfilePage({
   activityDays,
   linkedProfiles,
   apiBaseUrl,
+  backendOnline = false,
+  authSession = null,
+  firebaseEnabled = false,
+  onAuthSignIn,
+  onAuthSignOut,
+  onRestoreBackup,
+  portfolioSettings = { handle: '', isPublicProfile: false },
+  onUpdatePortfolioSettings,
   locale,
   defaultLocale,
   onSaveProfiles,
@@ -32,6 +42,22 @@ export function ProfilePage({
   onNavigate,
 }) {
   const t = getMessages(locale);
+  const importInputRef = useRef(null);
+  const [backupMsg, setBackupMsg] = useState('');
+  const [authOpen, setAuthOpen] = useState(false);
+  const [authEmail, setAuthEmail] = useState('');
+  const [authPassword, setAuthPassword] = useState('');
+  const [authBusy, setAuthBusy] = useState(false);
+  const [authError, setAuthError] = useState('');
+  const [pubHandle, setPubHandle] = useState(portfolioSettings.handle || '');
+  const [pubEnabled, setPubEnabled] = useState(Boolean(portfolioSettings.isPublicProfile));
+  const [pubBusy, setPubBusy] = useState(false);
+  const [pubMsg, setPubMsg] = useState('');
+
+  useEffect(() => {
+    setPubHandle(portfolioSettings.handle || '');
+    setPubEnabled(Boolean(portfolioSettings.isPublicProfile));
+  }, [portfolioSettings.handle, portfolioSettings.isPublicProfile]);
   const [savedGuides, setSavedGuides] = useState(() => {
     try {
       return Object.values(JSON.parse(localStorage.getItem(DOMAIN_FAVS_KEY) || '{}') || {});
@@ -55,6 +81,41 @@ export function ProfilePage({
   function removeSavedContent(item) {
     const res = toggleFavoriteContent(item);
     setSavedContent(Object.values(res.all));
+  }
+
+  function handleExportJson() {
+    const backup = exportLocalWorkspaceBackup(authSession?.uid || '');
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `codegrill-backup-${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    setBackupMsg(t.studio.backup.backupExported);
+    setTimeout(() => setBackupMsg(''), 2500);
+  }
+
+  function handleImportJson(event) {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async () => {
+      try {
+        const raw = String(reader.result || '');
+        if (onRestoreBackup) {
+          await onRestoreBackup(raw);
+        } else {
+          importLocalWorkspaceBackup(raw, authSession?.uid || '');
+        }
+        setBackupMsg(t.studio.backup.backupRestored);
+        setTimeout(() => setBackupMsg(''), 3000);
+      } catch (err) {
+        setBackupMsg(err?.message || t.studio.backup.invalidBackup);
+      }
+    };
+    reader.readAsText(file);
+    event.target.value = '';
   }
 
   const platformBreakdown = useMemo(() => {
@@ -148,8 +209,11 @@ export function ProfilePage({
             <Button variant="solid" size="sm" onClick={() => onNavigate('/roadmap')}>
               {t.nav.roadmap} <ArrowRight size={14} aria-hidden="true" />
             </Button>
-            <Button variant="outlined" size="sm" onClick={() => onNavigate('/tracks')}>
-              {t.nav.tracks}
+            <Button variant="outlined" size="sm" onClick={() => onNavigate('/u/me')}>
+              {t.studio.backup.publicPortfolio}
+            </Button>
+            <Button variant="quiet" size="sm" onClick={() => onNavigate('/contests')}>
+              <Calendar size={14} aria-hidden="true" /> {t.studio.backup.contests}
             </Button>
             <Button variant="quiet" size="sm" onClick={() => onNavigate('/rooms')}>
               <Users size={14} aria-hidden="true" /> {t.nav.rooms}
@@ -164,6 +228,187 @@ export function ProfilePage({
           <span className="marketing-hero-caption">{mascotCaption}</span>
         </div>
       </div>
+
+      <Card variant="outlined" className="storage-mode-banner">
+        <div className="storage-mode-copy">
+          <span className={`storage-mode-pill ${authSession || backendOnline ? 'is-cloud' : 'is-local'}`}>
+            {authSession || backendOnline ? <Cloud size={13} aria-hidden="true" /> : <HardDrive size={13} aria-hidden="true" />}
+            {authSession
+              ? `${t.controls.backendOnline} · ${authSession.email}`
+              : backendOnline
+                ? t.controls.backendOnline
+                : t.studio.backup.guestLocal}
+          </span>
+          <p>{backupMsg || authError || t.studio.backup.backupHint}</p>
+        </div>
+        <div className="storage-mode-actions">
+          {firebaseEnabled && !authSession && (
+            <Button variant="solid" size="sm" onClick={() => setAuthOpen((v) => !v)}>
+              {authOpen ? t.sheets.cancel : 'Sign in to Sync'}
+            </Button>
+          )}
+          {authSession && (
+            <Button variant="outlined" size="sm" onClick={() => onAuthSignOut?.()}>
+              Sign out
+            </Button>
+          )}
+          <Button variant="outlined" size="sm" onClick={handleExportJson}>
+            <Download size={14} aria-hidden="true" /> {t.studio.backup.exportJson}
+          </Button>
+          <Button variant="outlined" size="sm" onClick={() => importInputRef.current?.click()}>
+            <Upload size={14} aria-hidden="true" /> {t.studio.backup.importJson}
+          </Button>
+          <input
+            ref={importInputRef}
+            type="file"
+            accept="application/json,.json"
+            style={{ display: 'none' }}
+            onChange={handleImportJson}
+          />
+        </div>
+        {firebaseEnabled && !authSession && authOpen && (
+          <form
+            className="cloud-auth-form"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setAuthBusy(true);
+              setAuthError('');
+              try {
+                const sess = await signInWithEmail(authEmail, authPassword);
+                await onAuthSignIn?.(sess);
+                setAuthOpen(false);
+                setAuthPassword('');
+              } catch (err) {
+                setAuthError(err?.message || 'Sign-in failed');
+              } finally {
+                setAuthBusy(false);
+              }
+            }}
+          >
+            <input
+              type="email"
+              required
+              placeholder="Email"
+              value={authEmail}
+              onChange={(e) => setAuthEmail(e.target.value)}
+            />
+            <input
+              type="password"
+              required
+              minLength={6}
+              placeholder="Password (6+ chars)"
+              value={authPassword}
+              onChange={(e) => setAuthPassword(e.target.value)}
+            />
+            <Button variant="solid" size="sm" type="submit" disabled={authBusy}>
+              {authBusy ? '...' : 'Sign in'}
+            </Button>
+            <Button
+              variant="outlined"
+              size="sm"
+              type="button"
+              disabled={authBusy}
+              onClick={async () => {
+                setAuthBusy(true);
+                setAuthError('');
+                try {
+                  const sess = await signUpWithEmail(authEmail, authPassword);
+                  await onAuthSignIn?.(sess);
+                  setAuthOpen(false);
+                  setAuthPassword('');
+                } catch (err) {
+                  setAuthError(err?.message || 'Sign-up failed');
+                } finally {
+                  setAuthBusy(false);
+                }
+              }}
+            >
+              Create account
+            </Button>
+            {isGoogleAuthConfigured() && (
+              <Button
+                variant="outlined"
+                size="sm"
+                type="button"
+                disabled={authBusy}
+                onClick={async () => {
+                  setAuthBusy(true);
+                  setAuthError('');
+                  try {
+                    const sess = await signInWithGoogle();
+                    await onAuthSignIn?.(sess);
+                    setAuthOpen(false);
+                    setAuthPassword('');
+                  } catch (err) {
+                    const msg = err?.code === 'auth/popup-closed-by-user'
+                      ? 'Google sign-in cancelled.'
+                      : (err?.message || 'Google sign-in failed');
+                    setAuthError(msg);
+                  } finally {
+                    setAuthBusy(false);
+                  }
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" style={{ marginRight: 6 }}>
+                  <path fill="#4285F4" d="M23.49 12.27c0-.79-.07-1.54-.2-2.27H12v4.3h6.44a5.5 5.5 0 0 1-2.39 3.61v3h3.87c2.26-2.08 3.57-5.15 3.57-8.64z" />
+                  <path fill="#34A853" d="M12 24c3.24 0 5.95-1.07 7.93-2.91l-3.87-3c-1.07.72-2.45 1.15-4.06 1.15-3.12 0-5.77-2.11-6.72-4.96H1.29v3.09A12 12 0 0 0 12 24z" />
+                  <path fill="#FBBC05" d="M5.28 14.28A7.2 7.2 0 0 1 4.9 12c0-.79.14-1.56.38-2.28V6.63H1.29A12 12 0 0 0 0 12c0 1.94.46 3.77 1.29 5.37l3.99-3.09z" />
+                  <path fill="#EA4335" d="M12 4.76c1.76 0 3.34.61 4.58 1.8l3.44-3.44C17.95 1.19 15.24 0 12 0A12 12 0 0 0 1.29 6.63l3.99 3.09C6.23 6.87 8.88 4.76 12 4.76z" />
+                </svg>
+                Continue with Google
+              </Button>
+            )}
+          </form>
+        )}
+        {(authSession || backendOnline) && onUpdatePortfolioSettings && (
+          <form
+            className="cloud-auth-form"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setPubBusy(true);
+              setPubMsg('');
+              try {
+                const updated = await onUpdatePortfolioSettings({ handle: pubHandle, isPublicProfile: pubEnabled });
+                setPubHandle(updated.handle || '');
+                setPubEnabled(Boolean(updated.isPublicProfile));
+                setPubMsg(updated.isPublicProfile && updated.handle ? `Published at /u/${updated.handle}` : 'Portfolio settings saved');
+              } catch (err) {
+                setPubMsg(err?.message || 'Could not update portfolio settings');
+              } finally {
+                setPubBusy(false);
+              }
+            }}
+          >
+            <input
+              type="text"
+              placeholder="Public handle (e.g. alex-dev)"
+              value={pubHandle}
+              onChange={(e) => setPubHandle(e.target.value)}
+            />
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+              <input
+                type="checkbox"
+                checked={pubEnabled}
+                onChange={(e) => setPubEnabled(e.target.checked)}
+              />
+              Publish portfolio
+            </label>
+            <Button variant="outlined" size="sm" type="submit" disabled={pubBusy}>
+              {pubBusy ? '...' : 'Save portfolio'}
+            </Button>
+            {pubEnabled && pubHandle && (
+              <a
+                href={`/u/${encodeURIComponent(pubHandle)}`}
+                onClick={(e) => { e.preventDefault(); onNavigate(`/u/${encodeURIComponent(pubHandle)}`); }}
+                style={{ fontSize: 13, fontWeight: 600 }}
+              >
+                /u/{pubHandle}
+              </a>
+            )}
+            {pubMsg && <span style={{ fontSize: 12 }}>{pubMsg}</span>}
+          </form>
+        )}
+      </Card>
 
       <LedgerDashboard
         problems={problems}

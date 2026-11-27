@@ -26,6 +26,22 @@ export function AppHeader({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [confirmReset, setConfirmReset] = useState(false);
+  const [resetBusy, setResetBusy] = useState(false);
+  const [resetError, setResetError] = useState('');
+
+  async function handleConfirmReset(closePanel) {
+    setResetBusy(true);
+    setResetError('');
+    try {
+      await onResetProgress?.();
+      setConfirmReset(false);
+      closePanel();
+    } catch (err) {
+      setResetError(err?.message || 'Could not reset cloud progress. Please retry.');
+    } finally {
+      setResetBusy(false);
+    }
+  }
 
   const settingsRef = useRef(null);
 
@@ -158,9 +174,9 @@ export function AppHeader({
                         className={`settings-quick-tile ${isDark ? 'is-active' : ''}`}
                         onClick={onToggleTheme}
                         aria-label={isDark ? t.controls.switchToLight : t.controls.switchToDark}
+                        title={isDark ? t.controls.switchToLight : t.controls.switchToDark}
                       >
                         {isDark ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
-                        <span>{t.palette.theme}</span>
                       </button>
 
                       <button
@@ -199,32 +215,37 @@ export function AppHeader({
                       <button
                         type="button"
                         className="settings-danger-item"
-                        onClick={() => setConfirmReset(true)}
+                        onClick={() => { setResetError(''); setConfirmReset(true); }}
                       >
                         <RotateCcw size={15} aria-hidden="true" />
                         <span>{t.ui.resetProgress}</span>
                       </button>
                     ) : (
-                      <div className="reset-confirm-row">
-                        <button
-                          type="button"
-                          className="reset-confirm-yes"
-                          onClick={() => {
-                            onResetProgress?.();
-                            setConfirmReset(false);
-                            setSettingsOpen(false);
-                          }}
-                        >
-                          {t.ui.confirmReset}
-                        </button>
-                        <button
-                          type="button"
-                          className="reset-confirm-no"
-                          onClick={() => setConfirmReset(false)}
-                        >
-                          {t.sheets.cancel}
-                        </button>
-                      </div>
+                      <>
+                        <div className="reset-confirm-row">
+                          <button
+                            type="button"
+                            className="reset-confirm-yes"
+                            disabled={resetBusy}
+                            onClick={() => handleConfirmReset(() => setSettingsOpen(false))}
+                          >
+                            {resetBusy ? '...' : t.ui.confirmReset}
+                          </button>
+                          <button
+                            type="button"
+                            className="reset-confirm-no"
+                            disabled={resetBusy}
+                            onClick={() => { setResetError(''); setConfirmReset(false); }}
+                          >
+                            {t.sheets.cancel}
+                          </button>
+                        </div>
+                        {resetError && (
+                          <p role="alert" style={{ margin: '6px 0 0', fontSize: 12, color: '#ef4444' }}>
+                            {resetError}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 )}
@@ -300,12 +321,12 @@ export function AppHeader({
                 </div>
 
                 <div className="settings-row">
-                  <span>{t.palette.theme}</span>
                   <button
                     type="button"
                     className="locale-field icon-only-control"
                     onClick={onToggleTheme}
                     aria-label={isDark ? t.controls.switchToLight : t.controls.switchToDark}
+                    title={isDark ? t.controls.switchToLight : t.controls.switchToDark}
                   >
                     {isDark ? <Sun size={17} aria-hidden="true" /> : <Moon size={17} aria-hidden="true" />}
                   </button>
@@ -353,32 +374,37 @@ export function AppHeader({
                       <button
                         type="button"
                         className="locale-field icon-only-control reset-trigger-btn"
-                        onClick={() => setConfirmReset(true)}
+                        onClick={() => { setResetError(''); setConfirmReset(true); }}
                         aria-label={t.ui.resetProgress}
                       >
                         <RotateCcw size={16} aria-hidden="true" />
                       </button>
                     </>
                   ) : (
-                    <div className="reset-confirm-row">
-                      <button
-                        type="button"
-                        className="reset-confirm-yes"
-                        onClick={() => {
-                          onResetProgress?.();
-                          setConfirmReset(false);
-                          setSidebarOpen(false);
-                        }}
-                      >
-                        {t.ui.confirmReset}
-                      </button>
-                      <button
-                        type="button"
-                        className="reset-confirm-no"
-                        onClick={() => setConfirmReset(false)}
-                      >
-                        {t.sheets.cancel}
-                      </button>
+                    <div>
+                      <div className="reset-confirm-row">
+                        <button
+                          type="button"
+                          className="reset-confirm-yes"
+                          disabled={resetBusy}
+                          onClick={() => handleConfirmReset(() => setSidebarOpen(false))}
+                        >
+                          {resetBusy ? '...' : t.ui.confirmReset}
+                        </button>
+                        <button
+                          type="button"
+                          className="reset-confirm-no"
+                          disabled={resetBusy}
+                          onClick={() => { setResetError(''); setConfirmReset(false); }}
+                        >
+                          {t.sheets.cancel}
+                        </button>
+                      </div>
+                      {resetError && (
+                        <p role="alert" style={{ margin: '6px 0 0', fontSize: 12, color: '#ef4444' }}>
+                          {resetError}
+                        </p>
+                      )}
                     </div>
                   )}
                 </div>

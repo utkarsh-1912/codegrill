@@ -1,3 +1,5 @@
+import { isSafePublicUrl, safeFetchText } from '../security/ssrf.mjs';
+
 function decodeEntities(text) {
   if (!text) return '';
   return String(text)
@@ -93,16 +95,16 @@ async function fetchMediumViaRss(rawUrl, signal) {
   const parsed = parseMediumUrl(rawUrl);
   if (!parsed) return null;
 
-  const res = await fetch(parsed.feedUrl, {
+  const res = await safeFetchText(parsed.feedUrl, {
     signal,
-    redirect: 'follow',
     headers: {
       'User-Agent': 'Mozilla/5.0 (compatible; CodegrillReader/1.0)',
       Accept: 'application/rss+xml, application/xml, text/xml;q=0.9',
     },
+    allowedContentTypes: ['application/rss+xml', 'application/xml', 'text/xml', 'text/plain'],
   });
   if (!res.ok) return null;
-  const xml = await res.text();
+  const xml = res.text;
   const itemRegex = /<item>([\s\S]*?)<\/item>/gi;
   let match;
   let best = null;
@@ -189,29 +191,6 @@ function extractReadableBlocks(html) {
   return blocks;
 }
 
-function isSafePublicUrl(rawUrl) {
-  try {
-    const url = new URL(rawUrl);
-    if (url.protocol !== 'https:' || url.username || url.password) return false;
-    const host = url.hostname.toLowerCase();
-    if (
-      host === 'localhost' ||
-      host.endsWith('.local') ||
-      host.endsWith('.internal') ||
-      /^127\./.test(host) ||
-      /^10\./.test(host) ||
-      /^192\.168\./.test(host) ||
-      /^172\.(1[6-9]|2\d|3[0-1])\./.test(host) ||
-      host === '::1'
-    ) {
-      return false;
-    }
-    return true;
-  } catch {
-    return false;
-  }
-}
-
 function isPaywalledRedirect(rawUrl, finalUrl, blocks) {
   try {
     const orig = new URL(rawUrl);
@@ -272,19 +251,19 @@ export const articlePlugin = {
     const mediumRss = await fetchMediumViaRss(rawUrl, signal).catch(() => null);
     if (mediumRss) return mediumRss;
 
-    const response = await fetch(rawUrl, {
+    const response = await safeFetchText(rawUrl, {
       signal,
-      redirect: 'follow',
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; CodegrillReader/1.0)',
         Accept: 'text/html,application/xhtml+xml,text/plain;q=0.9',
       },
+      allowedContentTypes: ['text/html', 'application/xhtml+xml', 'text/plain', 'text/markdown'],
     });
     if (!response.ok) {
       throw new Error(`Source returned HTTP ${response.status}`);
     }
-    const contentType = response.headers.get('content-type') || '';
-    const body = (await response.text()).slice(0, 350000);
+    const contentType = response.contentType || '';
+    const body = response.text.slice(0, 350000);
 
     if (contentType.includes('text/plain') || contentType.includes('text/markdown')) {
       return {
@@ -321,7 +300,7 @@ export const articlePlugin = {
       }
     }
 
-    if (isPaywalledRedirect(rawUrl, response.url, blocks)) {
+    if (isPaywalledRedirect(rawUrl, response.finalUrl, blocks)) {
       return buildSubscriptionNotice(rawUrl, title, siteName);
     }
 

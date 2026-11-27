@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "CodeGrill Companion",
+  "version": "0.1.0",
+  "description": "One-click Track in CodeGrill button on LeetCode, Codeforces, and HackerRank problem pages.",
+  "permissions": ["storage"],
+  "action": {
+    "default_title": "CodeGrill Companion",
+    "default_popup": "popup.html"
+  },
+  "host_permissions": [
+    "https://leetcode.com/problems/*",
+    "https://codeforces.com/problemset/problem/*",
+    "https://www.hackerrank.com/challenges/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://leetcode.com/problems/*",
+        "https://codeforces.com/problemset/problem/*",
+        "https://www.hackerrank.com/challenges/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

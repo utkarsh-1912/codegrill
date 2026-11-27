@@ -360,9 +360,11 @@ export function buildWeeklyPlan(
 }
 
 export function normalizeCustomSheet(input, validSlugs) {
-  const name = String(input?.name ?? '').trim().slice(0, 80);
-  const description = String(input?.description ?? '').trim().slice(0, 220);
-  const rawSlugs = Array.isArray(input?.slugs) ? input.slugs : [];
+  const name = String(input?.name ?? input?.names?.en ?? input?.title ?? '').trim().slice(0, 80);
+  const description = String(input?.description ?? input?.descriptions?.en ?? '').trim().slice(0, 220);
+  const rawSlugs = Array.isArray(input?.slugs)
+    ? input.slugs
+    : (Array.isArray(input?.problems) ? input.problems : (Array.isArray(input?.problemSlugs) ? input.problemSlugs : []));
   const slugs = [...new Set(rawSlugs.filter((slug) => validSlugs.has(slug)))];
   if (!name) throw new Error('Series name is required');
   if (!slugs.length) throw new Error('Select at least one problem');

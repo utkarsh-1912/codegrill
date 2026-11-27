@@ -1,4 +1,5 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
 import { dirname } from 'node:path';
 import { normalizeLinkedProfiles } from '../src/profiles.mjs';
 
@@ -103,34 +104,48 @@ export function buildAnalytics(profile, problems, categories, activityDays = 28)
 }
 
 export function createStore(filePath, defaultProfileId = 'default') {
-  let state = null;
+  let loading;
   let writeQueue = Promise.resolve();
 
   async function load() {
-    if (state) return state;
+    loading ??= readState().catch((error) => {
+      loading = undefined;
+      throw error;
+    });
+    return loading;
+  }
+
+  async function readState() {
     try {
       const raw = await readFile(filePath, 'utf8');
       const parsed = JSON.parse(raw);
-      state = {
-        profiles: parsed.profiles && typeof parsed.profiles === 'object' ? parsed.profiles : {},
+      return {
+        profiles: Object.assign(Object.create(null), parsed.profiles),
         customSheets: Array.isArray(parsed.customSheets) ? parsed.customSheets : [],
       };
-    } catch {
-      state = { profiles: {}, customSheets: [] };
+    } catch (error) {
+      if (error.code !== 'ENOENT') throw error;
+      return { profiles: Object.create(null), customSheets: [] };
     }
-    return state;
   }
 
   async function persist() {
-    const snapshot = JSON.stringify(state, null, 2);
-    writeQueue = writeQueue.then(async () => {
+    const snapshot = JSON.stringify(await load(), null, 2);
+    writeQueue = writeQueue.catch(() => {}).then(async () => {
       await mkdir(dirname(filePath), { recursive: true });
-      await writeFile(filePath, snapshot, 'utf8');
+      const temporary = filePath + '.' + randomUUID() + '.tmp';
+      try {
+        await writeFile(temporary, snapshot, { mode: 0o600 });
+        await rename(temporary, filePath);
+      } finally {
+        await rm(temporary, { force: true });
+      }
     });
     return writeQueue;
   }
 
   function safeProfileId(id) {
+    if (/^firebase-[a-f0-9]{64}$/.test(id)) return id;
     const clean = String(id || defaultProfileId).replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 48);
     return clean || defaultProfileId;
   }
@@ -147,6 +162,17 @@ export function createStore(filePath, defaultProfileId = 'default') {
       const data = await load();
       const id = safeProfileId(profileId);
       const current = { ...DEFAULT_PROFILE, ...(data.profiles[id] || {}) };
+      if (
+        typeof patch.expectedUpdatedAt === 'string' &&
+        patch.expectedUpdatedAt &&
+        current.updatedAt &&
+        current.updatedAt !== patch.expectedUpdatedAt
+      ) {
+        const conflict = new Error('Conflict: remote progress has a newer revision');
+        conflict.statusCode = 409;
+        conflict.current = await this.getProgress(id);
+        throw conflict;
+      }
       const completed = Array.isArray(patch.completed)
         ? [...new Set(patch.completed.filter((s) => !validSlugs || validSlugs.has(s)))]
         : current.completed;
@@ -163,6 +189,21 @@ export function createStore(filePath, defaultProfileId = 'default') {
       const locale = typeof patch.locale === 'string' ? patch.locale : current.locale;
 
       const nowIso = new Date().toISOString();
+      const notesUpdatedAt = { ...(current.notesUpdatedAt || {}) };
+      if (patch.notesUpdatedAt && typeof patch.notesUpdatedAt === 'object') {
+        for (const [slug, ts] of Object.entries(patch.notesUpdatedAt)) {
+          if (typeof ts === 'string' && ts) notesUpdatedAt[slug] = ts;
+        }
+      }
+      for (const [slug, text] of Object.entries(notes)) {
+        if (current.notes?.[slug] !== text && !patch.notesUpdatedAt?.[slug]) {
+          notesUpdatedAt[slug] = nowIso;
+        }
+      }
+      for (const slug of Object.keys(notesUpdatedAt)) {
+        if (!notes[slug]) delete notesUpdatedAt[slug];
+      }
+
       const solvedAt = { ...(current.solvedAt || {}) };
       const newlySolved = completed.filter((slug) => !current.completed.includes(slug));
       for (const slug of newlySolved) solvedAt[slug] = nowIso;
@@ -171,7 +212,14 @@ export function createStore(filePath, defaultProfileId = 'default') {
       }
 
       const activity = { ...(current.activity || {}) };
-      if (newlySolved.length > 0) {
+      if (patch.activity && typeof patch.activity === 'object') {
+        for (const [day, count] of Object.entries(patch.activity)) {
+          if (/^\d{4}-\d{2}-\d{2}$/.test(day)) {
+            const num = Math.max(0, Math.floor(Number(count) || 0));
+            if (num > 0) activity[day] = Math.max(Number(activity[day] || 0), num);
+          }
+        }
+      } else if (newlySolved.length > 0) {
         const today = nowIso.slice(0, 10);
         activity[today] = (activity[today] || 0) + newlySolved.length;
       }
@@ -181,8 +229,13 @@ export function createStore(filePath, defaultProfileId = 'default') {
         completed,
         bookmarked,
         notes,
+        notesUpdatedAt,
         solvedAt,
         activity,
+        isPublicProfile: typeof patch.isPublicProfile === 'boolean'
+          ? patch.isPublicProfile
+          : Boolean(current.isPublicProfile),
+        handle: typeof patch.handle === 'string' ? patch.handle.slice(0, 40) : (current.handle || ''),
         linkedProfiles: current.linkedProfiles || {},
         updatedAt: nowIso,
       };
@@ -190,6 +243,103 @@ export function createStore(filePath, defaultProfileId = 'default') {
       await persist();
       const streaks = computeStreaks(activity);
       return { ...next, streak: streaks.current, longestStreak: streaks.longest };
+    },
+    async restoreWorkspace(profileId = defaultProfileId, payload = {}, validSlugs, owner = null) {
+      const data = await load();
+      const id = safeProfileId(profileId);
+      const current = { ...DEFAULT_PROFILE, ...(data.profiles[id] || {}) };
+      if (
+        typeof payload.expectedUpdatedAt === 'string' &&
+        payload.expectedUpdatedAt &&
+        current.updatedAt &&
+        current.updatedAt !== payload.expectedUpdatedAt
+      ) {
+        const conflict = new Error('Conflict: remote progress has a newer revision');
+        conflict.statusCode = 409;
+        conflict.current = await this.getProgress(id);
+        throw conflict;
+      }
+
+      const patch = payload.progressPatch && typeof payload.progressPatch === 'object' ? payload.progressPatch : {};
+      const nowIso = new Date().toISOString();
+
+      // Pre-validate custom sheet ownership before mutating any section
+      const incomingSheets = Array.isArray(payload.customSheets) ? payload.customSheets : null;
+      const normalizedOwnerId = owner ?? null;
+      if (incomingSheets && normalizedOwnerId) {
+        for (const sheet of incomingSheets) {
+          const existing = data.customSheets.find((s) => s.id === sheet.id);
+          if (existing && existing.ownerId && existing.ownerId !== normalizedOwnerId) {
+            const err = new Error('Forbidden: sheet belongs to another user');
+            err.statusCode = 403;
+            throw err;
+          }
+        }
+      }
+
+      const completed = Array.isArray(patch.completed)
+        ? [...new Set(patch.completed.filter((s) => !validSlugs || validSlugs.has(s)))]
+        : current.completed;
+      const bookmarked = Array.isArray(patch.bookmarked)
+        ? [...new Set(patch.bookmarked.filter((s) => !validSlugs || validSlugs.has(s)))]
+        : current.bookmarked;
+      const notes = patch.notes && typeof patch.notes === 'object'
+        ? Object.fromEntries(
+            Object.entries(patch.notes)
+              .filter(([slug, text]) => (!validSlugs || validSlugs.has(slug)) && typeof text === 'string' && text.trim())
+              .map(([slug, text]) => [slug, text.slice(0, 4000)]),
+          )
+        : current.notes;
+      const locale = typeof patch.locale === 'string' ? patch.locale : current.locale;
+
+      const notesUpdatedAt = { ...(current.notesUpdatedAt || {}) };
+      if (patch.notesUpdatedAt && typeof patch.notesUpdatedAt === 'object') {
+        for (const [slug, ts] of Object.entries(patch.notesUpdatedAt)) {
+          if (typeof ts === 'string' && ts) notesUpdatedAt[slug] = ts;
+        }
+      }
+      for (const slug of Object.keys(notesUpdatedAt)) {
+        if (!notes[slug]) delete notesUpdatedAt[slug];
+      }
+
+      const activity = patch.activity && typeof patch.activity === 'object'
+        ? Object.fromEntries(
+            Object.entries(patch.activity)
+              .filter(([day, count]) => /^\d{4}-\d{2}-\d{2}$/.test(day) && Number(count) > 0)
+              .map(([day, count]) => [day, Math.floor(Number(count))]),
+          )
+        : current.activity;
+
+      const linkedProfiles = payload.linkedProfiles && typeof payload.linkedProfiles === 'object'
+        ? normalizeLinkedProfiles(payload.linkedProfiles)
+        : current.linkedProfiles;
+
+      data.profiles[id] = {
+        ...current,
+        locale,
+        completed,
+        bookmarked,
+        notes,
+        notesUpdatedAt,
+        activity,
+        linkedProfiles,
+        updatedAt: nowIso,
+      };
+
+      if (incomingSheets) {
+        for (const sheet of incomingSheets) {
+          const entry = { ...sheet, ownerId: normalizedOwnerId };
+          data.customSheets = [entry, ...data.customSheets.filter((s) => s.id !== entry.id || (s.ownerId ?? null) !== normalizedOwnerId)];
+        }
+      }
+
+      await persist();
+      return {
+        ok: true,
+        progress: await this.getProgress(id),
+        profiles: linkedProfiles,
+        customSheets: await this.listCustomSheets(normalizedOwnerId),
+      };
     },
     async getLinkedProfiles(profileId = defaultProfileId) {
       const data = await load();
@@ -225,20 +375,46 @@ export function createStore(filePath, defaultProfileId = 'default') {
       await persist();
       return { ...fresh, streak: 0, longestStreak: 0 };
     },
-    async listCustomSheets() {
+    async getPublicPortfolio(handle) {
+      const clean = String(handle || '').trim().toLowerCase();
+      if (!clean) return null;
       const data = await load();
-      return data.customSheets;
+      for (const [id, raw] of Object.entries(data.profiles)) {
+        if (!raw?.isPublicProfile) continue;
+        const h = String(raw.handle || '').trim().toLowerCase();
+        if (h === clean || id.toLowerCase() === clean) {
+          const streaks = computeStreaks(raw.activity);
+          return {
+            handle: raw.handle || id,
+            displayName: raw.displayName || '',
+            progress: {
+              completed: Array.isArray(raw.completed) ? [...raw.completed] : [],
+              activity: raw.activity && typeof raw.activity === 'object' ? { ...raw.activity } : {},
+              streak: streaks.current,
+              longestStreak: streaks.longest,
+              updatedAt: raw.updatedAt || null,
+            },
+            profiles: normalizeLinkedProfiles(raw.linkedProfiles || {}),
+          };
+        }
+      }
+      return null;
     },
-    async addCustomSheet(sheet) {
+    async listCustomSheets(ownerId = null) {
       const data = await load();
-      data.customSheets = [sheet, ...data.customSheets.filter((s) => s.id !== sheet.id)];
+      return data.customSheets.filter((sheet) => (sheet.ownerId ?? null) === ownerId)
+        .map(({ ownerId: _, ...sheet }) => sheet);
+    },
+    async addCustomSheet(sheet, ownerId = null) {
+      const data = await load();
+      data.customSheets = [{ ...sheet, ownerId }, ...data.customSheets.filter((s) => s.id !== sheet.id || (s.ownerId ?? null) !== ownerId)];
       await persist();
       return sheet;
     },
-    async deleteCustomSheet(id) {
+    async deleteCustomSheet(id, ownerId = null) {
       const data = await load();
       const before = data.customSheets.length;
-      data.customSheets = data.customSheets.filter((s) => s.id !== id);
+      data.customSheets = data.customSheets.filter((s) => s.id !== id || (s.ownerId ?? null) !== ownerId);
       if (data.customSheets.length !== before) await persist();
       return data.customSheets.length !== before;
     },

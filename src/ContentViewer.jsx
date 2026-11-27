@@ -8,6 +8,7 @@ import { RichTextInterpreter } from './RichTextInterpreter.jsx';
 import { CustomVideoPlayer } from './CustomVideoPlayer.jsx';
 import { Pagination } from './Pagination.jsx';
 import { AnkiDeckViewer, NotebookViewer } from './MediaViewers.jsx';
+import { LanguageIcon } from './LanguageIcon.jsx';
 import { isContentFavorited, toggleFavoriteContent } from './favorites.mjs';
 
 export function formatViewerTitle(problemTitle, resourceTitle) {
@@ -251,7 +252,9 @@ export function ContentViewerBody({
     return (
       <div className="code-viewer">
         <div className="code-toolbar">
-          <span>{data.language}</span>
+          <span className="code-toolbar-lang">
+            <LanguageIcon lang={data.language} size={15} /> {data.language}
+          </span>
           <button type="button" className="icon-btn" onClick={onCopyCode} aria-label={t.viewer.copyCode} title={copied ? t.viewer.copiedCode : t.viewer.copyCode}>
             {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
           </button>
@@ -482,7 +485,7 @@ export function ContentViewer({ item, locale, languages, customPlayerTemplate, o
                   navigateNested(item.solutions[langId], `${item.problemTitle || ''} — ${langName}`);
                 }}
               >
-                {langName}
+                <LanguageIcon lang={langId} size={14} /> {langName}
               </button>
             ))}
           </div>
