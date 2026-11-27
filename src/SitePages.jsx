@@ -5,9 +5,11 @@ import {
   BookOpen,
   Boxes,
   Code2,
+  Compass,
   Cpu,
   Database,
   Flame,
+  Layers,
   Network,
   Sparkles,
   Trophy,
@@ -82,20 +84,39 @@ function MarketingHero({ title, subtitle, mood = 'idle', caption = '', actions =
   );
 }
 
+const WORKFLOW_ICONS = [Layers, Code2, Compass, Trophy];
+
 export function Workflow({ locale = 'en', onNavigate }) {
   const t = getMessages(locale);
   return (
-    <ol className="workflow-grid">
-      {t.site.workflow.map((step, index) => (
-        <li key={step.title}>
-          <Card variant="outlined">
-            <span className="workflow-step-num">0{index + 1}</span>
-            <h3>{step.title}</h3>
-            <p>{step.desc}</p>
-            <a href={workflowLinks[index]} onClick={navHandler(onNavigate, workflowLinks[index])}>{step.action}</a>
-          </Card>
-        </li>
-      ))}
+    <ol className="workflow-grid workflow-grid-v2">
+      {t.site.workflow.map((step, index) => {
+        const StepIcon = WORKFLOW_ICONS[index] || Code2;
+        return (
+          <li key={step.title} className="workflow-item-v2">
+            <Card variant="outlined" className="workflow-card-v2">
+              <div className="workflow-card-head">
+                <span className="workflow-step-badge">0{index + 1}</span>
+                <span className="workflow-icon-badge" aria-hidden="true">
+                  <StepIcon size={16} />
+                </span>
+              </div>
+              <div className="workflow-card-body">
+                <h3>{step.title}</h3>
+                <p>{step.desc}</p>
+              </div>
+              <a
+                className="workflow-cta-link"
+                href={workflowLinks[index]}
+                onClick={navHandler(onNavigate, workflowLinks[index])}
+              >
+                <span>{step.action}</span>
+                <ArrowRight size={14} aria-hidden="true" />
+              </a>
+            </Card>
+          </li>
+        );
+      })}
     </ol>
   );
 }

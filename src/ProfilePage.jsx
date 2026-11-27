@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card } from '@utkristi/ui';
-import { ArrowRight, BookOpen, Calendar, Cloud, Download, Flame, HardDrive, Star, Upload, Users } from 'lucide-react';
+import { ArrowRight, BookOpen, Calendar, Cloud, Download, ExternalLink, Flame, Globe, HardDrive, Star, Upload, Users } from 'lucide-react';
 import { LedgerDashboard } from './LedgerDashboard.jsx';
 import { PlatformProfiles } from './PlatformProfiles.jsx';
 import { Mascot } from './Mascot.jsx';
@@ -205,17 +205,17 @@ export function ProfilePage({
             </div>
           </div>
 
-          <div className="marketing-hero-actions">
+          <div className="marketing-hero-actions profile-hero-actions">
             <Button variant="solid" size="sm" onClick={() => onNavigate('/roadmap')}>
               {t.nav.roadmap} <ArrowRight size={14} aria-hidden="true" />
             </Button>
-            <Button variant="outlined" size="sm" onClick={() => onNavigate('/u/me')}>
+            <Button variant="outlined" size="sm" className="profile-hero-ghost-btn" onClick={() => onNavigate('/u/me')}>
               {t.studio.backup.publicPortfolio}
             </Button>
-            <Button variant="quiet" size="sm" onClick={() => onNavigate('/contests')}>
+            <Button variant="outlined" size="sm" className="profile-hero-ghost-btn" onClick={() => onNavigate('/contests')}>
               <Calendar size={14} aria-hidden="true" /> {t.studio.backup.contests}
             </Button>
-            <Button variant="quiet" size="sm" onClick={() => onNavigate('/rooms')}>
+            <Button variant="outlined" size="sm" className="profile-hero-ghost-btn" onClick={() => onNavigate('/rooms')}>
               <Users size={14} aria-hidden="true" /> {t.nav.rooms}
             </Button>
           </div>
@@ -362,7 +362,7 @@ export function ProfilePage({
         )}
         {(authSession || backendOnline) && onUpdatePortfolioSettings && (
           <form
-            className="cloud-auth-form"
+            className="portfolio-publish-bar"
             onSubmit={async (e) => {
               e.preventDefault();
               setPubBusy(true);
@@ -371,7 +371,8 @@ export function ProfilePage({
                 const updated = await onUpdatePortfolioSettings({ handle: pubHandle, isPublicProfile: pubEnabled });
                 setPubHandle(updated.handle || '');
                 setPubEnabled(Boolean(updated.isPublicProfile));
-                setPubMsg(updated.isPublicProfile && updated.handle ? `${t.studio.auth.publishedAt} /u/${updated.handle}` : t.studio.auth.portfolioSaved);
+                setPubMsg(t.studio.auth.portfolioSaved);
+                setTimeout(() => setPubMsg(''), 3000);
               } catch (err) {
                 setPubMsg(err?.message || t.studio.auth.portfolioFailed);
               } finally {
@@ -379,33 +380,55 @@ export function ProfilePage({
               }
             }}
           >
-            <input
-              type="text"
-              placeholder={t.studio.auth.handlePlaceholder}
-              value={pubHandle}
-              onChange={(e) => setPubHandle(e.target.value)}
-            />
-            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13 }}>
+            <div className="portfolio-handle-field">
+              <span className="portfolio-handle-prefix" aria-hidden="true">
+                <Globe size={13} />
+                <span>/u/</span>
+              </span>
               <input
-                type="checkbox"
-                checked={pubEnabled}
-                onChange={(e) => setPubEnabled(e.target.checked)}
+                type="text"
+                placeholder={t.studio.auth.handlePlaceholder}
+                value={pubHandle}
+                onChange={(e) => setPubHandle(e.target.value)}
+                aria-label={t.studio.auth.handlePlaceholder}
               />
-              {t.studio.auth.publishPortfolio}
-            </label>
-            <Button variant="outlined" size="sm" type="submit" disabled={pubBusy}>
-              {pubBusy ? '...' : t.studio.auth.savePortfolio}
-            </Button>
-            {pubEnabled && pubHandle && (
-              <a
-                href={`/u/${encodeURIComponent(pubHandle)}`}
-                onClick={(e) => { e.preventDefault(); onNavigate(`/u/${encodeURIComponent(pubHandle)}`); }}
-                style={{ fontSize: 13, fontWeight: 600 }}
-              >
-                /u/{pubHandle}
-              </a>
-            )}
-            {pubMsg && <span style={{ fontSize: 12 }}>{pubMsg}</span>}
+            </div>
+
+            <div className="portfolio-publish-controls">
+              <label className="ember-switch">
+                <input
+                  type="checkbox"
+                  checked={pubEnabled}
+                  onChange={(e) => setPubEnabled(e.target.checked)}
+                />
+                <span className="ember-switch-track" aria-hidden="true">
+                  <span className="ember-switch-thumb" />
+                </span>
+                <span className="ember-switch-label">{t.studio.auth.publishPortfolio}</span>
+              </label>
+
+              <Button variant="outlined" size="sm" type="submit" disabled={pubBusy}>
+                {pubBusy ? '...' : t.studio.auth.savePortfolio}
+              </Button>
+
+              {pubEnabled && pubHandle && (
+                <a
+                  className="portfolio-live-pill"
+                  href={`/u/${encodeURIComponent(pubHandle)}`}
+                  onClick={(e) => { e.preventDefault(); onNavigate(`/u/${encodeURIComponent(pubHandle)}`); }}
+                >
+                  <span className="sync-dot is-online" aria-hidden="true" />
+                  <span>/u/{pubHandle}</span>
+                  <ExternalLink size={12} aria-hidden="true" />
+                </a>
+              )}
+
+              {pubMsg && (
+                <span className="portfolio-status-note" role="status">
+                  {pubMsg}
+                </span>
+              )}
+            </div>
           </form>
         )}
       </Card>

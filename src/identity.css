@@ -9478,3 +9478,475 @@ input[type="search"]::-webkit-search-results-decoration {
   color: var(--ink);
   font-size: 0.84rem;
 }
+
+
+/* ==========================================================================
+   UI UPGRADE — Editorial Workflow Pipeline, Frosted Navbar & Settings Popover
+   ========================================================================== */
+
+.app-header {
+  background: color-mix(in srgb, var(--ut-bg) 86%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid color-mix(in srgb, var(--ut-line) 85%, transparent);
+}
+
+.app-header nav a {
+  border-radius: 8px;
+  transition: color 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+
+.app-header nav a[aria-current] {
+  border-radius: 8px 8px 0 0;
+  background: color-mix(in srgb, var(--ember-soft) 72%, transparent);
+}
+
+.header-search-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, color 160ms ease;
+}
+
+.header-search-pill:hover {
+  border-color: var(--ember);
+  color: var(--ink);
+  background: var(--ut-bg-2);
+}
+
+.header-search-label {
+  max-width: 84px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.header-search-kbd {
+  display: inline-flex;
+  align-items: center;
+  padding: 1px 6px;
+  border-radius: 5px;
+  border: 1px solid var(--ut-line);
+  background: var(--ut-bg-2);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+@media (max-width: 1080px) {
+  .header-search-label,
+  .header-search-kbd {
+    display: none;
+  }
+  .header-search-pill {
+    width: 36px;
+    padding: 0;
+    justify-content: center;
+  }
+}
+
+/* Settings Popover v2 — Symmetrical Tiles & Shortcuts */
+.settings-menu-v2 {
+  width: 296px;
+  padding: 12px;
+  gap: 10px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--ut-line) 90%, var(--ember) 10%);
+}
+
+.settings-nav-shortcut {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.settings-nav-shortcut:hover,
+.settings-nav-shortcut.is-active {
+  background: var(--ember-soft);
+  border-color: color-mix(in srgb, var(--ember) 45%, transparent);
+  color: var(--ut-accent);
+}
+
+.settings-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.settings-quick-tile {
+  min-height: 76px;
+  justify-content: space-between;
+  padding: 11px 12px;
+  border-radius: 12px;
+  text-align: left;
+  transition: transform 150ms ease, border-color 150ms ease, background-color 150ms ease, color 150ms ease;
+}
+
+.settings-quick-tile:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--ember) 55%, var(--ut-line));
+}
+
+.settings-tile-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--ut-bg-2);
+  color: var(--ink);
+}
+
+.settings-quick-tile.is-active .settings-tile-icon {
+  background: var(--ember);
+  color: #1c1009;
+}
+
+.settings-tile-label {
+  font-size: 0.78rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.mobile-profile-card {
+  margin: 0 0 12px;
+}
+
+/* Redesigned 4-Step Workflow Pipeline */
+.workflow-grid-v2 {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.workflow-item-v2 {
+  position: relative;
+}
+
+@media (min-width: 1025px) {
+  .workflow-item-v2:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    top: 32px;
+    right: -14px;
+    width: 12px;
+    border-top: 2px dashed color-mix(in srgb, var(--ember) 48%, var(--ut-line));
+    pointer-events: none;
+    z-index: 1;
+  }
+}
+
+.workflow-card-v2 {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 16px;
+  border: 1px solid var(--ut-line);
+  background: var(--ut-bg-2);
+  transition: transform 200ms cubic-bezier(0.22, 1, 0.36, 1), border-color 180ms ease, box-shadow 200ms ease;
+}
+
+.workflow-card-v2:hover {
+  transform: translateY(-3px);
+  border-color: color-mix(in srgb, var(--ember) 60%, var(--ut-line));
+  box-shadow: 0 14px 32px rgba(15, 10, 6, 0.1);
+}
+
+:root[data-theme="dark"] .workflow-card-v2:hover {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.42);
+}
+
+.workflow-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.workflow-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.workflow-icon-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid var(--ut-line);
+  background: var(--ut-bg);
+  color: var(--ut-accent);
+}
+
+.workflow-card-body {
+  display: grid;
+  gap: 6px;
+}
+
+.workflow-card-body h3 {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+
+.workflow-card-body p {
+  margin: 0;
+  font-size: 0.87rem;
+  line-height: 1.55;
+  color: var(--muted);
+}
+
+.workflow-cta-link {
+  margin-top: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-top: 10px;
+  border-top: 1px solid color-mix(in srgb, var(--ut-line) 75%, transparent);
+  color: var(--ut-accent);
+  font-size: 0.84rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.workflow-cta-link svg {
+  transition: transform 160ms ease;
+}
+
+.workflow-cta-link:hover {
+  text-decoration: none;
+}
+
+.workflow-cta-link:hover svg {
+  transform: translateX(3px);
+}
+
+@media (max-width: 1024px) {
+  .workflow-grid-v2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .workflow-grid-v2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ==========================================================================
+   ENTERPRISE UI POLISH — Profile Hero Actions, Portfolio Bar & Ember Switch
+   ========================================================================== */
+
+.profile-hero-actions .profile-hero-ghost-btn {
+  background: rgba(255, 247, 238, 0.06);
+  border-color: rgba(255, 247, 238, 0.18);
+  color: #f6efe7;
+  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.profile-hero-actions .profile-hero-ghost-btn:hover {
+  background: rgba(255, 247, 238, 0.13);
+  border-color: rgba(255, 138, 61, 0.55);
+  color: #fff7ee;
+}
+
+.portfolio-publish-bar {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px 16px;
+  padding-top: 14px;
+  margin-top: 2px;
+  border-top: 1px solid color-mix(in srgb, var(--ut-line) 80%, transparent);
+}
+
+.portfolio-handle-field {
+  display: flex;
+  align-items: center;
+  flex: 1 1 240px;
+  max-width: 380px;
+  height: 38px;
+  border: 1px solid var(--ut-line);
+  border-radius: 10px;
+  background: var(--ut-bg);
+  overflow: hidden;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.portfolio-handle-field:focus-within {
+  border-color: var(--ember);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ember) 18%, transparent);
+}
+
+.portfolio-handle-prefix {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 100%;
+  padding: 0 11px;
+  border-right: 1px solid var(--ut-line);
+  background: var(--ut-bg-2);
+  color: var(--muted);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.portfolio-handle-field input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  outline: 0;
+  padding: 0 12px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.portfolio-publish-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Custom Ember Pill Switch — replaces browser-default blue checkbox */
+.ember-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.ember-switch input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
+
+.ember-switch-track {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 38px;
+  height: 22px;
+  padding: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ut-line-2, var(--ut-line)) 90%, transparent);
+  border: 1px solid var(--ut-line);
+  transition: background-color 180ms ease, border-color 180ms ease;
+}
+
+.ember-switch-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 999px;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.24);
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.ember-switch input:checked + .ember-switch-track {
+  background: var(--ut-accent);
+  border-color: var(--ut-accent);
+}
+
+.ember-switch input:checked + .ember-switch-track .ember-switch-thumb {
+  transform: translateX(16px);
+}
+
+.ember-switch input:focus-visible + .ember-switch-track {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ember) 28%, transparent);
+}
+
+.ember-switch-label {
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.portfolio-live-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, #16a34a 35%, var(--ut-line));
+  background: color-mix(in srgb, #16a34a 10%, var(--ut-bg));
+  color: var(--ink);
+  font-family: "IBM Plex Mono", Consolas, monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+.portfolio-live-pill:hover {
+  border-color: #16a34a;
+  background: color-mix(in srgb, #16a34a 16%, var(--ut-bg));
+}
+
+.portfolio-status-note {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+@media (max-width: 720px) {
+  .portfolio-publish-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .portfolio-handle-field {
+    max-width: 100%;
+  }
+}

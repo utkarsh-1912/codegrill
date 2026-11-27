@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronRight, Maximize2, Menu, Minimize2, Moon, RotateCcw, Search, Settings, Sun, User, X } from 'lucide-react';
+import { Calendar, ChevronRight, Maximize2, Menu, Minimize2, Moon, RotateCcw, Search, Settings, Sun, User, X } from 'lucide-react';
 import { BrandLogo } from './BrandLogo.jsx';
 import { SelectDropdown } from './SelectDropdown.jsx';
 import { getMessages } from './i18n.mjs';
@@ -15,6 +15,7 @@ export function AppHeader({
   isDark,
   zenMode,
   backendOnline,
+  authSession = null,
   onLocaleChange,
   onToggleTheme,
   onToggleZen,
@@ -120,7 +121,7 @@ export function AppHeader({
             <div className="header-utility-group">
               <button
                 type="button"
-                className="locale-field icon-only-control"
+                className="locale-field header-search-pill"
                 onClick={() => {
                   setSettingsOpen(false);
                   setSidebarOpen(false);
@@ -129,7 +130,9 @@ export function AppHeader({
                 aria-label={t.palette.placeholder}
                 title={`${t.palette.placeholder} (⌘K)`}
               >
-                <Search size={18} aria-hidden="true" />
+                <Search size={16} aria-hidden="true" />
+                <span className="header-search-label">{t.controls.searchPlaceholder.split(' ')[0]}</span>
+                <kbd className="header-search-kbd">⌘K</kbd>
               </button>
 
               <div className="settings-anchor" ref={settingsRef}>
@@ -157,13 +160,28 @@ export function AppHeader({
                         <User size={16} />
                       </span>
                       <span className="settings-profile-copy">
-                        <strong>{t.nav.profile}</strong>
+                        <strong>{authSession?.displayName || authSession?.email || t.nav.profile}</strong>
                         <small className="settings-sync-inline">
-                          <span className={`sync-dot ${backendOnline ? 'is-online' : ''}`} />
-                          {backendOnline ? t.controls.backendOnline : t.controls.backendLocal}
+                          <span className={`sync-dot ${authSession || backendOnline ? 'is-online' : ''}`} />
+                          {authSession
+                            ? t.controls.backendOnline
+                            : backendOnline
+                              ? t.controls.backendOnline
+                              : t.controls.backendLocal}
                         </small>
                       </span>
                       <ChevronRight size={15} className="settings-profile-chevron" aria-hidden="true" />
+                    </a>
+
+                    <a
+                      href="/contests"
+                      className={`settings-nav-shortcut ${page === 'contests' ? 'is-active' : ''}`}
+                      aria-current={page === 'contests' ? 'page' : undefined}
+                      onClick={linkClick('/contests')}
+                    >
+                      <Calendar size={15} aria-hidden="true" />
+                      <span>{t.studio.backup.contests}</span>
+                      <ChevronRight size={14} className="settings-profile-chevron" aria-hidden="true" />
                     </a>
 
                     <div className="settings-divider" />
@@ -176,7 +194,12 @@ export function AppHeader({
                         aria-label={isDark ? t.controls.switchToLight : t.controls.switchToDark}
                         title={isDark ? t.controls.switchToLight : t.controls.switchToDark}
                       >
-                        {isDark ? <Sun size={16} aria-hidden="true" /> : <Moon size={16} aria-hidden="true" />}
+                        <span className="settings-tile-icon" aria-hidden="true">
+                          {isDark ? <Sun size={16} /> : <Moon size={16} />}
+                        </span>
+                        <span className="settings-tile-label">
+                          {isDark ? t.controls.switchToLight : t.controls.switchToDark}
+                        </span>
                       </button>
 
                       <button
@@ -186,8 +209,10 @@ export function AppHeader({
                         onClick={() => { onToggleZen(); setSettingsOpen(false); }}
                         aria-label={zenMode ? t.controls.zenExit : t.controls.zenEnter}
                       >
-                        {zenMode ? <Minimize2 size={16} aria-hidden="true" /> : <Maximize2 size={16} aria-hidden="true" />}
-                        <span>{t.palette.zen}</span>
+                        <span className="settings-tile-icon" aria-hidden="true">
+                          {zenMode ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
+                        </span>
+                        <span className="settings-tile-label">{t.palette.zen}</span>
                       </button>
                     </div>
 
@@ -290,6 +315,25 @@ export function AppHeader({
             </div>
 
             <div className="mobile-sidebar-scroll">
+              <a
+                href="/profile"
+                className={`settings-profile-card mobile-profile-card ${page === 'profile' ? 'is-active' : ''}`}
+                aria-current={page === 'profile' ? 'page' : undefined}
+                onClick={linkClick('/profile')}
+              >
+                <span className="settings-profile-avatar" aria-hidden="true">
+                  <User size={16} />
+                </span>
+                <span className="settings-profile-copy">
+                  <strong>{authSession?.displayName || authSession?.email || t.nav.profile}</strong>
+                  <small className="settings-sync-inline">
+                    <span className={`sync-dot ${authSession || backendOnline ? 'is-online' : ''}`} />
+                    {authSession || backendOnline ? t.controls.backendOnline : t.controls.backendLocal}
+                  </small>
+                </span>
+                <ChevronRight size={15} className="settings-profile-chevron" aria-hidden="true" />
+              </a>
+
               <nav className="mobile-sidebar-nav" aria-label="Study navigation">
                 {pathIds.map((id, index) => (
                   <a
@@ -302,6 +346,14 @@ export function AppHeader({
                     {navLabels[index]}
                   </a>
                 ))}
+                <a
+                  href="/contests"
+                  lang={locale}
+                  aria-current={page === 'contests' ? 'page' : undefined}
+                  onClick={linkClick('/contests')}
+                >
+                  {t.studio.backup.contests}
+                </a>
               </nav>
 
               <div className="mobile-sidebar-section">

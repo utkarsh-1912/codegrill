@@ -911,6 +911,7 @@ function App() {
         isDark={isDark}
         zenMode={zenMode}
         backendOnline={backendOnline}
+        authSession={authSession}
         problems={problems}
         categories={categories}
         sheets={allSheets}
