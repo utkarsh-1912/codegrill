@@ -459,6 +459,7 @@ export function AppHeader({
                 </div>
 
                 <div className="settings-row">
+                  <span>{isDark ? t.controls.switchToLight : t.controls.switchToDark}</span>
                   <button
                     type="button"
                     className="locale-field icon-only-control"
