@@ -1,6 +1,6 @@
 {
   "name": "codegrill",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,7 +9,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "check": "node scripts/check-catalog.mjs",
+    "typecheck": "tsc --noEmit",
+    "lint": "biome lint src server api scripts tests",
     "test": "node scripts/test-all.mjs",
+    "test:ui": "vitest run",
     "import:roadmap": "node scripts/import-roadmap.mjs",
     "verify:directories": "node scripts/verify-directories.mjs"
   },
@@ -23,6 +26,16 @@
     "react-dom": "18.3.1"
   },
   "devDependencies": {
-    "vite": "^6.4.0"
+    "@biomejs/biome": "^2.6.9",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.3",
+    "@types/node": "^22.20.7",
+    "@types/react": "^18.3.32",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "jsdom": "^26.1.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.0",
+    "vitest": "^5.1.2"
   }
 }

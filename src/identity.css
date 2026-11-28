@@ -11241,44 +11241,72 @@ body,
   .auth-shell-v2 {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
+    width: 100%;
+    max-width: 100%;
   }
 
-  /* Put the interactive sign-in card first on mobile so users can act immediately */
-  .auth-card,
-  .auth-card-v2 {
-    order: -1;
-    min-width: 0;
-    padding: 20px 18px;
-  }
-
+  /* Mobile auth: show only the clean sign-in/sign-up form card, hide the desktop mascot aside */
   .auth-aside,
   .auth-aside-v2 {
+    display: none !important;
+  }
+
+  .auth-card,
+  .auth-card-v2 {
+    width: 100%;
+    max-width: 100%;
     min-width: 0;
     overflow: hidden;
-    padding: 20px 18px;
-    gap: 14px;
+    padding: 20px 16px;
+    box-sizing: border-box;
+  }
+
+  .auth-form,
+  .auth-field {
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .auth-input-wrap {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .auth-input-wrap input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .auth-google-btn,
+  .auth-submit-btn {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
 
   .auth-signed-in-card h1 {
     font-size: 1.3rem;
     overflow-wrap: anywhere;
   }
-
-  .auth-mascot-stage {
-    min-height: 150px;
-    padding: 4px 0;
-  }
-
-  .auth-aside h1 {
-    font-size: 1.55rem;
-  }
 }
 
 @media (max-width: 768px) {
+  html {
+    scrollbar-gutter: auto;
+  }
+
   .app-shell > main.shell,
   .app-footer > .shell,
   .app-header .header-inner {
     width: calc(100% - 24px);
+    max-width: calc(100% - 24px);
+    margin-inline: auto;
   }
 
   .page-section,
@@ -11460,16 +11488,81 @@ body,
 
   .storage-mode-banner {
     padding: 16px;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
+  .storage-mode-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .storage-mode-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .storage-mode-actions > .btn-solid {
+    grid-column: 1 / -1;
+    width: 100%;
+    justify-content: center;
+  }
+
+  .storage-mode-actions > button {
+    width: 100%;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .portfolio-publish-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  /* Reset flex-basis to auto in column direction so it never inflates vertically */
+  .portfolio-handle-group {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
   }
 
   .portfolio-handle-field {
+    flex: 0 0 auto;
     max-width: 100%;
     width: 100%;
+    height: 42px;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .portfolio-handle-field input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .portfolio-live-pill {
+    width: fit-content;
+    max-width: 100%;
   }
 
   .portfolio-publish-controls {
     width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     justify-content: space-between;
+    gap: 10px;
   }
 
   /* Contests Page */

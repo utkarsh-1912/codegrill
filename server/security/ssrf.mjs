@@ -76,19 +76,22 @@ export function isBlockedIp(rawIp) {
     if (allZero) return true; // ::
     const isLoopback = groups.slice(0, 7).every((g) => g === 0) && groups[7] === 1;
     if (isLoopback) return true; // ::1
-    // IPv4-mapped ::ffff:0:0/96 or IPv4-compatible ::/96
+    // IPv4-mapped ::ffff:0:0/96, IPv4-compatible ::/96, or NAT64 64:ff9b::/96
     const isV4Mapped = groups.slice(0, 5).every((g) => g === 0) && (groups[5] === 0xffff || groups[5] === 0);
-    if (isV4Mapped) {
+    const isNat64 = groups[0] === 0x0064 && groups[1] === 0xff9b && groups.slice(2, 6).every((g) => g === 0);
+    if (isV4Mapped || isNat64) {
       const a = (groups[6] >>> 8) & 0xff;
       const b = groups[6] & 0xff;
       const c = (groups[7] >>> 8) & 0xff;
       const d = groups[7] & 0xff;
       return isBlockedIp(`${a}.${b}.${c}.${d}`);
     }
+    // Discard-only 100::/64
+    if (groups[0] === 0x0100 && groups[1] === 0 && groups[2] === 0 && groups[3] === 0) return true;
     // Unique Local Address fc00::/7
     if ((groups[0] & 0xfe00) === 0xfc00) return true;
-    // Link-local fe80::/10
-    if ((groups[0] & 0xffc0) === 0xfe80) return true;
+    // Link-local fe80::/10 and deprecated site-local fec0::/10
+    if ((groups[0] & 0xffc0) === 0xfe80 || (groups[0] & 0xffc0) === 0xfec0) return true;
     // Multicast ff00::/8
     if ((groups[0] & 0xff00) === 0xff00) return true;
     // Documentation 2001:db8::/32

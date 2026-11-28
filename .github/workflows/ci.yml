@@ -35,8 +35,17 @@ jobs:
       - name: Verify catalog, i18n & plugin contracts
         run: npm run check
 
+      - name: Type-check with TypeScript
+        run: npm run typecheck
+
+      - name: Lint with Biome
+        run: npm run lint
+
       - name: Run unit & store integration tests
         run: npm test
+
+      - name: Run React & HTTP integration tests (Vitest)
+        run: npm run test:ui
 
       - name: Build production bundle
         run: npm run build
