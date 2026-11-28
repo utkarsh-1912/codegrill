@@ -6,7 +6,12 @@ function loadMermaid() {
   if (typeof window === 'undefined') return Promise.reject(new Error('No window'));
   if (!mermaidPromise) {
     const cdnUrl = 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
-    mermaidPromise = import(/* @vite-ignore */ cdnUrl).then((mod) => mod.default || mod);
+    mermaidPromise = import(/* @vite-ignore */ cdnUrl)
+      .then((mod) => mod.default || mod)
+      .catch((err) => {
+        mermaidPromise = null;
+        throw err;
+      });
   }
   return mermaidPromise;
 }
@@ -24,7 +29,12 @@ function loadKatex() {
   }
   if (!katexPromise) {
     const cdnUrl = 'https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.mjs';
-    katexPromise = import(/* @vite-ignore */ cdnUrl).then((mod) => mod.default || mod);
+    katexPromise = import(/* @vite-ignore */ cdnUrl)
+      .then((mod) => mod.default || mod)
+      .catch((err) => {
+        katexPromise = null;
+        throw err;
+      });
   }
   return katexPromise;
 }
@@ -164,6 +174,231 @@ const HTML_ENTITIES = {
   trade: '™',
   sect: '§',
 };
+
+const GITHUB_EMOJI_MAP = {
+  '+1': '👍',
+  thumbsup: '👍',
+  '-1': '👎',
+  thumbsdown: '👎',
+  100: '💯',
+  fire: '🔥',
+  rocket: '🚀',
+  sparkles: '✨',
+  star: '⭐',
+  star2: '🌟',
+  tada: '🎉',
+  confetti_ball: '🎊',
+  white_check_mark: '✅',
+  heavy_check_mark: '✔️',
+  ballot_box_with_check: '☑️',
+  x: '❌',
+  negative_squared_cross_mark: '❎',
+  heavy_multiplication_x: '✖️',
+  warning: '⚠️',
+  no_entry: '⛔',
+  no_entry_sign: '🚫',
+  stop_sign: '🛑',
+  bulb: '💡',
+  zap: '⚡',
+  boom: '💥',
+  collision: '💥',
+  bug: '🐛',
+  ambulance: '🚑',
+  wrench: '🔧',
+  hammer: '🔨',
+  hammer_and_wrench: '🛠️',
+  nut_and_bolt: '🔩',
+  gear: '⚙️',
+  package: '📦',
+  gift: '🎁',
+  bookmark: '🔖',
+  pushpin: '📌',
+  round_pushpin: '📍',
+  paperclip: '📎',
+  link: '🔗',
+  lock: '🔒',
+  unlock: '🔓',
+  key: '🔑',
+  shield: '🛡️',
+  mag: '🔍',
+  mag_right: '🔎',
+  book: '📖',
+  open_book: '📖',
+  books: '📚',
+  notebook: '📓',
+  ledger: '📒',
+  memo: '📝',
+  pencil: '📝',
+  pencil2: '✏️',
+  clipboard: '📋',
+  page_facing_up: '📄',
+  page_with_curl: '📃',
+  file_folder: '📁',
+  open_file_folder: '📂',
+  card_index_dividers: '🗂️',
+  computer: '💻',
+  laptop: '💻',
+  desktop_computer: '🖥️',
+  keyboard: '⌨️',
+  globe_with_meridians: '🌐',
+  earth_americas: '🌎',
+  earth_africa: '🌍',
+  earth_asia: '🌏',
+  cloud: '☁️',
+  database: '🗄️',
+  chart_with_upwards_trend: '📈',
+  chart_with_downwards_trend: '📉',
+  bar_chart: '📊',
+  trophy: '🏆',
+  medal_sports: '🏅',
+  first_place_medal: '🥇',
+  second_place_medal: '🥈',
+  third_place_medal: '🥉',
+  crown: '👑',
+  gem: '💎',
+  construction: '🚧',
+  hourglass: '⌛',
+  hourglass_flowing_sand: '⏳',
+  stopwatch: '⏱️',
+  alarm_clock: '⏰',
+  clock1: '🕐',
+  clock2: '🕑',
+  clock3: '🕒',
+  calendar: '📆',
+  date: '📅',
+  point_right: '👉',
+  point_left: '👈',
+  point_up: '☝️',
+  point_up_2: '👆',
+  point_down: '👇',
+  arrow_right: '➡️',
+  arrow_left: '⬅️',
+  arrow_up: '⬆️',
+  arrow_down: '⬇️',
+  arrow_upper_right: '↗️',
+  arrow_lower_right: '↘️',
+  arrows_counterclockwise: '🔄',
+  repeat: '🔁',
+  fast_forward: '⏩',
+  rewind: '⏪',
+  information_source: 'ℹ️',
+  question: '❓',
+  grey_question: '❔',
+  exclamation: '❗',
+  heavy_exclamation_mark: '❗',
+  interrobang: '⁉️',
+  speech_balloon: '💬',
+  thought_balloon: '💭',
+  loudspeaker: '📢',
+  mega: '📣',
+  bell: '🔔',
+  no_bell: '🔕',
+  email: '📧',
+  envelope: '✉️',
+  inbox_tray: '📥',
+  outbox_tray: '📤',
+  green_circle: '🟢',
+  yellow_circle: '🟡',
+  orange_circle: '🟠',
+  red_circle: '🔴',
+  blue_circle: '🔵',
+  large_blue_circle: '🔵',
+  purple_circle: '🟣',
+  white_circle: '⚪',
+  black_circle: '⚫',
+  green_square: '🟩',
+  yellow_square: '🟨',
+  red_square: '🟥',
+  blue_square: '🟦',
+  heavy_plus_sign: '➕',
+  heavy_minus_sign: '➖',
+  heavy_division_sign: '➗',
+  checkered_flag: '🏁',
+  triangular_flag_on_post: '🚩',
+  art: '🎨',
+  rainbow: '🌈',
+  sunny: '☀️',
+  crescent_moon: '🌙',
+  coffee: '☕',
+  pizza: '🍕',
+  beer: '🍺',
+  clap: '👏',
+  wave: '👋',
+  ok_hand: '👌',
+  v: '✌️',
+  muscle: '💪',
+  pray: '🙏',
+  raised_hands: '🙌',
+  eyes: '👀',
+  brain: '🧠',
+  robot: '🤖',
+  heart: '❤️',
+  orange_heart: '🧡',
+  yellow_heart: '💛',
+  green_heart: '💚',
+  blue_heart: '💙',
+  broken_heart: '💔',
+  smile: '😄',
+  grinning: '😀',
+  smiley: '😃',
+  blush: '😊',
+  wink: '😉',
+  sunglasses: '😎',
+  thinking: '🤔',
+  joy: '😂',
+  rofl: '🤣',
+  sweat_smile: '😅',
+  neutral_face: '😐',
+  confused: '😕',
+  disappointed: '😞',
+  cry: '😢',
+  sob: '😭',
+  scream: '😱',
+  angry: '😠',
+  poop: '💩',
+  hankey: '💩',
+  ghost: '👻',
+  alien: '👽',
+  seedling: '🌱',
+  herb: '🌿',
+  evergreen_tree: '🌲',
+  deciduous_tree: '🌳',
+  mortar_board: '🎓',
+  school: '🏫',
+  briefcase: '💼',
+  moneybag: '💰',
+  credit_card: '💳',
+  house: '🏠',
+  office: '🏢',
+  microscope: '🔬',
+  telescope: '🔭',
+  satellite: '📡',
+  battery: '🔋',
+  electric_plug: '🔌',
+  floppy_disk: '💾',
+  cd: '💿',
+  scissors: '✂️',
+  straight_ruler: '📏',
+  triangular_ruler: '📐',
+  new: '🆕',
+  free: '🆓',
+  up: '🆙',
+  cool: '🆒',
+  ok: '🆗',
+  sos: '🆘',
+  recycle: '♻️',
+  copyright: '©️',
+  registered: '®️',
+  tm: '™️',
+};
+
+export function replaceEmojiShortcodes(text) {
+  if (!text || !String(text).includes(':')) return text;
+  return String(text).replace(/:([a-z0-9_+-]+):/gi, (full, code) => {
+    const emoji = GITHUB_EMOJI_MAP[code.toLowerCase()];
+    return emoji || full;
+  });
+}
 
 export function decodeHtmlEntities(text) {
   if (!text || !String(text).includes('&')) return text;
@@ -354,7 +589,7 @@ function renderInline(text, { sourceUrl, onOpenLink, keyPrefix = 'in' } = {}) {
 
   while ((match = pattern.exec(prepared)) !== null) {
     if (match.index > lastIndex) {
-      tokens.push(decodeHtmlEntities(prepared.slice(lastIndex, match.index)));
+      tokens.push(replaceEmojiShortcodes(decodeHtmlEntities(prepared.slice(lastIndex, match.index))));
     }
     const token = match[0];
     const key = `${keyPrefix}-${idx++}`;
@@ -471,7 +706,7 @@ function renderInline(text, { sourceUrl, onOpenLink, keyPrefix = 'in' } = {}) {
   }
 
   if (lastIndex < prepared.length) {
-    tokens.push(decodeHtmlEntities(prepared.slice(lastIndex)));
+    tokens.push(replaceEmojiShortcodes(decodeHtmlEntities(prepared.slice(lastIndex))));
   }
   return tokens;
 }

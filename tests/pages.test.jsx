@@ -5,6 +5,7 @@ import { AuthPage } from '../src/AuthPage.jsx';
 import { ProfilePage } from '../src/ProfilePage.jsx';
 import { PublicPortfolioPage } from '../src/PublicPortfolioPage.jsx';
 import { SheetsPage } from '../src/SheetsPage.jsx';
+import { RichTextInterpreter, replaceEmojiShortcodes } from '../src/RichTextInterpreter.jsx';
 import { BUILTIN_SHEETS } from '../src/sheets.mjs';
 
 const SAMPLE_CATEGORIES = [
@@ -166,5 +167,14 @@ describe('SheetsPage', () => {
     const checkboxes = screen.getAllByRole('checkbox');
     fireEvent.click(checkboxes[0]);
     expect(toggleComplete).toHaveBeenCalledWith('two-sum');
+  });
+});
+
+describe('RichTextInterpreter emoji shortcodes', () => {
+  it('converts GitHub emoji shortcodes like :+1: and :rocket: while preserving inline code', () => {
+    expect(replaceEmojiShortcodes('Great job :+1: :rocket: :white_check_mark: :-1:')).toBe('Great job 👍 🚀 ✅ 👎');
+    render(<RichTextInterpreter content={'Ship it :+1: `:rocket:` :fire:'} />);
+    expect(screen.getByText(/Ship it 👍/)).toBeInTheDocument();
+    expect(screen.getByText(':rocket:')).toBeInTheDocument();
   });
 });
