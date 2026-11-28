@@ -1,5 +1,6 @@
 const AUTH_SESSION_KEY = 'codegrill:auth-session:v1';
 let lazyFirebaseAuth = null;
+let tokenRefreshPromise = null;
 
 // Direct `import.meta.env.VITE_*` (without optional chaining) is required for Vite static replacement.
 const BUILD_FIREBASE_API_KEY = String((import.meta.env && import.meta.env.VITE_FIREBASE_API_KEY) || '').trim();
@@ -64,8 +65,25 @@ export async function ensureFirebaseConfig() {
 
 export function readAuthSession() {
   try {
-    const raw = JSON.parse(sessionStorage.getItem(AUTH_SESSION_KEY) || 'null');
-    if (raw && raw.uid && raw.idToken) return raw;
+    const rawLocal = localStorage.getItem(AUTH_SESSION_KEY);
+    if (rawLocal) {
+      const parsed = JSON.parse(rawLocal);
+      if (parsed && parsed.uid && (parsed.idToken || parsed.refreshToken)) return parsed;
+    }
+    // One-time migration from legacy sessionStorage persistence
+    const rawSession = sessionStorage.getItem(AUTH_SESSION_KEY);
+    if (rawSession) {
+      const parsed = JSON.parse(rawSession);
+      if (parsed && parsed.uid && (parsed.idToken || parsed.refreshToken)) {
+        try {
+          localStorage.setItem(AUTH_SESSION_KEY, rawSession);
+          sessionStorage.removeItem(AUTH_SESSION_KEY);
+        } catch {
+          // Ignore storage errors
+        }
+        return parsed;
+      }
+    }
   } catch {
     // Ignore storage errors
   }
@@ -74,8 +92,13 @@ export function readAuthSession() {
 
 function writeAuthSession(session) {
   try {
-    if (session) sessionStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
-    else sessionStorage.removeItem(AUTH_SESSION_KEY);
+    if (session) {
+      localStorage.setItem(AUTH_SESSION_KEY, JSON.stringify(session));
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
+    } else {
+      localStorage.removeItem(AUTH_SESSION_KEY);
+      sessionStorage.removeItem(AUTH_SESSION_KEY);
+    }
   } catch {
     // Ignore storage errors
   }
@@ -125,7 +148,7 @@ export async function signInWithGoogle() {
     throw new Error('Google sign-in requires VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, and VITE_FIREBASE_PROJECT_ID.');
   }
 
-  const [{ getApps, initializeApp }, { GoogleAuthProvider, browserSessionPersistence, getAuth, setPersistence, signInWithPopup }] = await Promise.all([
+  const [{ getApps, initializeApp }, { GoogleAuthProvider, browserLocalPersistence, getAuth, setPersistence, signInWithPopup }] = await Promise.all([
     import('@firebase/app'),
     import('@firebase/auth'),
   ]);
@@ -135,7 +158,7 @@ export async function signInWithGoogle() {
     : initializeApp({ apiKey, authDomain, projectId });
   const auth = getAuth(app);
   lazyFirebaseAuth = auth;
-  await setPersistence(auth, browserSessionPersistence);
+  await setPersistence(auth, browserLocalPersistence);
 
   const provider = new GoogleAuthProvider();
   provider.setCustomParameters({ prompt: 'select_account' });
@@ -171,29 +194,44 @@ export function signOutAuth() {
 export async function getValidIdToken() {
   const session = readAuthSession();
   if (!session) return '';
-  if (session.expiresAt > Date.now()) return session.idToken;
+  if (session.idToken && session.expiresAt > Date.now()) return session.idToken;
 
-  const apiKey = getFirebaseApiKey();
-  if (!apiKey || !session.refreshToken) return session.idToken || '';
+  if (tokenRefreshPromise) return tokenRefreshPromise;
 
-  try {
-    const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${encodeURIComponent(apiKey)}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(session.refreshToken)}`,
-    });
-    if (!res.ok) return '';
-    const data = await res.json();
-    const expiresSec = Math.max(300, Number(data.expires_in) || 3600);
-    const refreshed = {
-      ...session,
-      idToken: data.id_token,
-      refreshToken: data.refresh_token || session.refreshToken,
-      expiresAt: Date.now() + (expiresSec - 60) * 1000,
-    };
-    writeAuthSession(refreshed);
-    return refreshed.idToken;
-  } catch {
-    return '';
-  }
+  tokenRefreshPromise = (async () => {
+    await ensureFirebaseConfig();
+    const apiKey = getFirebaseApiKey();
+    if (!apiKey || !session.refreshToken) return session.idToken || '';
+
+    try {
+      const res = await fetch(`https://securetoken.googleapis.com/v1/token?key=${encodeURIComponent(apiKey)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `grant_type=refresh_token&refresh_token=${encodeURIComponent(session.refreshToken)}`,
+      });
+      if (!res.ok) {
+        if (res.status === 400 || res.status === 401) {
+          // Refresh token revoked or expired permanently
+          writeAuthSession(null);
+        }
+        return '';
+      }
+      const data = await res.json();
+      const expiresSec = Math.max(300, Number(data.expires_in) || 3600);
+      const refreshed = {
+        ...session,
+        idToken: data.id_token,
+        refreshToken: data.refresh_token || session.refreshToken,
+        expiresAt: Date.now() + (expiresSec - 60) * 1000,
+      };
+      writeAuthSession(refreshed);
+      return refreshed.idToken;
+    } catch {
+      return '';
+    } finally {
+      tokenRefreshPromise = null;
+    }
+  })();
+
+  return tokenRefreshPromise;
 }

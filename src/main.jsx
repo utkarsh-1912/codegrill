@@ -266,8 +266,17 @@ function App() {
         setPaletteOpen((open) => !open);
       }
     };
+    const onStorage = (event) => {
+      if (event.key === 'codegrill:auth-session:v1') {
+        setAuthSession(readAuthSession());
+      }
+    };
     window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
+    window.addEventListener('storage', onStorage);
+    return () => {
+      window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
   // Hydrate runtime config, daily challenge, sheets, and progress from backend
@@ -286,13 +295,26 @@ function App() {
       setDailyChallenge(daily);
       const startupSession = readAuthSession();
       const startupUid = startupSession?.uid || '';
-      const canSyncNow = health.workspaceAvailable && (!health.authEnforced || Boolean(startupSession));
+      if (startupSession) {
+        // Proactively refresh an expired ID token on startup before parallel cloud reads
+        const freshToken = await getValidIdToken();
+        if (!active) return;
+        const latestSession = readAuthSession();
+        if (!freshToken && !latestSession) {
+          setAuthSession(null);
+        } else if (latestSession) {
+          setAuthSession(latestSession);
+        }
+      }
+      const activeSession = readAuthSession();
+      const canSyncNow = health.workspaceAvailable && (!health.authEnforced || Boolean(activeSession));
       if (canSyncNow) {
+        const useCloudAuth = Boolean(health.authEnforced || activeSession);
         const cloud = createCloudApiAdapter({ apiBaseUrl: remoteConfig.apiBaseUrl, getIdToken: getValidIdToken });
         const [remote, remoteProfilesObj, remoteSheetsObj] = await Promise.all([
-          health.authEnforced ? cloud.getProgress().catch(() => null) : fetchRemoteProgress(remoteConfig.defaultProfile),
-          health.authEnforced ? cloud.getLinkedProfiles().catch(() => null) : fetchRemoteProfiles(remoteConfig.defaultProfile),
-          (health.authEnforced || startupSession)
+          useCloudAuth ? cloud.getProgress().catch(() => null) : fetchRemoteProgress(remoteConfig.defaultProfile),
+          useCloudAuth ? cloud.getLinkedProfiles().catch(() => null) : fetchRemoteProfiles(remoteConfig.defaultProfile),
+          useCloudAuth
             ? cloud.getCustomSheets().catch(() => null)
             : fetchAllSheets(remoteConfig.apiBaseUrl, startupUid),
         ]);
@@ -330,7 +352,7 @@ function App() {
           });
           if (remoteProfiles && Object.keys(remoteProfiles).length > 0) {
             setLinkedProfiles((prev) => {
-              const next = { ...remoteProfiles, ...prev };
+              const next = { ...prev, ...remoteProfiles };
               writeLocalProfiles(next, startupUid);
               return next;
             });
