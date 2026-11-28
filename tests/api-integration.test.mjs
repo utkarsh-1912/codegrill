@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createApiHandler } from '../server/index.mjs';
+import { getClientIp } from '../server/security/rateLimit.mjs';
 import { isBlockedIp, isSafePublicUrl } from '../server/security/ssrf.mjs';
 
 async function callApi(handler, { method = 'GET', url = '/api/health', headers = {}, body = null } = {}) {
@@ -161,5 +162,33 @@ describe('API HTTP integration: 401, 409, and 429 paths', () => {
     expect(limited.status).toBe(429);
     expect(limited.headers['Retry-After']).toBeDefined();
     expect(limited.headers['X-RateLimit-Remaining']).toBe('0');
+  });
+
+  it('guards getClientIp against leftmost x-forwarded-for spoofing', () => {
+    expect(
+      getClientIp({
+        headers: {
+          'x-forwarded-for': '1.2.3.4, 203.0.113.88',
+          'x-vercel-forwarded-for': '198.51.100.42',
+        },
+      }),
+    ).toBe('198.51.100.42');
+
+    expect(
+      getClientIp({
+        headers: {
+          'x-forwarded-for': '1.2.3.4, 203.0.113.88',
+          'x-real-ip': '198.51.100.99',
+        },
+      }),
+    ).toBe('198.51.100.99');
+
+    expect(
+      getClientIp({
+        headers: {
+          'x-forwarded-for': '1.2.3.4, 203.0.113.88',
+        },
+      }),
+    ).toBe('203.0.113.88');
   });
 });

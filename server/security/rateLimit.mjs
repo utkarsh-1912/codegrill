@@ -50,11 +50,34 @@ async function checkUpstashSlidingWindow(key, limit, windowSec) {
   }
 }
 
+function readHeader(headers, name) {
+  if (!headers || typeof headers !== 'object') return '';
+  const direct = headers[name];
+  if (direct !== undefined) return Array.isArray(direct) ? String(direct[0] || '') : String(direct || '');
+  const lower = name.toLowerCase();
+  for (const [k, v] of Object.entries(headers)) {
+    if (k.toLowerCase() === lower) {
+      return Array.isArray(v) ? String(v[0] || '') : String(v || '');
+    }
+  }
+  return '';
+}
+
 export function getClientIp(req) {
-  const forwarded = req?.headers?.['x-forwarded-for'] || req?.headers?.['X-Forwarded-For'];
-  if (forwarded) return String(forwarded).split(',')[0].trim();
-  const realIp = req?.headers?.['x-real-ip'];
-  if (realIp) return String(realIp).trim();
+  // Prefer Vercel's trusted edge-injected header over spoofable client headers
+  const vercelForwarded = readHeader(req?.headers, 'x-vercel-forwarded-for').trim();
+  if (vercelForwarded) {
+    const parts = vercelForwarded.split(',').map((s) => s.trim()).filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
+  const realIp = readHeader(req?.headers, 'x-real-ip').trim();
+  if (realIp) return realIp;
+  // Use the rightmost proxy-appended entry in x-forwarded-for so callers cannot spoof leftmost entries
+  const forwarded = readHeader(req?.headers, 'x-forwarded-for').trim();
+  if (forwarded) {
+    const parts = forwarded.split(',').map((s) => s.trim()).filter(Boolean);
+    if (parts.length) return parts[parts.length - 1];
+  }
   return req?.socket?.remoteAddress || '127.0.0.1';
 }
 
