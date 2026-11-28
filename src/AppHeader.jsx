@@ -20,6 +20,7 @@ export function AppHeader({
   onToggleTheme,
   onToggleZen,
   onResetProgress,
+  onAuthSignOut,
   onOpenPalette,
   onNavigate,
 }) {
@@ -282,14 +283,31 @@ export function AppHeader({
                     <div className="settings-divider" />
 
                     {!confirmReset ? (
-                      <button
-                        type="button"
-                        className="settings-danger-item"
-                        onClick={() => { setResetError(''); setConfirmReset(true); }}
-                      >
-                        <RotateCcw size={15} aria-hidden="true" />
-                        <span>{t.ui.resetProgress}</span>
-                      </button>
+                      <div className="settings-footer-split">
+                        <button
+                          type="button"
+                          className="settings-danger-item"
+                          onClick={() => { setResetError(''); setConfirmReset(true); }}
+                          aria-label={t.ui.resetProgress}
+                          title={t.ui.resetProgress}
+                        >
+                          <RotateCcw size={14} aria-hidden="true" />
+                          <span>{locale === 'en' ? 'Reset' : t.ui.resetProgress}</span>
+                        </button>
+                        {authSession && onAuthSignOut && (
+                          <>
+                            <span className="settings-footer-vdiv" aria-hidden="true" />
+                            <button
+                              type="button"
+                              className="settings-signout-item"
+                              onClick={() => { setSettingsOpen(false); onAuthSignOut(); }}
+                            >
+                              <span>{t.studio.auth.signOut}</span>
+                              <ChevronRight size={14} aria-hidden="true" />
+                            </button>
+                          </>
+                        )}
+                      </div>
                     ) : (
                       <>
                         <div className="reset-confirm-row">
@@ -489,17 +507,31 @@ export function AppHeader({
 
                 <div className="settings-row">
                   {!confirmReset ? (
-                    <>
-                      <span>{t.ui.resetProgress}</span>
+                    <div className="settings-footer-split" style={{ width: '100%' }}>
                       <button
                         type="button"
-                        className="locale-field icon-only-control reset-trigger-btn"
+                        className="settings-danger-item"
                         onClick={() => { setResetError(''); setConfirmReset(true); }}
                         aria-label={t.ui.resetProgress}
+                        title={t.ui.resetProgress}
                       >
-                        <RotateCcw size={16} aria-hidden="true" />
+                        <RotateCcw size={14} aria-hidden="true" />
+                        <span>{locale === 'en' ? 'Reset' : t.ui.resetProgress}</span>
                       </button>
-                    </>
+                      {authSession && onAuthSignOut && (
+                        <>
+                          <span className="settings-footer-vdiv" aria-hidden="true" />
+                          <button
+                            type="button"
+                            className="settings-signout-item"
+                            onClick={() => { setSidebarOpen(false); onAuthSignOut(); }}
+                          >
+                            <span>{t.studio.auth.signOut}</span>
+                            <ChevronRight size={14} aria-hidden="true" />
+                          </button>
+                        </>
+                      )}
+                    </div>
                   ) : (
                     <div>
                       <div className="reset-confirm-row">

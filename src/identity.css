@@ -11386,17 +11386,21 @@ body,
     gap: 12px;
   }
 
+  .site-stats,
   .home-stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-  .site-stats {
-    grid-template-columns: minmax(0, 1fr);
   }
 
   .site-stats > div + div {
     border-left: 0;
+    border-top: 0;
+  }
+
+  .site-stats > div:nth-child(even) {
+    border-left: 1px solid var(--ut-line);
+  }
+
+  .site-stats > div:nth-child(n + 3) {
     border-top: 1px solid var(--ut-line);
   }
 
@@ -11566,10 +11570,24 @@ body,
   }
 
   /* Contests Page */
+  .contests-page-v2,
+  .contests-hero-banner,
+  .contest-next-spotlight,
+  .contest-import-card,
+  .contest-card-v2 {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    overflow: hidden;
+    box-sizing: border-box;
+  }
+
   .contests-toolbar {
     flex-direction: column;
     align-items: stretch;
     gap: 10px;
+    width: 100%;
+    min-width: 0;
   }
 
   .contests-platform-tabs {
@@ -11577,6 +11595,7 @@ body,
     flex-wrap: nowrap;
     overflow-x: auto;
     padding-bottom: 4px;
+    max-width: 100%;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
   }
@@ -11592,20 +11611,195 @@ body,
   .contests-search-box {
     min-width: 0;
     width: 100%;
+    max-width: 100%;
     height: 42px;
+    box-sizing: border-box;
+  }
+
+  .contests-search-box input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .contest-import-card {
     padding: 16px;
   }
 
+  .contest-import-form {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+    width: 100%;
+  }
+
   .contest-import-field {
-    flex: 1 1 100%;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    height: 42px;
+    box-sizing: border-box;
+  }
+
+  .contest-import-field input {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
   }
 
   .contest-import-form > button {
     width: 100%;
     justify-content: center;
+    min-height: 42px;
+  }
+
+  .contest-card-v2 .contest-card-copy {
+    flex: 0 0 auto;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .contest-card-v2 .contest-card-actions {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  .contest-card-v2 .contest-card-actions > a,
+  .contest-card-v2 .contest-card-actions > button {
+    width: 100%;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .contest-spotlight-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  .contest-spotlight-actions > a,
+  .contest-spotlight-actions > button {
+    width: 100%;
+    justify-content: center;
+    min-width: 0;
+  }
+
+  .imported-practice-row {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  /* Global Mobile Card, Input & Flex-Basis Overflow Guards */
+  .marketing-cta-left {
+    flex: 0 0 auto;
+    width: 100%;
+  }
+
+  .rooms-quick-join,
+  .cloud-auth-form,
+  .filters,
+  .sheet-filters {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .rooms-quick-join input,
+  .cloud-auth-form input,
+  .search-field,
+  .search-field input,
+  .share-field input,
+  .invite-form input {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .profile-hero-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+  }
+
+  .profile-hero-actions > a,
+  .profile-hero-actions > button {
+    width: 100%;
+    justify-content: center;
+    min-width: 0;
+    min-height: 40px;
+  }
+
+  /* Mobile Sidebar Drawer Polish */
+  .mobile-sidebar {
+    width: min(320px, 88vw);
+  }
+
+  .mobile-sidebar-head {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    padding: 12px 14px;
+  }
+
+  .mobile-sidebar-scroll {
+    padding: 12px 12px max(18px, env(safe-area-inset-bottom));
+    gap: 10px;
+  }
+
+  .mobile-profile-card {
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .mobile-get-started-cta {
+    margin: 0;
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 42px;
+  }
+
+  .mobile-sidebar-nav {
+    padding: 4px 0;
+    gap: 3px;
+  }
+
+  .mobile-sidebar-nav a {
+    min-height: 42px;
+    padding: 9px 12px;
+    font-size: 0.92rem;
+  }
+
+  .mobile-sidebar-section {
+    margin-top: 6px;
+    padding: 12px;
+    border: 1px solid var(--ut-line);
+    border-radius: 12px;
+    background: var(--ut-bg);
+    gap: 10px;
+  }
+
+  .mobile-lang-pill {
+    min-height: 38px;
+    justify-content: flex-start;
+  }
+
+  .viewer-panel {
+    width: 100%;
+    max-width: 100%;
+    max-height: 92dvh;
+    border-radius: 16px 16px 0 0;
   }
 
   /* Study Rooms */
@@ -11707,4 +11901,53 @@ body,
   .app-footer > .site-footer-inner {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+.settings-footer-split {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.settings-footer-split .settings-danger-item,
+.settings-footer-split .settings-signout-item {
+  flex: 1 1 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 550;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 150ms ease, color 150ms ease;
+}
+
+.settings-footer-split .settings-danger-item:hover {
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+}
+
+.settings-footer-split .settings-signout-item {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.settings-footer-split .settings-signout-item:hover {
+  background: var(--ember-soft);
+  color: var(--ut-accent);
+}
+
+.settings-footer-vdiv {
+  width: 1px;
+  height: 18px;
+  background: var(--ut-line);
+  flex-shrink: 0;
 }

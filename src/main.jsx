@@ -920,6 +920,7 @@ function App() {
         onToggleTheme={() => setTheme(isDark ? 'light' : 'dark')}
         onToggleZen={() => setZenMode((v) => !v)}
         onResetProgress={resetProgress}
+        onAuthSignOut={handleAuthSignOut}
         onOpenPalette={() => setPaletteOpen(true)}
         onNavigate={navigate}
         onSelectSearchItem={(item) => {
